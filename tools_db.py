@@ -362,7 +362,7 @@ def get_postgis_version():
     return postgis_version
 
 
-def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_conn=None, is_admin=None):
+def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_conn=None, is_admin=None, is_thread=False):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao
@@ -375,7 +375,7 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
 
     if not row and not is_admin:
         # Check if any error has been raised
-        if lib_vars.session_vars['last_error']:
+        if lib_vars.session_vars['last_error'] and not is_thread:
             tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
         elif lib_vars.session_vars['last_error'] is None and log_info:
             tools_log.log_info("Any record found", parameter=sql, stack_level_increase=1)
@@ -383,7 +383,7 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
     return row
 
 
-def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False):
+def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao
@@ -396,7 +396,7 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
     lib_vars.session_vars['last_error'] = dao.last_error
     if not rows2:
         # Check if any error has been raised
-        if lib_vars.session_vars['last_error']:
+        if lib_vars.session_vars['last_error'] and not is_thread:
             tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
         elif lib_vars.session_vars['last_error'] is None and log_info:
             tools_log.log_info("Any record found", parameter=sql, stack_level_increase=1)
