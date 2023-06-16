@@ -434,7 +434,7 @@ def cancel_pid(pid):
     return dao.cancel_pid(pid)
 
 
-def execute_returning(sql, log_sql=False, log_error=False, commit=True):
+def execute_returning(sql, log_sql=False, log_error=False, commit=True, is_thread=False, show_exception=True):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao
@@ -445,7 +445,8 @@ def execute_returning(sql, log_sql=False, log_error=False, commit=True):
     if not value:
         if log_error:
             tools_log.log_info(sql, stack_level_increase=1)
-        tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
+        if show_exception and not is_thread:
+            tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
         return False
 
     return value
