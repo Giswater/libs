@@ -22,7 +22,7 @@ This repository eases the development of QGIS python plugins by providing functi
 ## Use
 You can add this module in your plugin by running this command:
 
-    git submodule add https://github.com/bgeo-gis/lib.git
+    git submodule add https://github.com/giswater/lib.git
 
 
 This should've placed it in the root folder of your plugin like so:
