@@ -1,4 +1,4 @@
-# lib
+# libs
 This repository eases the development of QGIS python plugins by providing functions that bridge the gap between your plugin code and the PyQt, QGIS &amp; psycopg2 modules.
 
 ## File structure &amp; summary
@@ -22,7 +22,7 @@ This repository eases the development of QGIS python plugins by providing functi
 ## Use
 You can add this module in your plugin by running this command:
 
-    git submodule add https://github.com/giswater/lib.git
+    git submodule add https://github.com/giswater/libs.git
 
 
 This should've placed it in the root folder of your plugin like so:
