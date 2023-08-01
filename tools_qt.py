@@ -240,6 +240,8 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
                 text = str(value)
             else:
                 text = None
+        else:
+            return None
 
         if text in (None, '') and return_string_null:
             text = "null"
