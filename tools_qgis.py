@@ -946,7 +946,10 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
     if reset_rb:
         rubber_band.reset(1)
     rubber_band.setIconSize(20)
-    polyline = QgsGeometry.fromPolylineXY(points)
+    if type(points) is str:
+        polyline = QgsGeometry.fromWkt(points)
+    else:
+        polyline = QgsGeometry.fromPolylineXY(points)
     if rubber_band.size() == 0:
         rubber_band.setToGeometry(polyline, None)
     else:
