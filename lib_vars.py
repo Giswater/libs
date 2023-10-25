@@ -8,6 +8,7 @@ or (at your option) any later version.
 
 schema_name = None                      # Schema name retrieved from QGIS project connection with PostgreSql
 qgis_db_credentials = None              # Instance of class QSqlDatabase (QPSQL) used to manage QTableView widgets
+last_db_credentials = None              # Last DB credentials used for QSqlDatabase connection (is used for resetting it)
 plugin_name = None                      # Plugin name
 plugin_dir = None                       # Plugin folder path
 user_folder_dir = None                  # User folder path

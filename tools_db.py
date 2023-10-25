@@ -9,6 +9,8 @@ from qgis.PyQt.QtSql import QSqlDatabase
 from qgis.core import QgsCredentials, QgsDataSourceUri
 from qgis.PyQt.QtCore import QSettings
 
+from qgis.utils import iface
+
 from . import lib_vars
 from . import tools_log, tools_qt, tools_qgis, tools_pgdao, tools_os
 
@@ -278,6 +280,28 @@ def connect_to_database(host, port, db, user, pwd, sslmode):
     current_user = user
 
     # QSqlDatabase connection for Table Views
+    status = create_qsqldatabase_connection(host, port, db, user, pwd)
+    if not status:
+        return False
+    lib_vars.last_db_credentials = {'host': host, 'port': port, 'db': db, 'user': user, 'pwd': pwd}
+
+    # psycopg2 connection
+    dao = tools_pgdao.GwPgDao()
+    dao.set_params(host, port, db, user, pwd, sslmode)
+    status = dao.init_db()
+    tools_log.log_info(f"PostgreSQL PID: {dao.pid}")
+    if not status:
+        msg = "Database connection error (psycopg2). Please open plugin log file to get more details"
+        lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
+        tools_log.log_warning(str(dao.last_error))
+        return False
+
+    return status
+
+
+def create_qsqldatabase_connection(host, port, db, user, pwd):
+
+    # QSqlDatabase connection for Table Views
     lib_vars.qgis_db_credentials = QSqlDatabase.addDatabase("QPSQL", lib_vars.plugin_name)
     lib_vars.qgis_db_credentials.setHostName(host)
     if port != '':
@@ -292,19 +316,20 @@ def connect_to_database(host, port, db, user, pwd, sslmode):
         details = lib_vars.qgis_db_credentials.lastError().databaseText()
         tools_log.log_warning(str(details))
         return False
+    return status
 
-    # psycopg2 connection
-    dao = tools_pgdao.GwPgDao()
-    dao.set_params(host, port, db, user, pwd, sslmode)
-    status = dao.init_db()
-    tools_log.log_info(f"PostgreSQL PID: {dao.pid}")
-    if not status:
-        msg = "Database connection error (psycopg2). Please open plugin log file to get more details"
-        lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
-        tools_log.log_warning(str(dao.last_error))
+def reset_qsqldatabase_connection(dialog=iface):
+    if not lib_vars.last_db_credentials:
         return False
 
-    return status
+    host = lib_vars.last_db_credentials['host']
+    port = lib_vars.last_db_credentials['port']
+    db = lib_vars.last_db_credentials['db']
+    user = lib_vars.last_db_credentials['user']
+    pwd = lib_vars.last_db_credentials['pwd']
+    QSqlDatabase.removeDatabase(lib_vars.plugin_name)
+    create_qsqldatabase_connection(host, port, db, user, pwd)
+    tools_qgis.show_warning("Database connection reset, please try again", dialog=dialog)
 
 
 def connect_to_database_service(service, sslmode=None):
