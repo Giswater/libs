@@ -21,7 +21,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel
 from qgis.utils import iface
 
 from . import tools_log, tools_qt, tools_os
@@ -1284,5 +1284,18 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
     if duration_time is not None:
         # Qtimer singleShot works with ms, we manage transformation to seconds
         QTimer.singleShot(int(duration_time)*1000, rubber_band.reset)
+
+
+def create_point(canvas, iface, event):
+
+    x = event.pos().x()
+    y = event.pos().y()
+    try:
+        point = QgsMapToPixel.toMapCoordinates(canvas.getCoordinateTransform(), x, y)
+    except(TypeError, KeyError):
+        iface.actionPan().trigger()
+        return False
+
+    return point
 
 # endregion
