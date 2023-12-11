@@ -21,7 +21,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes
 from qgis.utils import iface
 
 from . import tools_log, tools_qt, tools_os
@@ -960,7 +960,7 @@ def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, d
     """
 
     if reset_rb:
-        rubber_band.reset(0)
+        rubber_band.reset(QgsWkbTypes.PointGeometry)
     rubber_band.setIconSize(10)
     rubber_band.setColor(color)
     rubber_band.setWidth(width)
@@ -986,7 +986,7 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
      """
 
     if reset_rb:
-        rubber_band.reset(1)
+        rubber_band.reset(QgsWkbTypes.LineGeometry)
     rubber_band.setIconSize(20)
     if type(points) is str:
         polyline = QgsGeometry.fromWkt(points)
@@ -1012,7 +1012,7 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
     """
 
     if reset_rb:
-        rubber_band.reset(2)
+        rubber_band.reset(QgsWkbTypes.PolygonGeometry)
     rubber_band.setIconSize(20)
     polygon = QgsGeometry.fromPolygonXY([points])
     if rubber_band.size() == 0:
