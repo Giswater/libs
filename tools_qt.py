@@ -895,7 +895,7 @@ def add_combo_on_tableview(qtable, rows, field, widget_pos, combo_values):
         combo = QComboBox()
         row = rows[x]
         # Populate QComboBox
-        fill_combo_values(combo, combo_values, 1)
+        fill_combo_values(combo, combo_values)
         # Set QCombobox to wanted item
         set_combo_value(combo, str(row[field]), 1)
         # Get index and put QComboBox into QTableView at index position
