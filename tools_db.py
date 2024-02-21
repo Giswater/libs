@@ -624,9 +624,13 @@ def get_uri():
             dao_db_credentials['db'], dao_db_credentials['user'],
             dao_db_credentials['password'])
     else:
-        uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
-            dao_db_credentials['db'], dao_db_credentials['user'],
-            dao_db_credentials['password'])
+        if tools_os.set_boolean(lib_vars.project_vars['store_credentials'], default=True):
+            uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
+                dao_db_credentials['db'], dao_db_credentials['user'],
+                dao_db_credentials['password'])
+        else:
+            uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
+                              dao_db_credentials['db'], '', '')
 
     return uri
 
