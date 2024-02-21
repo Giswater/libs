@@ -17,7 +17,7 @@ from encodings.aliases import aliases
 from warnings import warn
 
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
-    QPersistentModelIndex, QCoreApplication, QTranslator, QEvent
+    QPersistentModelIndex, QCoreApplication, QTranslator, QEvent, QLocale
 from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
@@ -561,8 +561,9 @@ def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=Q
 
     validator = QDoubleValidator(min_, max_, decimals)
     validator.setNotation(notation)
-    if locale is not None:
-        validator.setLocale(locale)
+    if locale is None:
+        locale = QLocale("en_US")
+    validator.setLocale(locale)
     widget.setValidator(validator)
 
 
