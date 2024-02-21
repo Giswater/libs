@@ -549,14 +549,16 @@ def enable_tab_by_tab_name(tab_widget, tab_name, enable):
             break
 
 
-def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator().StandardNotation, locale=None):
+def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator().StandardNotation,
+                     locale=None):
     """
     Create and apply a validator for doubles to ensure the number is within a maximum and minimum values
         :param widget: Widget to apply the validator
         :param min_: Minimum value (int)
         :param max_: Maximum value (int)
         :param decimals: Number of decimals (int)
-        :param notation:
+        :param notation: StandardNotation or ScientificNotation
+        :param locale: Locale to define decimal separator and more (QLocale)
     """
 
     validator = QDoubleValidator(min_, max_, decimals)
