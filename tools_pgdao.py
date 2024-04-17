@@ -145,21 +145,21 @@ class GwPgDao(object):
             return query
 
 
-    def get_rows(self, sql, commit=False):
+    def get_rows(self, sql, commit=False, aux_conn=None):
         """ Get multiple rows from selected query """
 
         self.last_error = None
         rows = None
         try:
-            cursor = self.get_cursor()
+            cursor = self.get_cursor(aux_conn)
             cursor.execute(sql)
             rows = cursor.fetchall()
             if commit:
-                self.commit()
+                self.commit(aux_conn)
         except Exception as e:
             self.last_error = e
             if commit:
-                self.rollback()
+                self.rollback(aux_conn)
         finally:
             return rows
 
@@ -187,39 +187,39 @@ class GwPgDao(object):
             return row
 
 
-    def execute_sql(self, sql, commit=True):
+    def execute_sql(self, sql, commit=True, aux_conn=None):
         """ Execute selected query """
 
         self.last_error = None
         status = True
         try:
-            cursor = self.get_cursor()
+            cursor = self.get_cursor(aux_conn)
             cursor.execute(sql)
             if commit:
-                self.commit()
+                self.commit(aux_conn)
         except Exception as e:
             self.last_error = e
             status = False
             if commit:
-                self.rollback()
+                self.rollback(aux_conn)
         finally:
             return status
 
 
-    def execute_returning(self, sql, commit=True):
+    def execute_returning(self, sql, commit=True, aux_conn=None):
         """ Execute selected query and return RETURNING field """
 
         self.last_error = None
         value = None
         try:
-            cursor = self.get_cursor()
+            cursor = self.get_cursor(aux_conn)
             cursor.execute(sql)
             value = cursor.fetchone()
             if commit:
-                self.commit()
+                self.commit(aux_conn)
         except Exception as e:
             self.last_error = e
-            self.rollback()
+            self.rollback(aux_conn)
         finally:
             return value
 
