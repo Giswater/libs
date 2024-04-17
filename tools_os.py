@@ -153,7 +153,10 @@ def manage_pg_service(section):
 
     service_file = os.environ.get('PGSERVICEFILE')
     if service_file is None:
-        return None
+        pg_path = os.environ.get('PGSYSCONFDIR')
+        if pg_path is None:
+            return None
+        service_file = f"{pg_path}{os.sep}pg_service.conf"
 
     if not os.path.exists(service_file):
         tools_log.log_warning(f"File defined in environment variable 'PGSERVICEFILE' not found: {service_file}")
