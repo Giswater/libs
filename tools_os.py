@@ -150,34 +150,43 @@ def ireplace(old, new, text):
 
 
 def manage_pg_service(section):
+    pgservice_file = os.environ.get('PGSERVICEFILE')
+    sysconf_dir = f"{os.environ.get('PGSYSCONFDIR')}{os.sep}pg_service.conf"
 
-    service_file = os.environ.get('PGSERVICEFILE')
-    if service_file is None:
-        pg_path = os.environ.get('PGSYSCONFDIR')
-        if pg_path is None:
-            return None
-        service_file = f"{pg_path}{os.sep}pg_service.conf"
-
-    if not os.path.exists(service_file):
-        tools_log.log_warning(f"File defined in environment variable 'PGSERVICEFILE' not found: {service_file}")
+    if not any([pgservice_file, sysconf_dir]):
         return None
 
-    config_parser = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
+    invalid_service_files = {path: not os.path.exists(value)
+                             for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
+
+    if all(invalid_service_files.values()):
+        tools_log.log_warning(f"Files defined in environment variables 'PGSERVICEFILE' and 'PGSYSCONFDIR' not found.")
+        return None
+
+    credentials = get_credentials_from_config(section, pgservice_file)
+    if not any([credentials['host'], credentials['port'], credentials['dbname']]):
+        tools_log.log_info(f"Connection '{section}' not found in the file '{pgservice_file}'. Trying in '{sysconf_dir}'...")
+        credentials = get_credentials_from_config(section, sysconf_dir)
+        if not any([credentials['host'], credentials['port'], credentials['dbname']]):
+            tools_log.log_warning(f"Connection '{section}' not found in the file '{sysconf_dir}'")
+            return None
+
+    return credentials
+
+
+def get_credentials_from_config(section, config_file) -> dict:
     credentials = {'host': None, 'port': None, 'dbname': None, 'user': None, 'password': None, 'sslmode': None}
     try:
-        config_parser.read(service_file)
-        if config_parser.has_section(section):
-            params = config_parser.items(section)
-            if not params:
-                tools_log.log_warning(f"No parameters found in section {section}")
-                return None
-            else:
+        with open(config_file, 'r') as file:
+            config_parser = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
+            config_parser.read_file(file)
+            if config_parser.has_section(section):
+                params = config_parser.items(section)
+                if not params:
+                    tools_log.log_warning(f"No parameters found in section {section}")
+                    return credentials
                 for param in params:
                     credentials[param[0]] = param[1]
-        else:
-            tools_log.log_warning(f"Section '{section}' not found in the file {service_file}")
-    except configparser.DuplicateSectionError as e:
+    except (configparser.DuplicateSectionError, FileNotFoundError) as e:
         tools_log.log_warning(e)
-    finally:
-        return credentials
-
+    return credentials
