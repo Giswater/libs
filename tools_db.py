@@ -16,7 +16,7 @@ from . import tools_log, tools_qt, tools_qgis, tools_pgdao, tools_os
 
 
 dao = None
-dao_db_credentials = None
+dao_db_credentials: dict[str, str] = None
 current_user = None
 
 
@@ -332,21 +332,27 @@ def reset_qsqldatabase_connection(dialog=iface):
     tools_qgis.show_warning("Database connection reset, please try again", dialog=dialog)
 
 
-def connect_to_database_service(service, sslmode=None):
+def connect_to_database_service(service, sslmode=None, conn_info=None):
     """ Connect to database trough selected service
     This service must exist in file pg_service.conf """
 
     global dao
-    conn_string = f"service={service}"
+    conn_string = f"service='{service}'"
     if sslmode:
         conn_string += f" sslmode={sslmode}"
 
     # Get credentials from .pg_service.conf
     credentials = tools_os.manage_pg_service(service)
+    if None in [credentials['user'], credentials['password']]:
+        (success, credentials['user'], credentials['password']) = \
+                QgsCredentials.instance().get(conn_info, credentials['user'], credentials['password'])
+
+    # Put the credentials back (for yourself and the provider), as QGIS removes it when you "get" it
+    QgsCredentials.instance().put(conn_info, credentials['user'], credentials['password'])
+
     if credentials:
         status = connect_to_database(credentials['host'], credentials['port'], credentials['dbname'],
                                      credentials['user'], credentials['password'], credentials['sslmode'])
-
     else:
         # Try to connect using name defined in service file
         # QSqlDatabase connection
@@ -358,7 +364,7 @@ def connect_to_database_service(service, sslmode=None):
             lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
             details = lib_vars.qgis_db_credentials.lastError().databaseText()
             tools_log.log_warning(str(details))
-            return False
+            return False, credentials
 
         # psycopg2 connection
         dao = tools_pgdao.GwPgDao()
@@ -369,9 +375,9 @@ def connect_to_database_service(service, sslmode=None):
             msg = "Service database connection error (psycopg2). Please open plugin log file to get more details"
             lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
             tools_log.log_warning(str(dao.last_error))
-            return False
+            return False, credentials
 
-    return status
+    return status, credentials
 
 
 def get_postgis_version():
@@ -506,7 +512,9 @@ def connect_to_database_credentials(credentials, conn_info=None, max_attempts=2)
 
     # Check if credential parameter 'service' is set
     if credentials.get('service'):
-        logged = connect_to_database_service(credentials['service'], credentials['sslmode'])
+        logged, credentials_pgservice = connect_to_database_service(credentials['service'], credentials['sslmode'], conn_info)
+        credentials['user'] = credentials_pgservice['user']
+        credentials['password'] = credentials_pgservice['password']
         return logged, credentials
 
     attempt = 0
