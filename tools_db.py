@@ -550,7 +550,7 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
         lib_vars.session_vars['last_error'] = f"Layer not found: '{layer_name}'"
         return None, not_version
 
-    credentials = None
+    credentials: dict = None
     not_version = True
     if layer:
 
@@ -565,7 +565,21 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
                 tools_log.log_info(f"Getting sslmode from .pg_service file")
                 credentials_service = tools_os.manage_pg_service(credentials['service'])
                 sslmode = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
-            credentials['sslmode'] = sslmode
+            elif settings.value('selected'):
+                default_connection = settings.value('selected')
+                settings.endGroup()
+                settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
+                sslmode_settings = settings.value('sslmode')
+                settings.endGroup()
+                try:
+                    sslmode_dict = {
+                        0: 'prefer', 1: 'disable', 3: 'require',
+                        'SslPrefer': 'prefer', 'SslDisable': 'disable', 'SslRequire': 'require', 'SslAllow': 'allow'
+                    }
+                    sslmode = sslmode_dict.get(sslmode_settings, sslmode_default)
+                except ValueError:
+                    sslmode = sslmode_settings
+                credentials['sslmode'] = sslmode
 
         lib_vars.schema_name = credentials['schema']
         conn_info = QgsDataSourceUri(layer.dataProvider().dataSourceUri()).connectionInfo()
@@ -598,8 +612,16 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
             credentials['service'] = settings.value('service')
 
             sslmode_settings = settings.value('sslmode')
+            # If service is defined: get sslmode from .pg_service file
+            if credentials['service']:
+                tools_log.log_info(f"Getting sslmode from .pg_service file")
+                credentials_service = tools_os.manage_pg_service(credentials['service'])
+                sslmode = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
             try:
-                sslmode_dict = {0: 'prefer', 1: 'disable', 3: 'require'}
+                sslmode_dict = {
+                    0: 'prefer', 1: 'disable', 3: 'require',
+                    'SslPrefer': 'prefer', 'SslDisable': 'disable', 'SslRequire': 'require', 'SslAllow': 'allow'
+                }
                 sslmode = sslmode_dict.get(sslmode_settings, sslmode_default)
             except ValueError:
                 sslmode = sslmode_settings
@@ -629,18 +651,30 @@ def get_uri():
 
     global dao_db_credentials
     uri = QgsDataSourceUri()
+    sslmode_default = QgsDataSourceUri.SslMode.SslPrefer
+    sslmode_creds: str = dao_db_credentials['sslmode']
+    try:
+        sslmode_dict = {
+            'prefer': QgsDataSourceUri.SslMode.SslPrefer,
+            'disable': QgsDataSourceUri.SslMode.SslDisable,
+            'require': QgsDataSourceUri.SslMode.SslRequire,
+            'allow': QgsDataSourceUri.SslMode.SslAllow
+        }
+        sslmode = sslmode_dict.get(sslmode_creds, sslmode_default)
+    except ValueError:
+        sslmode = sslmode_default
     if dao_db_credentials['service']:
         uri.setConnection(dao_db_credentials['service'],
             dao_db_credentials['db'], dao_db_credentials['user'],
-            dao_db_credentials['password'])
+            dao_db_credentials['password'], sslmode)
     else:
         if tools_os.set_boolean(lib_vars.project_vars['store_credentials'], default=True):
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
                 dao_db_credentials['db'], dao_db_credentials['user'],
-                dao_db_credentials['password'])
+                dao_db_credentials['password'], sslmode)
         else:
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
-                              dao_db_credentials['db'], '', '')
+                              dao_db_credentials['db'], '', '', sslmode)
 
     return uri
 
