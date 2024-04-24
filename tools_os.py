@@ -156,7 +156,7 @@ def manage_pg_service(section):
     if not any([pgservice_file, sysconf_dir]):
         return None
 
-    invalid_service_files = {path: not os.path.exists(value)
+    invalid_service_files = {path: not (bool(value) and os.path.exists(value))
                              for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
 
     if all(invalid_service_files.values()):
@@ -189,4 +189,6 @@ def get_credentials_from_config(section, config_file) -> dict:
                     credentials[param[0]] = param[1]
     except (configparser.DuplicateSectionError, FileNotFoundError) as e:
         tools_log.log_warning(e)
+    except TypeError:
+        pass
     return credentials
