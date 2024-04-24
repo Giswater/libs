@@ -150,18 +150,21 @@ def ireplace(old, new, text):
 
 
 def manage_pg_service(section):
+
+    credentials = {'host': None, 'port': None, 'dbname': None, 'user': None, 'password': None, 'sslmode': None}
+
     pgservice_file = os.environ.get('PGSERVICEFILE')
     sysconf_dir = f"{os.environ.get('PGSYSCONFDIR')}{os.sep}pg_service.conf"
 
     if not any([pgservice_file, sysconf_dir]):
-        return None
+        return credentials
 
     invalid_service_files = {path: not (bool(value) and os.path.exists(value))
                              for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
 
     if all(invalid_service_files.values()):
         tools_log.log_warning(f"Files defined in environment variables 'PGSERVICEFILE' and 'PGSYSCONFDIR' not found.")
-        return None
+        return credentials
 
     credentials = get_credentials_from_config(section, pgservice_file)
     if not any([credentials['host'], credentials['port'], credentials['dbname']]):
@@ -169,7 +172,7 @@ def manage_pg_service(section):
         credentials = get_credentials_from_config(section, sysconf_dir)
         if not any([credentials['host'], credentials['port'], credentials['dbname']]):
             tools_log.log_warning(f"Connection '{section}' not found in the file '{sysconf_dir}'")
-            return None
+            return credentials
 
     return credentials
 

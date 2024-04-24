@@ -343,7 +343,7 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
 
     # Get credentials from .pg_service.conf
     credentials = tools_os.manage_pg_service(service)
-    if None in [credentials['user'], credentials['password']]:
+    if all([credentials['host'], credentials['port'], credentials['dbname']]) and None in [credentials['user'], credentials['password']]:
         if conn_info is None:
             conn_info = f"service='{service}'"
         (success, credentials['user'], credentials['password']) = \
