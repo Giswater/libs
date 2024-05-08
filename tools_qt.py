@@ -11,6 +11,7 @@ import operator
 import sys
 import subprocess
 import traceback
+from typing import Dict, Literal
 import webbrowser
 from functools import partial
 from encodings.aliases import aliases
@@ -73,6 +74,16 @@ class GwHyperLinkLineEdit(QLineEdit):
         if self.isReadOnly():
             self.clicked.emit()
             self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")
+
+
+QtMatchFlag = Literal['starts', 'contains', 'ends', 'exact', 'regex']
+match_flags: Dict[QtMatchFlag, Qt.MatchFlag] = {
+    'starts': Qt.MatchStartsWith,
+    'contains': Qt.MatchContains,
+    'ends': Qt.MatchEndsWith,
+    'exact': Qt.MatchExactly,
+    'regex': Qt.MatchRegularExpression,
+}
 
 
 def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):
@@ -866,7 +877,7 @@ def set_completer_lineedit(qlineedit, list_items):
     completer.setModel(model)
 
 
-def set_completer_rows(widget, rows):
+def set_completer_rows(widget, rows, filter_mode: QtMatchFlag = 'starts'):
     """ Set a completer into a widget
     :param widget: Object where to set the completer (QLineEdit)
     :param rows: rows to set into the completer (List)["item1","item2","..."]
@@ -880,6 +891,7 @@ def set_completer_rows(widget, rows):
     # Set completer and model: add autocomplete in the widget
     completer = QCompleter()
     completer.setCaseSensitivity(Qt.CaseInsensitive)
+    completer.setFilterMode(match_flags.get(filter_mode))
     widget.setCompleter(completer)
     model = QStringListModel()
     model.setStringList(list_values)
