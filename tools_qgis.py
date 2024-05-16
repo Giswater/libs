@@ -1055,7 +1055,7 @@ def get_geometry_from_json(feature):
         type_ = feature['geometry']['type']
         geometry = f"{type_}{coordinates}"
         return QgsGeometry.fromWkt(geometry)
-    except (AttributeError, TypeError) as e:
+    except (AttributeError, TypeError, IndexError) as e:
         tools_log.log_info(f"{type(e).__name__} --> {e}")
         return None
 
