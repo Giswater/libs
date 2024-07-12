@@ -11,7 +11,7 @@ import operator
 import sys
 import subprocess
 import traceback
-from typing import Dict, Literal
+from typing import Dict, Literal, Optional
 import webbrowser
 from functools import partial
 from encodings.aliases import aliases
@@ -629,6 +629,24 @@ def get_col_index_by_col_name(qtable, column_name):
 
     return column_index
 
+
+def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional[int]:
+    """ Return tab index searching by tab name """
+
+    tab_index = -1
+
+    try:
+        for idx in range(qtabwidget.count()):
+            if qtabwidget.widget(idx).objectName() == tab_name:
+                tab_index = idx
+                break
+    except Exception as e:
+        tools_log.log_error("Tab not found.", parameter=tab_name)
+
+    if tab_index == -1:
+        tab_index = None
+
+    return tab_index
 
 
 def onCellChanged(table, row, column):
