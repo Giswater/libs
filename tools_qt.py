@@ -403,14 +403,24 @@ def set_autocompleter(combobox, list_items=None):
 
     if list_items is None:
         list_items = [combobox.itemText(i) for i in range(combobox.count())]
-    proxy_model = QSortFilterProxyModel()
-    _set_model_by_list(list_items, combobox, proxy_model)
+
+    proxy_model = QSortFilterProxyModel(combobox)
+    _set_model_by_list(list_items, proxy_model)
     combobox.editTextChanged.connect(partial(filter_by_list, combobox, proxy_model))
 
+    # Set up the completer without changing the combobox's model
+    completer = QCompleter(proxy_model, combobox)
+    completer.setCompletionColumn(0)
+    completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+    combobox.setCompleter(completer)
 
-def filter_by_list(widget, proxy_model):
-    """ Create the model """
-    proxy_model.setFilterFixedString(widget.currentText())
+
+def filter_by_list(combobox, proxy_model, text):
+    """ Filter the list based on the text input """
+
+    proxy_model.setFilterFixedString(text)
+    if combobox.completer():
+        combobox.completer().complete()
 
 
 def get_combo_value(dialog, widget, index=0, add_quote=False):
@@ -1533,23 +1543,13 @@ def _translate_tooltip(context_name, widget, idx=None, aux_context='ui_message')
                 widget.setToolTip(widget.text())
 
 
-def _set_model_by_list(string_list, widget, proxy_model):
+def _set_model_by_list(string_list, proxy_model):
     """ Set the model according to the list """
 
     model = QStringListModel()
     model.setStringList(string_list)
     proxy_model.setSourceModel(model)
     proxy_model.setFilterKeyColumn(0)
-    proxy_model_aux = QSortFilterProxyModel()
-    proxy_model_aux.setSourceModel(model)
-    proxy_model_aux.setFilterKeyColumn(0)
-    widget.setModel(proxy_model_aux)
-    widget.setModelColumn(0)
-    completer = QCompleter()
-    completer.setModel(proxy_model)
-    completer.setCompletionColumn(0)
-    completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
-    widget.setCompleter(completer)
 
 
 # endregion
