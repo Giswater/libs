@@ -80,7 +80,8 @@ def show_message(text, message_level=1, duration=10, context_name=None, paramete
     # Show message
     try:
         dialog.messageBar().pushMessage(title, msg, message_level, duration)
-    except Exception:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
+    except Exception as e:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
+        print("Exception show_message: ", e)
         iface.messageBar().pushMessage(title, msg, message_level, duration)
 
     # Check if logger to file
