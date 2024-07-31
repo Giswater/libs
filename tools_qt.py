@@ -24,7 +24,7 @@ from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
     QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
-    QToolButton
+    QToolButton, QDialog, QGridLayout
 from qgis.core import QgsExpression, QgsProject, QgsLayerTreeLayer
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
@@ -74,6 +74,76 @@ class GwHyperLinkLineEdit(QLineEdit):
         if self.isReadOnly():
             self.clicked.emit()
             self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")
+
+
+class GwEditDialog(QDialog):
+    """
+    Dialog with just one widget (QLineEdit, QTextEdit, QComboBox, QCheckBox).
+
+    Use example:
+```
+        edit_dialog = GwEditDialog(dialog, title=f"Edit {header}", 
+                                   label_text=f"Set new '{header}' value for result '{result_id}':", 
+                                   widget_type="QTextEdit", initial_value=value)
+        if edit_dialog.exec_() == QDialog.Accepted:
+            new_value = edit_dialog.get_value()
+            self._update_data(result_id, columnname, new_value)
+```
+    """
+    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None, initial_value=None):
+        super(GwEditDialog, self).__init__(parent)
+
+        self.setWindowTitle(title)
+
+        self.layout = QGridLayout(self)
+
+        # Add the label
+        self.label = QLabel(label_text, self)
+        self.layout.addWidget(self.label, 0, 0, 1, 2)
+
+        # Create the widget based on the type
+        if widget_type == "QLineEdit":
+            self.widget = QLineEdit(self)
+        elif widget_type == "QTextEdit":
+            self.widget = QTextEdit(self)
+        elif widget_type == "QComboBox":
+            self.widget = QComboBox(self)
+            if options:
+                self.widget.addItems(options)
+        elif widget_type == "QCheckBox":
+            self.widget = QCheckBox(self)
+        else:
+            raise ValueError("Unsupported widget type")
+
+        self.layout.addWidget(self.widget, 1, 0, 1, 2)
+
+        if initial_value is not None:
+            self.set_value(initial_value)
+
+        # Add buttons
+        self.accept_button = QPushButton("Accept", self)
+        self.cancel_button = QPushButton("Cancel", self)
+
+        self.accept_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        self.layout.addWidget(self.accept_button, 2, 0)
+        self.layout.addWidget(self.cancel_button, 2, 1)
+
+    def get_value(self):
+        if isinstance(self.widget, QLineEdit):
+            return self.widget.text()
+        elif isinstance(self.widget, QTextEdit):
+            return self.widget.toPlainText()
+        elif isinstance(self.widget, QComboBox):
+            return self.widget.currentText()
+        elif isinstance(self.widget, QCheckBox):
+            return self.widget.isChecked()
+        else:
+            return None
+
+    def set_value(self, value):
+        set_widget_text(self, self.widget, value)
 
 
 QtMatchFlag = Literal['starts', 'contains', 'ends', 'exact', 'regex']
