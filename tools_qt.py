@@ -694,13 +694,17 @@ def get_col_index_by_col_name(qtable, column_name):
     """ Return column index searching by column name """
 
     model = qtable.model()
+    columns_dict = qtable.property('columns')
+    if not columns_dict:
+        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}
+        qtable.setProperty('columns', columns_dict)
     column_index = -1
     try:
         record = model.record(0)
         column_index = record.indexOf(column_name)
     except AttributeError:
         for x in range(0, model.columnCount()):
-            if model.headerData(x, Qt.Horizontal) == column_name:
+            if columns_dict.get(model.headerData(x, Qt.Horizontal)) == column_name:
                 column_index = x
                 break
 
