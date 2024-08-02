@@ -8,6 +8,7 @@ or (at your option) any later version.
 import configparser
 import re
 from functools import partial
+from typing import Optional
 
 import console
 import os.path
@@ -21,7 +22,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsLayerTree
 from qgis.utils import iface
 
 from . import tools_log, tools_qt, tools_os
@@ -487,6 +488,62 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         tools_log.log_info("Layer not found", parameter=tablename)
 
     return layer
+
+
+def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None):
+    """ If the function receives a group name, check if it exists or not and put the layer in this group
+    :param layer: (QgsVectorLayer)
+    :param group: Name of the group that will be created in the toc (string)
+    """
+
+    if group is None:
+        QgsProject.instance().addMapLayer(layer)
+        return
+
+    QgsProject.instance().addMapLayer(layer, False)
+    root: QgsLayerTree = QgsProject.instance().layerTreeRoot()
+    if root is None:
+        msg = "QgsLayerTree not found for project."
+        tools_log.log_error(msg)
+        return
+    first_group = find_toc_group(root, group)
+    if first_group is None:
+        msg = f"Group '{group}' not found in layer tree."
+        tools_log.log_error(msg)
+        return
+
+    if create_groups:
+        if not first_group:
+            first_group = root.insertGroup(0, group)
+        if not find_toc_group(first_group, sub_group):
+            second_group = first_group.insertGroup(0, sub_group)
+            if second_group is None:
+                msg = "Couldn't add group."
+                tools_log.log_error(msg)
+                return
+            if sub_sub_group and not find_toc_group(second_group, sub_sub_group):
+                second_group.insertGroup(0, sub_sub_group)
+
+    if first_group and sub_group:
+        second_group = find_toc_group(first_group, sub_group)
+        if second_group:
+            third_group = find_toc_group(second_group, sub_sub_group)
+            if third_group:
+                third_group.insertLayer(0, layer)
+                iface.setActiveLayer(layer)
+                return
+            second_group.insertLayer(0, layer)
+            iface.setActiveLayer(layer)
+            return
+        first_group.insertLayer(0, layer)
+        iface.setActiveLayer(layer)
+        return
+
+    root = QgsProject.instance().layerTreeRoot()
+    my_group = root.findGroup("GW Layers")
+    if my_group is None:
+        my_group = root.insertGroup(0, "GW Layers")
+    my_group.insertLayer(0, layer)
 
 
 def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):

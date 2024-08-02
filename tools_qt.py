@@ -847,50 +847,6 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
     qtable.setModel(model)
 
 
-def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None):
-    """ If the function receives a group name, check if it exists or not and put the layer in this group
-    :param layer: (QgsVectorLayer)
-    :param group: Name of the group that will be created in the toc (string)
-    """
-
-    if group is None:
-        QgsProject.instance().addMapLayer(layer)
-        return
-
-    QgsProject.instance().addMapLayer(layer, False)
-    root = QgsProject.instance().layerTreeRoot()
-    first_group = tools_qgis.find_toc_group(root, group)
-
-    if create_groups:
-        if not first_group:
-            first_group = root.insertGroup(0, group)
-        if not tools_qgis.find_toc_group(first_group, sub_group):
-            second_group = first_group.insertGroup(0, sub_group)
-            if sub_sub_group and not tools_qgis.find_toc_group(second_group, sub_sub_group):
-                second_group.insertGroup(0, sub_sub_group)
-
-    if first_group and sub_group:
-        second_group = tools_qgis.find_toc_group(first_group, sub_group)
-        if second_group:
-            third_group = tools_qgis.find_toc_group(second_group, sub_sub_group)
-            if third_group:
-                third_group.insertLayer(0, layer)
-                iface.setActiveLayer(layer)
-                return
-            second_group.insertLayer(0, layer)
-            iface.setActiveLayer(layer)
-            return
-        first_group.insertLayer(0, layer)
-        iface.setActiveLayer(layer)
-        return
-
-    root = QgsProject.instance().layerTreeRoot()
-    my_group = root.findGroup("GW Layers")
-    if my_group is None:
-        my_group = root.insertGroup(0, "GW Layers")
-    my_group.insertLayer(0, layer)
-
-
 def set_lazy_init(widget, lazy_widget=None, lazy_init_function=None):
     """Apply the init function related to the model. It's necessary
     a lazy init because model is changed everytime is loaded."""
