@@ -25,7 +25,7 @@ from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsLayerTree
 from qgis.utils import iface
 
-from . import tools_log, tools_qt, tools_os
+from . import tools_log, tools_qt, tools_os, tools_db
 from . import lib_vars
 
 # List of user parameters (optionals)
@@ -507,14 +507,14 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
         tools_log.log_error(msg)
         return
     first_group = find_toc_group(root, group)
-    if first_group is None:
-        msg = f"Group '{group}' not found in layer tree."
-        tools_log.log_error(msg)
-        return
 
     if create_groups:
         if not first_group:
             first_group = root.insertGroup(0, group)
+        if first_group is None:
+            msg = f"Group '{group}' not found in layer tree."
+            tools_log.log_error(msg)
+            return
         if not find_toc_group(first_group, sub_group):
             second_group = first_group.insertGroup(0, sub_group)
             if second_group is None:
@@ -544,6 +544,36 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
     if my_group is None:
         my_group = root.insertGroup(0, "GW Layers")
     my_group.insertLayer(0, layer)
+
+
+def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
+                         key_column: Optional[str] = None, geom_column: Optional[str] = "the_geom",
+                         group: Optional[str] = None):
+    """ Creates a QVectorLayer and adds it to the project """
+
+    # Define your PostgreSQL connection parameters
+    uri = tools_db.get_uri()
+
+    querytext = f"({query})"
+    if key_column is None:
+        querytext = f"(SELECT row_number() over () AS _uid_,* FROM {querytext} AS query_table)"
+        key_column = "_uid_"
+
+    # TODO: manage if @geom_column isn't present on querytext
+
+    # Set the SQL query and the geometry column
+    uri.setDataSource("", f"({query})", geom_column, "", key_column)
+
+    # Create the layer
+    layer = QgsVectorLayer(uri.uri(False), f"{layer_name}", "postgres")
+
+    # Check if the layer is valid
+    if not layer.isValid():
+        tools_log.log_error("Layer failed to load!", parameter=querytext)
+        return
+
+    # Add the layer to the project
+    add_layer_to_toc(layer, group)
 
 
 def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
