@@ -554,15 +554,29 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
     # Define your PostgreSQL connection parameters
     uri = tools_db.get_uri()
 
-    querytext = f"({query})"
+    # Modify the query to include a unique identifier if key_column is not provided
     if key_column is None:
-        querytext = f"(SELECT row_number() over () AS _uid_,* FROM {querytext} AS query_table)"
+        querytext = f"(SELECT row_number() over () AS _uid_, * FROM ({query}) AS query_table)"
         key_column = "_uid_"
+    else:
+        querytext = f"({query})"
 
-    # TODO: manage if @geom_column isn't present on querytext
+    # Set the SQL query and the geometry column (initially without geom_column)
+    uri.setDataSource("", f"({query})", "", "", key_column)
 
-    # Set the SQL query and the geometry column
-    uri.setDataSource("", f"({query})", geom_column, "", key_column)
+    # Create a provisional layer
+    provisional_layer  = QgsVectorLayer(uri.uri(False), f"{layer_name}", "postgres")
+
+    # Check if the provisional layer is valid
+    if not provisional_layer.isValid():
+        tools_log.log_error("Layer failed to load!", parameter=querytext)
+        return
+
+    # Check if the geometry column exists in the provisional layer
+    fields = provisional_layer.fields()
+    if geom_column in fields.names():
+        # Update uri to include the geometry column
+        uri.setDataSource("", querytext, geom_column, "", key_column)
 
     # Create the layer
     layer = QgsVectorLayer(uri.uri(False), f"{layer_name}", "postgres")
