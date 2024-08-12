@@ -491,6 +491,7 @@ def filter_by_list(combobox, proxy_model, text):
     proxy_model.setFilterFixedString(text)
     if combobox.completer():
         combobox.completer().complete()
+        combobox.completer().popup().hide()
 
 
 def get_combo_value(dialog, widget, index=0, add_quote=False):
