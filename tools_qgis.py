@@ -213,6 +213,19 @@ def show_critical(text, duration=10, context_name=None, parameter=None, logger_f
     show_message(text, 2, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
+def show_success(text, duration=10, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+    """
+    Show success message to the user
+        :param text: The text to be shown (String)
+        :param duration: The duration of the message (int)
+        :param context_name: Where to look for translating the message
+        :param parameter: A text to show after the message (String)
+        :param logger_file: Whether it should log the message in a file or not (bool)
+        :param title: The title of the message (String) """
+
+    show_message(text, 3, duration, context_name, parameter, title, logger_file, dialog=dialog)
+
+
 def get_visible_layers(as_str_list=False, as_list=False):
     """
     Return string as {...} or [...] or list with name of table in DB of all visible layer in TOC
