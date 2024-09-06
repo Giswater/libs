@@ -205,7 +205,7 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
     date = None
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
     if type(widget) is QDateEdit:
         date = widget.date().toString(date_format)
@@ -224,7 +224,7 @@ def set_calendar(dialog, widget, date, default_current_date=True):
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
 
     if lib_vars.date_format in ("dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "yyyy-MM-dd"):
@@ -250,7 +250,7 @@ def set_time(dialog, widget, time):
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
     if type(widget) is QTimeEdit:
         if time is None:
@@ -262,8 +262,6 @@ def get_widget(dialog, widget):
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
-        return None
     return widget
 
 
@@ -271,7 +269,7 @@ def get_widget_type(dialog, widget):
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return None
     return type(widget)
 
@@ -281,7 +279,7 @@ def get_widget_value(dialog, widget):
     value = None
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return value
 
     if type(widget) in (QDoubleSpinBox, QLineEdit, QSpinBox, QTextEdit, GwHyperLinkLineEdit):
@@ -343,7 +341,7 @@ def set_widget_text(dialog, widget, text):
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
 
     if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton):
@@ -393,7 +391,7 @@ def set_checked(dialog, widget, checked=True):
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
     if type(widget) is QCheckBox or type(widget) is QRadioButton:
         widget.setChecked(bool(checked))
@@ -456,7 +454,7 @@ def add_image(dialog, widget, cat_shape):
     element = cat_shape.lower()
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if not widget:
+    if widget is None:
         return
     if type(widget) is QLabel:
         plugin_dir = os.path.dirname(__file__)
@@ -1422,7 +1420,7 @@ def set_table_model(dialog, table_object, table_name, expr_filter):
     # Attach model to selected widget
     if type(table_object) is str:
         widget = get_widget(dialog, table_object)
-        if not widget:
+        if widget is None:
             message = "Widget not found"
             tools_log.log_info(message, parameter=table_object)
             return expr
@@ -1489,7 +1487,7 @@ def _translate_form(dialog, context_name, aux_context='ui_message'):
 def _translate_widget(context_name, widget, aux_context='ui_message'):
     """ Translate widget text """
 
-    if not widget:
+    if widget is None:
         return
 
     widget_name = ""
