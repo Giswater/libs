@@ -1094,6 +1094,7 @@ def show_details(detail_text, title=None, inf_text=None):
 
     iface.messageBar().clearWidgets()
     msg_box = QMessageBox()
+    msg_box.setIcon(QMessageBox.Information)
     msg_box.setText(detail_text)
     if title:
         title = tr(title)
@@ -1145,6 +1146,9 @@ def show_question(text, title="Info", inf_text=None, context_name=None, paramete
     msg_box.setDefaultButton(QMessageBox.Ok)
     msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
 
+    # Set icon for the type of message
+    msg_box.setIcon(QMessageBox.Question)
+
     # Set window icon
     icon_folder = f"{lib_vars.plugin_dir}{os.sep}icons"
     icon_path = f"{icon_folder}{os.sep}dialogs{os.sep}20x20{os.sep}giswater.png"
@@ -1180,6 +1184,7 @@ def show_info_box(text, title=None, inf_text=None, context_name=None, parameter=
         if len(inf_text) > 500:
             inf_text = inf_text[:500] + "\n[...]"
         msg_box.setInformativeText(inf_text)
+    msg_box.setIcon(QMessageBox.Information)
     msg_box.setDefaultButton(QMessageBox.No)
     msg_box.exec_()
 
