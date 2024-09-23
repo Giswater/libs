@@ -16,6 +16,7 @@ import webbrowser
 from functools import partial
 from encodings.aliases import aliases
 from warnings import warn
+from sip import isdeleted
 
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
     QPersistentModelIndex, QCoreApplication, QTranslator, QEvent, QLocale
@@ -260,12 +261,18 @@ def set_time(dialog, widget, time):
 
 def get_widget(dialog, widget):
 
+    if isdeleted(dialog):
+        return None
+
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     return widget
 
 
 def get_widget_type(dialog, widget):
+
+    if isdeleted(dialog):
+        return None
 
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
@@ -277,6 +284,10 @@ def get_widget_type(dialog, widget):
 def get_widget_value(dialog, widget):
 
     value = None
+
+    if isdeleted(dialog):
+        return value
+
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
@@ -297,6 +308,9 @@ def get_widget_value(dialog, widget):
 
 
 def get_text(dialog, widget, add_quote=False, return_string_null=True):
+
+    if isdeleted(dialog):
+        return None
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
@@ -1435,6 +1449,9 @@ def set_table_model(dialog, table_object, table_name, expr_filter):
         msg = "Table_object is not a table name or QTableView"
         tools_log.log_info(msg)
         return expr
+
+    if isdeleted(widget):
+        return
 
     if expr_filter:
         widget.setModel(model)
