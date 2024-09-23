@@ -351,6 +351,19 @@ def get_project_variable(var_name):
         return value
 
 
+def set_project_variable(var_name, value):
+    """ Set project variable """
+
+    try:
+        custom_vars = QgsProject.instance().customVariables()
+        custom_vars[var_name] = value
+        QgsProject.instance().setCustomVariables(custom_vars)
+    except Exception:
+        pass
+    finally:
+        return
+
+
 def get_project_layers():
     """ Return layers in the same order as listed in TOC """
 
