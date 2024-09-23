@@ -1398,15 +1398,13 @@ def fill_combo_unicodes(combo):
 
     unicode_list = []
     matches = ["utf8", "windows", "latin"]
-    for item in list(aliases.items()):
-        for x in matches:
-            if not f"{item[0]}".startswith(x):
-                continue
-            unicode_list.append(str(item[0]))
 
-    sorted_list = sorted(unicode_list, key=str.lower)
-    if sorted_list:
-        set_autocompleter(combo, sorted_list)
+    for item in list(aliases.items()):
+        if any(item[0].startswith(match) for match in matches):
+            unicode_list.append((str(item[0]), str(item[0])))
+
+    fill_combo_values(combo, unicode_list)
+
 
 
 def set_table_model(dialog, table_object, table_name, expr_filter):
