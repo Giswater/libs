@@ -18,7 +18,7 @@ from random import randrange
 
 from qgis.PyQt.QtCore import Qt, QTimer, QSettings
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton
+from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QFrame
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
@@ -31,6 +31,15 @@ from . import lib_vars
 # List of user parameters (optionals)
 user_parameters = {'log_sql': None, 'show_message_durations': None, 'aux_context': 'ui_message'}
 
+# Define message level constants
+MESSAGE_LEVEL_INFO = 0 # Blue
+MESSAGE_LEVEL_WARNING = 1 # Yellow
+MESSAGE_LEVEL_CRITICAL = 2 # Red
+MESSAGE_LEVEL_SUCCESS = 3 # Green
+
+# Define message duration constants
+DEFAULT_MESSAGE_DURATION = 10
+MINIMUM_WARNING_DURATION = 10
 
 def get_feature_by_expr(layer, expr_filter):
 
@@ -49,12 +58,12 @@ def get_feature_by_expr(layer, expr_filter):
     return False
 
 
-def show_message(text, message_level=1, duration=10, context_name=None, parameter=None, title="", logger_file=True,
-                 dialog=iface):
+def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, title="", logger_file=True,
+                 dialog=iface, sqlcontext=None):
     """
     Show message to the user with selected message level
         :param text: The text to be shown (String)
-        :param message_level: {INFO = 0(blue), WARNING = 1(yellow), CRITICAL = 2(red), SUCCESS = 3(green)}
+        :param message_level: Message level constant
         :param duration: The duration of the message (int)
         :param context_name: Where to look for translating the message
         :param parameter: A text to show after the message (String)
@@ -68,8 +77,8 @@ def show_message(text, message_level=1, duration=10, context_name=None, paramete
     dev_duration = user_parameters.get('show_message_durations')
     # If is set, use this value
     if dev_duration not in (None, "None"):
-        if message_level in (1, 2) and int(dev_duration) < 10:
-            duration = 10
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:
+            duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
     msg = None
@@ -80,7 +89,11 @@ def show_message(text, message_level=1, duration=10, context_name=None, paramete
 
     # Show message
     try:
-        dialog.messageBar().pushMessage(title, msg, message_level, duration)
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL):
+            # show message with button with the sqlcontext
+            show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300), "Show more", message_level, duration, context_name, logger_file, dialog)
+        else:
+            dialog.messageBar().pushMessage(title, msg, message_level, duration)
     except Exception as e:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
         print("Exception show_message: ", e)
         iface.messageBar().pushMessage(title, msg, message_level, duration)
@@ -90,7 +103,7 @@ def show_message(text, message_level=1, duration=10, context_name=None, paramete
         lib_vars.logger.info(text)
 
 
-def show_message_link(text, url, btn_text="Open", message_level=0, duration=10, context_name=None, logger_file=True,
+def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name=None, logger_file=True,
                       dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
@@ -132,14 +145,14 @@ def show_message_link(text, url, btn_text="Open", message_level=0, duration=10, 
         lib_vars.logger.info(text)
 
 
-def show_message_function(text, function, btn_text="Open", message_level=0, duration=10, context_name=None, logger_file=True,
+def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name=None, logger_file=True,
                           dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
         :param text: The text to be shown (String)
         :param function: The function (can be a ``partial()`` object) to execute.
         :param btn_text: The text of the button (String)
-        :param message_level: {INFO = 0(blue), WARNING = 1(yellow), CRITICAL = 2(red), SUCCESS = 3(green)}
+        :param message_level: Message level constant
         :param duration: The duration of the message (int)
         :param context_name: Where to look for translating the message
         :param logger_file: Whether it should log the message in a file or not (bool)
@@ -151,8 +164,8 @@ def show_message_function(text, function, btn_text="Open", message_level=0, dura
     dev_duration = user_parameters.get('show_message_durations')
     # If is set, use this value
     if dev_duration not in (None, "None") and duration > 0:
-        if message_level in (1, 2) and int(dev_duration) < 10:
-            duration = 10
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:
+            duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
     msg = None
@@ -174,7 +187,7 @@ def show_message_function(text, function, btn_text="Open", message_level=0, dura
         lib_vars.logger.info(text)
 
 
-def show_info(text, duration=10, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show information message to the user
         :param text: The text to be shown (String)
@@ -183,11 +196,12 @@ def show_info(text, duration=10, context_name=None, parameter=None, logger_file=
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
+    print("show_info")
 
-    show_message(text, 0, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_warning(text, duration=10, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show warning message to the user
         :param text: The text to be shown (String)
@@ -196,11 +210,12 @@ def show_warning(text, duration=10, context_name=None, parameter=None, logger_fi
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
+    print("show_info")
 
-    show_message(text, 1, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_critical(text, duration=10, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show critical message to the user
         :param text: The text to be shown (String)
@@ -209,11 +224,12 @@ def show_critical(text, duration=10, context_name=None, parameter=None, logger_f
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
+    print("show_info")
 
-    show_message(text, 2, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_success(text, duration=10, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show success message to the user
         :param text: The text to be shown (String)
@@ -222,8 +238,54 @@ def show_success(text, duration=10, context_name=None, parameter=None, logger_fi
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
+    print("show_info")
 
-    show_message(text, 3, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog)
+
+
+def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200):
+    """
+    Displays a dialog with the SQL context in a more detailed, error-specific format.
+
+    :param sqlcontext: The SQL context to display (String)
+    :param msg: The message to display above the sqlcontext (String)
+    :param title: The title of the dialog window (String)
+    :param min_width: The minimum width of the dialog (int)
+    :param min_height: The minimum height of the dialog (int)
+    """
+
+    dialog = QDialog()
+    dialog.setWindowTitle(title or "SQLERROR Information")
+
+    dialog.setMinimumWidth(min_width)
+    dialog.setMinimumHeight(min_height)
+
+    layout = QVBoxLayout()
+
+    # Construct the full message
+    if msg and sqlcontext:
+        full_message = f"{msg}\n\nSQL context:\n{sqlcontext}"
+    elif msg:
+        full_message = msg
+    elif sqlcontext:
+        full_message = f"SQL context:\n{sqlcontext}"
+    else:
+        full_message = "No SQL context available."
+
+    # Add the message label
+    label_message = QLabel(full_message)
+    label_message.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
+    label_message.setAlignment(Qt.AlignLeft)
+    label_message.setWordWrap(True)
+    layout.addWidget(label_message)
+
+    # Add standard close button at the bottom
+    button_box = QDialogButtonBox(QDialogButtonBox.Close)
+    button_box.rejected.connect(dialog.reject)
+    layout.addWidget(button_box)
+
+    dialog.setLayout(layout)
+    dialog.exec_()
 
 
 def get_visible_layers(as_str_list=False, as_list=False):
