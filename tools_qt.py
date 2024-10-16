@@ -558,7 +558,7 @@ def set_combo_value(combo, value, item1, add_new=True):
     return False
 
 
-def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False):
+def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False, value_to_show=None, item_to_compare=None):
     """
     Populate @combo with list @rows and show field @index_to_show
         :param combo: QComboBox widget to fill (QComboBox)
@@ -600,6 +600,9 @@ def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo
         for record in records_sorted:
             combo.addItem(str(record[index_to_show]), record)
             combo.blockSignals(False)
+
+    if value_to_show is not None and item_to_compare is not None:
+        set_combo_value(combo, value_to_show, item_to_compare)
 
 
 def set_combo_item_unselectable_by_id(qcombo, list_id=[]):
