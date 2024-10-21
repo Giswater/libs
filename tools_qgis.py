@@ -196,7 +196,6 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parame
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
-    print("show_info")
 
     show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
@@ -210,7 +209,6 @@ def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, par
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
-    print("show_info")
 
     show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
@@ -224,7 +222,6 @@ def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, pa
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
-    print("show_info")
 
     show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
@@ -238,7 +235,6 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, par
         :param parameter: A text to show after the message (String)
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
-    print("show_info")
 
     show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog)
 

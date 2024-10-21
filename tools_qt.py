@@ -525,18 +525,18 @@ def get_combo_value(dialog, widget, index=0, add_quote=False):
     return value
 
 
-def set_combo_value(combo, value, item1, add_new=True):
+def set_combo_value(combo, value, index, add_new=True):
     """
     Set text to combobox populate with more than 1 item for row
         :param combo: QComboBox widget to manage
         :param value: element to show
-        :param item1: element to compare
+        :param index: index to compare
         :param add_new: if True it will add the value even if it's not in the combo
     """
 
     for i in range(0, combo.count()):
         elem = combo.itemData(i)
-        if elem is not None and value == str(elem[item1]):
+        if elem is not None and value == str(elem[index]):
             combo.setCurrentIndex(i)
             return True
 
@@ -558,7 +558,7 @@ def set_combo_value(combo, value, item1, add_new=True):
     return False
 
 
-def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False, value_to_show=None, item_to_compare=None):
+def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False, selected_id=None, index_to_compare=None):
     """
     Populate @combo with list @rows and show field @index_to_show
         :param combo: QComboBox widget to fill (QComboBox)
@@ -568,6 +568,8 @@ def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo
         :param sort_combo: whether it should sort the items or not (bool)
         :param sort_by: sort combo by this column (int)
         :param add_empty: add an empty element as first item (bool)
+        :param selected_id: The value to be set as selected in the ComboBox (str or int)
+        :param index_to_compare: Index to compare `selected_id` with the id or value in this combo widget (int).
     """
 
     records = []
@@ -601,8 +603,8 @@ def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo
             combo.addItem(str(record[index_to_show]), record)
             combo.blockSignals(False)
 
-    if value_to_show is not None and item_to_compare is not None:
-        set_combo_value(combo, value_to_show, item_to_compare)
+    if None not in (selected_id, index_to_compare):
+        set_combo_value(combo, selected_id, index_to_compare)
 
 
 def set_combo_item_unselectable_by_id(qcombo, list_id=[]):
