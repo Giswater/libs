@@ -416,7 +416,7 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
     return row
 
 
-def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False):
+def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False, aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao
@@ -425,7 +425,7 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
         return None
     sql = _get_sql(sql, log_sql, params)
     rows = None
-    rows2 = dao.get_rows(sql, commit)
+    rows2 = dao.get_rows(sql, commit, aux_conn=aux_conn)
     lib_vars.session_vars['last_error'] = dao.last_error
     if not rows2:
         # Check if any error has been raised
@@ -443,13 +443,13 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
     return rows
 
 
-def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True):
+def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True, aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao
     if log_sql:
         tools_log.log_db(sql, stack_level_increase=1)
-    result = dao.execute_sql(sql, commit)
+    result = dao.execute_sql(sql, commit, aux_conn=aux_conn)
     lib_vars.session_vars['last_error'] = dao.last_error
     if not result:
         if log_error:
