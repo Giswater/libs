@@ -89,7 +89,7 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
 
     # Show message
     try:
-        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL):
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and sqlcontext is not None:
             # show message with button with the sqlcontext
             show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300), "Show more", message_level, duration, context_name, logger_file, dialog)
         else:
