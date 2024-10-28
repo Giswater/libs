@@ -281,6 +281,11 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     layout.addWidget(button_box)
 
     dialog.setLayout(layout)
+
+    # Manage stay on top
+    flags = Qt.WindowStaysOnTopHint
+    dialog.setWindowFlags(flags)
+
     dialog.exec_()
 
 
