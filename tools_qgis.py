@@ -18,7 +18,7 @@ from random import randrange
 
 from qgis.PyQt.QtCore import Qt, QTimer, QSettings
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QFrame
+from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QTextEdit, QDialogButtonBox
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
@@ -241,7 +241,8 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, par
 
 def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200):
     """
-    Displays a dialog with the SQL context in a more detailed, error-specific format.
+    Displays a dialog with the SQL context in a more detailed, error-specific format,
+    allowing the user to copy the error message.
 
     :param sqlcontext: The SQL context to display (String)
     :param msg: The message to display above the sqlcontext (String)
@@ -251,7 +252,7 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     """
 
     dialog = QDialog()
-    dialog.setWindowTitle(title or "SQLERROR Information")
+    dialog.setWindowTitle(title or "SQL Context")
 
     dialog.setMinimumWidth(min_width)
     dialog.setMinimumHeight(min_height)
@@ -268,12 +269,11 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     else:
         full_message = "No SQL context available."
 
-    # Add the message label
-    label_message = QLabel(full_message)
-    label_message.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-    label_message.setAlignment(Qt.AlignLeft)
-    label_message.setWordWrap(True)
-    layout.addWidget(label_message)
+    # Add the message text area to allow copying
+    text_area = QTextEdit()
+    text_area.setPlainText(full_message)
+    text_area.setReadOnly(True)
+    layout.addWidget(text_area)
 
     # Add standard close button at the bottom
     button_box = QDialogButtonBox(QDialogButtonBox.Close)
