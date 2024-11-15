@@ -1170,7 +1170,7 @@ def show_question(text, title="Info", inf_text=None, context_name=None, paramete
 
     # Set window icon
     icon_folder = f"{lib_vars.plugin_dir}{os.sep}icons"
-    icon_path = f"{icon_folder}{os.sep}dialogs{os.sep}20x20{os.sep}giswater.png"
+    icon_path = f"{icon_folder}{os.sep}dialogs{os.sep}136.png"
     giswater_icon = QIcon(icon_path)
     msg_box.setWindowIcon(giswater_icon)
 
