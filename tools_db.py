@@ -395,6 +395,20 @@ def get_postgis_version():
     return postgis_version
 
 
+def get_pgrouting_version():
+    """ Get pgRouting version (integer value) """
+
+    global dao
+    pgrouting_version = None
+    sql = "SELECT * FROM pgr_version()"
+    row = dao.get_row(sql)
+    if row:
+        pgrouting_version = row[0]
+
+    return pgrouting_version
+
+
+
 def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_conn=None, is_admin=None, is_thread=False):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
