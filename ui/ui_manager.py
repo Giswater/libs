@@ -6,6 +6,7 @@ or (at your option) any later version.
 """
 # -*- coding: utf-8 -*-
 import os
+from warnings import warn
 
 from qgis.PyQt import uic
 
@@ -20,7 +21,11 @@ def get_ui_class(ui_file_name):
     return uic.loadUiType(ui_file_path)[0]
 
 
-FORM_CLASS = get_ui_class('dialog_text.ui')
-class DialogTextUi(Dialog, FORM_CLASS):
+FORM_CLASS = get_ui_class('show_info.ui')
+class ShowInfoUi(Dialog, FORM_CLASS):
     pass
+
+FORM_CLASS = get_ui_class('show_info.ui')
+class DialogTextUi(Dialog, FORM_CLASS):
+    warn('This class is deprecated, use <ShowInfoUi> instead.', DeprecationWarning, stacklevel=2)
 

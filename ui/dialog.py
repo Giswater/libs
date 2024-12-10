@@ -10,8 +10,10 @@ from qgis.PyQt.QtWidgets import QDialog
 
 class Dialog(QDialog):
 
-    def __init__(self):
+    def __init__(self, icon=None):
 
         super().__init__()
         self.setupUi(self)
 
+        if icon:
+            self.setWindowIcon(icon)

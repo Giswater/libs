@@ -32,11 +32,11 @@ from qgis.utils import iface
 
 from . import tools_log, tools_os, tools_qgis, tools_db
 from . import lib_vars
-from .ui.ui_manager import DialogTextUi
+from .ui.ui_manager import ShowInfoUi
 
 
 translator = QTranslator()
-dlg_text = DialogTextUi()
+dlg_info = ShowInfoUi()
 
 
 class GwExtendedQLabel(QLabel):
@@ -1349,20 +1349,20 @@ def show_exception_message(title=None, msg="", window_title="Information about e
         return
 
     lib_vars.session_vars['last_error_msg'] = None
-    dlg_text.btn_accept.setVisible(False)
-    dlg_text.btn_close.clicked.connect(lambda: dlg_text.close())
-    dlg_text.setWindowTitle(window_title)
+    dlg_info.btn_accept.setVisible(False)
+    dlg_info.btn_close.clicked.connect(lambda: dlg_info.close())
+    dlg_info.setWindowTitle(window_title)
     if title:
-        dlg_text.lbl_text.setText(title)
-    set_widget_text(dlg_text, dlg_text.txt_infolog, msg)
-    dlg_text.setWindowFlags(Qt.WindowStaysOnTopHint)
+        dlg_info.lbl_text.setText(title)
+    set_widget_text(dlg_info, dlg_info.txt_infolog, msg)
+    dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
     if pattern is None:
         pattern = "File\\sname:|Function\\sname:|Line\\snumber:|SQL:|SQL\\sfile:|Detail:|Context:|Description|Schema " \
                   "name|Message\\serror:"
-    set_text_bold(dlg_text.txt_infolog, pattern)
+    set_text_bold(dlg_info.txt_infolog, pattern)
 
 
-    dlg_text.show()
+    dlg_info.show()
 
 
 def manage_exception(title=None, description=None, sql=None, schema_name=None):
