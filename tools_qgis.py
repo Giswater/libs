@@ -23,7 +23,7 @@ from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
     QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsLayerTree
-from qgis.utils import iface
+from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
 from . import lib_vars
@@ -384,6 +384,52 @@ def get_build_version(plugin_dir, default_version='35001'):
 
     build_version = get_plugin_metadata('version', default_version, plugin_dir).replace(".", "")
     return build_version
+
+
+def find_plugin_path(folder_name: str) -> Optional[str]:
+    """
+    Find the full path of a plugin folder by checking possible paths.
+
+    :param folder_name: The folder name of the plugin.
+    :return: The full path to the plugin folder if found, None otherwise.
+    """
+    for path in plugin_paths:
+        potential_path = os.path.join(path, folder_name)
+        if os.path.exists(potential_path):
+            return potential_path
+    return None
+
+
+def is_plugin_available(plugin_name: str) -> bool:
+    """
+    Check if a QGIS plugin is available by matching its metadata name.
+
+    :param plugin_name: The 'name' parameter from the plugin's metadata.
+    :return: True if the plugin is available, False otherwise.
+    """
+    for folder_name in available_plugins:
+        plugin_dir = find_plugin_path(folder_name)
+        if plugin_dir:
+            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            if metadata_name == plugin_name:
+                return True
+    return False
+
+
+def is_plugin_active(plugin_name: str) -> bool:
+    """
+    Check if a QGIS plugin is active by matching its metadata name.
+
+    :param plugin_name: The 'name' parameter from the plugin's metadata.
+    :return: True if the plugin is active, False otherwise.
+    """
+    for folder_name in active_plugins:
+        plugin_dir = find_plugin_path(folder_name)
+        if plugin_dir:
+            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            if metadata_name == plugin_name:
+                return True
+    return False
 
 
 def enable_python_console():
