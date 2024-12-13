@@ -543,17 +543,28 @@ def get_layer_source_table_name(layer):
     if layer is None:
         return None
 
-    uri = layer.dataProvider().dataSourceUri().lower()
-    pos_ini = uri.find('table=')
-    total = len(uri)
-    pos_end_schema = uri.rfind('.')
-    pos_fi = uri.find('" ')
-    if uri.find('pg:') != -1:
-        uri_table = uri[pos_ini + 6:total]
-    elif pos_ini != -1 and pos_fi != -1:
-        uri_table = uri[pos_end_schema + 2:pos_fi]
+    provider = layer.providerType()
+    if provider == 'postgres':
+        uri = layer.dataProvider().dataSourceUri().lower()
+        pos_ini = uri.find('table=')
+        total = len(uri)
+        pos_end_schema = uri.rfind('.')
+        pos_fi = uri.find('" ')
+        if uri.find('pg:') != -1:
+            uri_table = uri[pos_ini + 6:total]
+        elif pos_ini != -1 and pos_fi != -1:
+            uri_table = uri[pos_end_schema + 2:pos_fi]
+        else:
+            uri_table = uri[pos_end_schema + 2:total - 1]
+    elif provider == 'ogr' and layer.source().split('|')[0].endswith('.gpkg'):
+        uri_table = ""
+        parts = layer.source().split('|')  # Split by the pipe character '|'
+        for part in parts:
+            if part.startswith('layername='):
+                uri_table = part.split('=')[1]
+                break
     else:
-        uri_table = uri[pos_end_schema + 2:total - 1]
+        uri_table = None
 
     return uri_table
 
@@ -562,6 +573,8 @@ def get_layer_schema(layer):
     """ Get table or view schema_name of selected layer """
 
     if layer is None:
+        return None
+    if layer.providerType() != 'postgres':
         return None
 
     table_schema = None
