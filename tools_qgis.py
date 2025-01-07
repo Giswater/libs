@@ -58,7 +58,7 @@ def get_feature_by_expr(layer, expr_filter):
     return False
 
 
-def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, title="", logger_file=True,
+def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, title="", logger_file=True,
                  dialog=iface, sqlcontext=None):
     """
     Show message to the user with selected message level
@@ -103,7 +103,7 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
         lib_vars.logger.info(text)
 
 
-def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name=None, logger_file=True,
+def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True,
                       dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
@@ -145,7 +145,7 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
         lib_vars.logger.info(text)
 
 
-def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name=None, logger_file=True,
+def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True,
                           dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
@@ -187,7 +187,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
         lib_vars.logger.info(text)
 
 
-def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show information message to the user
         :param text: The text to be shown (String)
@@ -200,7 +200,7 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parame
     show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show warning message to the user
         :param text: The text to be shown (String)
@@ -213,7 +213,7 @@ def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, par
     show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show critical message to the user
         :param text: The text to be shown (String)
@@ -226,7 +226,7 @@ def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, pa
     show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name=None, parameter=None, logger_file=True, title="", dialog=iface):
+def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
     """
     Show success message to the user
         :param text: The text to be shown (String)

@@ -1127,7 +1127,7 @@ def show_details(detail_text, title=None, inf_text=None):
     msg_box.exec_()
 
 
-def show_warning_open_file(text, inf_text, file_path, context_name=None):
+def show_warning_open_file(text, inf_text, file_path, context_name="giswater"):
     """ Show warning message with a button to open @file_path """
 
     widget = iface.messageBar().createMessage(tr(text, context_name), tr(inf_text))
@@ -1138,7 +1138,7 @@ def show_warning_open_file(text, inf_text, file_path, context_name=None):
     iface.messageBar().pushWidget(widget, 1)
 
 
-def show_question(text, title="Info", inf_text=None, context_name=None, parameter=None, force_action=False):
+def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False):
     """ Ask question to the user """
 
     # Expert mode does not ask and accept all actions
@@ -1181,7 +1181,7 @@ def show_question(text, title="Info", inf_text=None, context_name=None, paramete
         return False
 
 
-def show_info_box(text, title=None, inf_text=None, context_name=None, parameter=None):
+def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None):
     """ Show information box to the user """
 
     msg = ""
@@ -1237,7 +1237,7 @@ def set_stylesheet(widget, style="border: 2px solid red"):
     widget.setStyleSheet(style)
 
 
-def tr(message, context_name=None, aux_context='ui_message'):
+def tr(message, context_name="giswater", aux_context='ui_message'):
     """ Translate @message looking it in @context_name """
 
     if context_name is None:
@@ -1246,12 +1246,15 @@ def tr(message, context_name=None, aux_context='ui_message'):
     value = None
     try:
         value = QCoreApplication.translate(context_name, message)
+        print(value)
     except TypeError:
         value = QCoreApplication.translate(context_name, str(message))
+        print(value)
     finally:
         # If not translation has been found, check into context @aux_context
         if value == message:
             value = QCoreApplication.translate(aux_context, message)
+            print(value)
 
     return value
 
