@@ -432,6 +432,22 @@ def is_plugin_active(plugin_name: str) -> bool:
     return False
 
 
+def get_plugin_folder(plugin_name: str) -> Optional[str]:
+    """
+    Get the full path of a plugin folder by matching its metadata name.
+
+    :param plugin_name: The 'name' parameter from the plugin's metadata.
+    :return: The folder name of the plugin if found, None otherwise.
+    """
+    for folder_name in available_plugins:
+        plugin_dir = find_plugin_path(folder_name)
+        if plugin_dir:
+            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            if metadata_name == plugin_name:
+                return folder_name
+    return None
+
+
 def enable_python_console():
     """ Enable Python console and Log Messages panel """
 
