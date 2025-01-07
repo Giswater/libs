@@ -1246,15 +1246,12 @@ def tr(message, context_name="giswater", aux_context='ui_message'):
     value = None
     try:
         value = QCoreApplication.translate(context_name, message)
-        print(value)
     except TypeError:
         value = QCoreApplication.translate(context_name, str(message))
-        print(value)
     finally:
         # If not translation has been found, check into context @aux_context
         if value == message:
             value = QCoreApplication.translate(aux_context, message)
-            print(value)
 
     return value
 
