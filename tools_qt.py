@@ -750,6 +750,24 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
 
     return tab_index
 
+def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[int]:
+    """ Return page index searching by page name """
+
+    page_index = -1
+
+    try:
+        for idx in range(qtoolbox.count()):
+            if qtoolbox.widget(idx).objectName() == page_name:
+                page_index = idx
+                break
+    except Exception as e:
+        tools_log.log_error("Page not found.", parameter=page_name)
+
+    if page_index == -1:
+        page_index = None
+
+    return page_index
+
 
 def onCellChanged(table, row, column):
     """ Function to be connected to a QTableWidget cellChanged signal.
