@@ -142,24 +142,30 @@ def check_super_user(username=None):
         return False
 
 
-def check_postgis_version():
-
-    sql = f"SELECT name FROM pg_available_extensions WHERE name = 'postgis'"
+def check_pg_extension(extension, form_enabled=True):
+    sql = f"SELECT extname FROM pg_extension WHERE extname = '{extension}'"
     row = get_row(sql)
-    if row:
-        return row[0]
-    else:
-        return False
 
+    if not row:
+        sql = f"SELECT name FROM pg_available_extensions WHERE name = '{extension}'"
+        row = get_row(sql)
+        if row and form_enabled:
+            sql = f"CREATE EXTENSION IF NOT EXISTS {extension};"
+            execute_sql(sql)
 
-def check_pg_extension(extension):
+            if extension == 'postgis':
+                postgis_version = get_postgis_version()
+                # Check postGis version
+                major_version = postgis_version.split(".")
+                if int(major_version[0]) >= 3:
+                    sql = f"CREATE EXTENSION IF NOT EXISTS postgis_raster;"
+                    execute_sql(sql)
+            return True, None
+        elif form_enabled:
+            message = f"Unable to create '{extension}' extension. Packages must be installed, consult your administrator."
+            return False, message
 
-    sql = f"SELECT name FROM pg_available_extensions WHERE name = '{extension}'"
-    row = get_row(sql)
-    if row:
-        return row[0]
-    else:
-        return False
+    return True, None
 
 
 def get_current_user():
@@ -385,12 +391,14 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
 def get_postgis_version():
     """ Get Postgis version (integer value) """
 
-    global dao
     postgis_version = None
-    sql = "SELECT postgis_lib_version()"
-    row = dao.get_row(sql)
-    if row:
-        postgis_version = row[0]
+    postgis_extension = check_pg_extension('postgis')
+
+    if postgis_extension:
+        sql = "SELECT postgis_lib_version()"
+        row = get_row(sql)
+        if row:
+            postgis_version = row[0]
 
     return postgis_version
 
@@ -398,12 +406,14 @@ def get_postgis_version():
 def get_pgrouting_version():
     """ Get pgRouting version (integer value) """
 
-    global dao
     pgrouting_version = None
-    sql = "SELECT * FROM pgr_version()"
-    row = dao.get_row(sql)
-    if row:
-        pgrouting_version = row[0]
+    pgrouting_extension = check_pg_extension('pgrouting')
+
+    if pgrouting_extension:
+        sql = "SELECT * FROM pgr_version()"
+        row = get_row(sql)
+        if row:
+            pgrouting_version = row[0]
 
     return pgrouting_version
 
