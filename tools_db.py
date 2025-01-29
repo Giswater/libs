@@ -518,7 +518,7 @@ def set_search_path(schema_name):
     dao.set_search_path = sql
 
 
-def check_function(function_name, schema_name=None, commit=True, aux_conn=None):
+def check_function(function_name, schema_name=None, commit=True, aux_conn=None, is_thread=False):
     """ Check if @function_name exists in selected schema """
 
     if schema_name is None:
@@ -529,7 +529,7 @@ def check_function(function_name, schema_name=None, commit=True, aux_conn=None):
            f"FROM information_schema.routines "
            f"WHERE lower(routine_schema) = '{schema_name}' "
            f"AND lower(routine_name) = '{function_name}'")
-    row = get_row(sql, commit=commit, aux_conn=aux_conn)
+    row = get_row(sql, commit=commit, aux_conn=aux_conn, is_thread=is_thread)
     return row
 
 
