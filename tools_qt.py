@@ -1372,12 +1372,12 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     dlg_info.setWindowTitle(window_title)
     if title:
         dlg_info.lbl_text.setText(title)
-    set_widget_text(dlg_info, dlg_info.txt_infolog, msg)
+    set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
     dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
     if pattern is None:
         pattern = "File\\sname:|Function\\sname:|Line\\snumber:|SQL:|SQL\\sfile:|Detail:|Context:|Description|Schema " \
                   "name|Message\\serror:"
-    set_text_bold(dlg_info.txt_infolog, pattern)
+    set_text_bold(dlg_info.tab_log_txt_infolog, pattern)
 
 
     dlg_info.show()
