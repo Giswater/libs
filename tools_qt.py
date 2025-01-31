@@ -212,10 +212,10 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
         date = widget.date().toString(date_format)
     elif type(widget) is QDateTimeEdit:
         date = widget.dateTime().toString(datetime_format)
-    elif type(widget) is QgsDateTimeEdit and widget.displayFormat() in \
+    elif (type(widget) is QgsDateTimeEdit or isinstance(widget, QgsDateTimeEdit)) and widget.displayFormat() in \
             ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd'):
         date = widget.dateTime().toString(date_format)
-    elif type(widget) is QgsDateTimeEdit and widget.displayFormat() in ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
+    elif (type(widget) is QgsDateTimeEdit or isinstance(widget, QgsDateTimeEdit)) and widget.displayFormat() in ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
         date = widget.dateTime().toString(datetime_format)
 
     return date
@@ -231,7 +231,7 @@ def set_calendar(dialog, widget, date, default_current_date=True):
     if lib_vars.date_format in ("dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "yyyy-MM-dd"):
         widget.setDisplayFormat(lib_vars.date_format)
     if type(widget) is QDateEdit \
-            or (type(widget) is QgsDateTimeEdit and widget.displayFormat() in
+            or ((type(widget) is QgsDateTimeEdit or isinstance(widget, QgsDateTimeEdit)) and widget.displayFormat() in
                 ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd')):
         if date is None:
             if default_current_date:
@@ -240,7 +240,7 @@ def set_calendar(dialog, widget, date, default_current_date=True):
                 date = QDate.fromString('01-01-2000', 'dd-MM-yyyy')
         widget.setDate(date)
     elif type(widget) is QDateTimeEdit \
-            or (type(widget) is QgsDateTimeEdit and widget.displayFormat() in
+            or ((type(widget) is QgsDateTimeEdit or isinstance(widget, QgsDateTimeEdit)) and widget.displayFormat() in
                 ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss', 'dd-MM-yyyy hh:mm:ss', 'yyyy-MM-dd hh:mm:ss')):
         if date is None:
             date = QDateTime.currentDateTime()
@@ -295,13 +295,13 @@ def get_widget_value(dialog, widget):
 
     if type(widget) in (QDoubleSpinBox, QLineEdit, QSpinBox, QTextEdit, GwHyperLinkLineEdit):
         value = get_text(dialog, widget, return_string_null=False)
-    elif type(widget) is QComboBox:
+    elif type(widget) is QComboBox or isinstance(widget, QComboBox):
         value = get_combo_value(dialog, widget, 0)
     elif type(widget) is QCheckBox:
         value = is_checked(dialog, widget)
         if value is not None:
             value = str(value).lower()
-    elif type(widget) is QgsDateTimeEdit:
+    elif type(widget) is QgsDateTimeEdit or isinstance(widget, QgsDateTimeEdit):
         value = get_calendar_date(dialog, widget)
 
     return value
@@ -325,7 +325,7 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
             text = round(widget.value(), 4)
         elif type(widget) in (QTextEdit, QPlainTextEdit):
             text = widget.toPlainText()
-        elif type(widget) is QComboBox:
+        elif type(widget) is QComboBox or isinstance(widget, QComboBox):
             text = widget.currentText()
         elif type(widget) is QCheckBox:
             value = is_checked(dialog, widget)
@@ -515,7 +515,7 @@ def get_combo_value(dialog, widget, index=0, add_quote=False):
     if type(widget) is str or type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
-        if type(widget) is QComboBox:
+        if type(widget) is QComboBox or isinstance(widget, QComboBox):
             current_index = widget.currentIndex()
             elem = widget.itemData(current_index)
             if index == -1:
@@ -690,7 +690,7 @@ def enable_dialog(dialog, enable, ignore_widgets=['', None]):
                 else:
                     widget.setStyleSheet("QWidget { background: rgb(242, 242, 242);"
                                          " color: rgb(100, 100, 100)}")
-            elif type(widget) in (QComboBox, QCheckBox, QPushButton, QgsDateTimeEdit, QTableView):
+            elif type(widget) in (QComboBox, QCheckBox, QPushButton, QgsDateTimeEdit, QTableView) or isinstance(widget, QComboBox) or isinstance(widget, QgsDateTimeEdit):
                 widget.setEnabled(enable)
 
 
