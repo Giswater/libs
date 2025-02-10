@@ -25,7 +25,7 @@ from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
     QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
-    QToolButton, QDialog, QGridLayout
+    QToolButton, QDialog, QGridLayout, QTextBrowser
 from qgis.core import QgsExpression, QgsProject, QgsLayerTreeLayer
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
@@ -358,7 +358,7 @@ def set_widget_text(dialog, widget, text):
     if widget is None:
         return
 
-    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton):
+    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser):
         if str(text) == 'None':
             text = ""
         widget.setText(f"{text}")
