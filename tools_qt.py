@@ -103,18 +103,19 @@ class GwEditDialog(QDialog):
         self.layout.addWidget(self.label, 0, 0, 1, 2)
 
         # Create the widget based on the type
-        if widget_type == "QLineEdit":
-            self.widget = QLineEdit(self)
-        elif widget_type == "QTextEdit":
-            self.widget = QTextEdit(self)
-        elif widget_type == "QComboBox":
-            self.widget = QComboBox(self)
-            if options:
-                self.widget.addItems(options)
-        elif widget_type == "QCheckBox":
-            self.widget = QCheckBox(self)
-        else:
-            raise ValueError("Unsupported widget type")
+        match widget_type:
+            case 'QLineEdit':
+                self.widget = QLineEdit(self)
+            case 'QTextEdit':
+                self.widget = QTextEdit(self)
+            case 'QComboBox':
+                self.widget = QComboBox(self)
+                if options:
+                    self.widget.addItems(options)
+            case 'QCheckBox':
+                self.widget = QCheckBox(self)
+            case _:
+                raise ValueError("Unsupported widget type")
 
         self.layout.addWidget(self.widget, 1, 0, 1, 2)
 
