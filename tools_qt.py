@@ -801,12 +801,6 @@ def set_completer_object(completer, model, widget, list_items, max_visible=10):
     model.setStringList(list_items)
     completer.setModel(model)
 
-    # Connect the textChanged signal of the widget to a custom slot that hides the popup
-    widget.textChanged.connect(partial(on_text_changed, completer))
-
-def on_text_changed(completer):
-    completer.popup().hide()
-
 
 def set_action_checked(action, enabled, dialog=None):
 
