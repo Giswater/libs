@@ -20,7 +20,7 @@ from sip import isdeleted
 
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
     QPersistentModelIndex, QCoreApplication, QTranslator, QEvent, QLocale
-from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon
+from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
@@ -841,6 +841,84 @@ def check_expression_filter(expr_filter, log_info=False):
         return False, expr
 
     return True, expr
+
+
+def check_date(widget, button=None, regex_type=1):
+    """ Set QRegExpression in order to validate QLineEdit(widget) field type date.
+    Also allow to enable or disable a QPushButton(button), like typical accept button
+    @Type=1 (yyy-mm-dd), @Type=2 (dd-mm-yyyy)
+    """
+
+    reg_exp = ""
+    placeholder = "yyyy-mm-dd"
+    if regex_type == 1:
+        widget.setPlaceholderText("yyyy-mm-dd")
+        placeholder = "yyyy-mm-dd"
+        reg_exp = QRegExp("(((\d{4})([-])(0[13578]|10|12)([-])(0[1-9]|[12][0-9]|3[01]))|"
+                          "((\d{4})([-])(0[469]|11)([-])([0][1-9]|[12][0-9]|30))|"
+                          "((\d{4})([-])(02)([-])(0[1-9]|1[0-9]|2[0-8]))|"
+                          "(([02468][048]00)([-])(02)([-])(29))|"
+                          "(([13579][26]00)([-])(02)([-])(29))|"
+                          "(([0-9][0-9][0][48])([-])(02)([-])(29))|"
+                          "(([0-9][0-9][2468][048])([-])(02)([-])(29))|"
+                          "(([0-9][0-9][13579][26])([-])(02)([-])(29)))")
+    elif regex_type == 2:
+        widget.setPlaceholderText("dd-mm-yyyy")
+        placeholder = "dd-mm-yyyy"
+        reg_exp = QRegExp("(((0[1-9]|[12][0-9]|3[01])([-])(0[13578]|10|12)([-])(\d{4}))|"
+                          "(([0][1-9]|[12][0-9]|30)([-])(0[469]|11)([-])(\d{4}))|"
+                          "((0[1-9]|1[0-9]|2[0-8])([-])(02)([-])(\d{4}))|"
+                          "((29)(-)(02)([-])([02468][048]00))|"
+                          "((29)([-])(02)([-])([13579][26]00))|"
+                          "((29)([-])(02)([-])([0-9][0-9][0][48]))|"
+                          "((29)([-])(02)([-])([0-9][0-9][2468][048]))|"
+                          "((29)([-])(02)([-])([0-9][0-9][13579][26])))")
+    elif regex_type == 3:
+        widget.setPlaceholderText("yyyy/mm/dd")
+        placeholder = "yyyy/mm/dd"
+        reg_exp = QRegExp("(((\d{4})([/])(0[13578]|10|12)([/])(0[1-9]|[12][0-9]|3[01]))|"
+                          "((\d{4})([/])(0[469]|11)([/])([0][1-9]|[12][0-9]|30))|"
+                          "((\d{4})([/])(02)([/])(0[1-9]|1[0-9]|2[0-8]))|"
+                          "(([02468][048]00)([/])(02)([/])(29))|"
+                          "(([13579][26]00)([/])(02)([/])(29))|"
+                          "(([0-9][0-9][0][48])([/])(02)([/])(29))|"
+                          "(([0-9][0-9][2468][048])([/])(02)([/])(29))|"
+                          "(([0-9][0-9][13579][26])([/])(02)([/])(29)))")
+    elif regex_type == 4:
+        widget.setPlaceholderText("dd/mm/yyyy")
+        placeholder = "dd/mm/yyyy"
+        reg_exp = QRegExp("(((0[1-9]|[12][0-9]|3[01])([/])(0[13578]|10|12)([/])(\d{4}))|"
+                          "(([0][1-9]|[12][0-9]|30)([/])(0[469]|11)([/])(\d{4}))|"
+                          "((0[1-9]|1[0-9]|2[0-8])([/])(02)([/])(\d{4}))|"
+                          "((29)(-)(02)([/])([02468][048]00))|"
+                          "((29)([/])(02)([/])([13579][26]00))|"
+                          "((29)([/])(02)([/])([0-9][0-9][0][48]))|"
+                          "((29)([/])(02)([/])([0-9][0-9][2468][048]))|"
+                          "((29)([/])(02)([/])([0-9][0-9][13579][26])))")
+
+    widget.setValidator(QRegExpValidator(reg_exp))
+    widget.textChanged.connect(partial(check_regex, widget, reg_exp, button, placeholder))
+
+
+def check_regex(widget, reg_exp, button, placeholder, text):
+
+    is_valid = False
+    if reg_exp.exactMatch(text) is True:
+        widget.setStyleSheet(None)
+        is_valid = True
+    elif str(text) == '':
+        widget.setStyleSheet(None)
+        widget.setPlaceholderText(placeholder)
+        is_valid = True
+    elif reg_exp.exactMatch(text) is False:
+        widget.setStyleSheet("border: 1px solid red")
+        is_valid = False
+
+    if button is not None and type(button) == QPushButton:
+        if is_valid is False:
+            button.setEnabled(False)
+        else:
+            button.setEnabled(True)
 
 
 def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableModel.OnManualSubmit,

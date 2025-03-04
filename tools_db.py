@@ -5,7 +5,7 @@ General Public License as published by the Free Software Foundation, either vers
 or (at your option) any later version.
 """
 # -*- coding: utf-8 -*-
-from qgis.PyQt.QtSql import QSqlDatabase
+from qgis.PyQt.QtSql import QSqlDatabase, QSqlQueryModel
 from qgis.core import QgsCredentials, QgsDataSourceUri
 from qgis.PyQt.QtCore import QSettings
 
@@ -338,6 +338,24 @@ def reset_qsqldatabase_connection(dialog=iface):
     tools_qgis.show_warning("Database connection reset, please try again", dialog=dialog)
 
 
+def fill_table_by_query(qtable, query):
+    """
+    :param qtable: QTableView to show
+    :param query: query to set model
+    """
+    model = QSqlQueryModel()
+    model.setQuery(query, db=lib_vars.qgis_db_credentials)
+    qtable.setModel(model)
+    qtable.show()
+
+    # Check for errors
+    if model.lastError().isValid():
+        if 'Unable to find table' in model.lastError().text():
+            reset_qsqldatabase_connection()
+        else:
+            tools_qgis.show_warning(model.lastError().text())
+
+
 def connect_to_database_service(service, sslmode=None, conn_info=None):
     """ Connect to database trough selected service
     This service must exist in file pg_service.conf """
@@ -464,6 +482,16 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
         else:
             rows = rows2
 
+    return rows
+
+
+def get_values_from_catalog(table_name, typevalue, order_by='id'):
+
+    sql = (f"SELECT id, idval"
+           f" FROM {table_name}"
+           f" WHERE typevalue = '{typevalue}'"
+           f" ORDER BY {order_by}")
+    rows = get_rows(sql)
     return rows
 
 
