@@ -150,7 +150,7 @@ def check_pg_extension(extension, form_enabled=True):
         sql = f"SELECT name FROM pg_available_extensions WHERE name = '{extension}'"
         row = get_row(sql)
         if row and form_enabled:
-            sql = f"CREATE EXTENSION IF NOT EXISTS {extension};"
+            sql = f"CREATE EXTENSION IF NOT EXISTS {extension} schema pg_catalog;"
             execute_sql(sql)
 
             if extension == 'postgis':
@@ -158,7 +158,7 @@ def check_pg_extension(extension, form_enabled=True):
                 # Check postGis version
                 major_version = postgis_version.split(".")
                 if int(major_version[0]) >= 3:
-                    sql = f"CREATE EXTENSION IF NOT EXISTS postgis_raster;"
+                    sql = f"CREATE EXTENSION IF NOT EXISTS postgis_raster schema pg_catalog;"
                     execute_sql(sql)
             return True, None
         elif form_enabled:
