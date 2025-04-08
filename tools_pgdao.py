@@ -19,7 +19,6 @@ class GwPgDao(object):
         self.cursor = None
         self.pid = None
 
-
     def init_db(self):
         """ Initializes database connection """
 
@@ -33,7 +32,6 @@ class GwPgDao(object):
             status = False
 
         return status
-
 
     def close_db(self):
         """ Close database connection """
@@ -52,7 +50,6 @@ class GwPgDao(object):
 
         return status
 
-
     def get_cursor(self, aux_conn=None):
 
         if aux_conn:
@@ -61,14 +58,12 @@ class GwPgDao(object):
             cursor = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         return cursor
 
-
     def reset_db(self):
         """ Reset database connection """
 
         if self.init_db():
             if self.set_search_path:
                 self.execute_sql(self.set_search_path)
-
 
     def check_cursor(self):
         """ Check if cursor is closed """
@@ -80,13 +75,11 @@ class GwPgDao(object):
 
         return status
 
-
     def cursor_execute(self, sql):
         """ Check if cursor is closed before execution """
 
         if self.check_cursor():
             self.cursor.execute(sql)
-
 
     def get_poll(self):
         """ Check if the connection is established """
@@ -104,7 +97,6 @@ class GwPgDao(object):
         finally:
             return status
 
-
     def set_params(self, host, port, dbname, user, password, sslmode):
         """ Set database parameters """
 
@@ -119,18 +111,15 @@ class GwPgDao(object):
         if self.password is not None:
             self.conn_string += f" password={self.password}"
 
-
     def set_conn_string(self, conn_string):
         """ Set connection string """
         self.conn_string = conn_string
-
 
     def set_service(self, service, sslmode=None):
         """ Set service """
         self.conn_string = f"service={service}"
         if sslmode:
             self.conn_string += f" sslmode={sslmode}"
-
 
     def mogrify(self, sql, params):
         """ Return a query string after arguments binding """
@@ -143,7 +132,6 @@ class GwPgDao(object):
             self.last_error = e
         finally:
             return query
-
 
     def get_rows(self, sql, commit=False, aux_conn=None):
         """ Get multiple rows from selected query """
@@ -162,7 +150,6 @@ class GwPgDao(object):
                 self.rollback(aux_conn)
         finally:
             return rows
-
 
     def get_row(self, sql, commit=False, aux_conn=None):
         """ Get single row from selected query """
@@ -186,7 +173,6 @@ class GwPgDao(object):
         finally:
             return row
 
-
     def execute_sql(self, sql, commit=True, aux_conn=None):
         """ Execute selected query """
 
@@ -205,7 +191,6 @@ class GwPgDao(object):
         finally:
             return status
 
-
     def execute_returning(self, sql, commit=True, aux_conn=None):
         """ Execute selected query and return RETURNING field """
 
@@ -223,7 +208,6 @@ class GwPgDao(object):
         finally:
             return value
 
-
     def commit(self, aux_conn=None):
         """ Commit current database transaction """
 
@@ -234,7 +218,6 @@ class GwPgDao(object):
             self.conn.commit()
         except Exception:
             pass
-
 
     def rollback(self, aux_conn=None):
         """ Rollback current database transaction """
@@ -247,7 +230,6 @@ class GwPgDao(object):
         except Exception:
             pass
 
-
     def export_to_csv(self, sql, csv_file):
         """ Dumps contents of the query to selected CSV file """
 
@@ -257,7 +239,6 @@ class GwPgDao(object):
             return None
         except Exception as e:
             return e
-
 
     def cancel_pid(self, pid):
         """ Cancel one process by pid """
@@ -279,7 +260,6 @@ class GwPgDao(object):
 
         return {'status': status, 'last_error': last_error}
 
-
     def get_aux_conn(self):
 
         try:
@@ -294,7 +274,6 @@ class GwPgDao(object):
 
         return {'status': status, 'last_error': last_error}
 
-
     def delete_aux_con(self, aux_conn):
 
         try:
@@ -305,7 +284,6 @@ class GwPgDao(object):
             last_error = e
             status = False
         return {'status': status, 'last_error': last_error}
-
 
     def check_connection(self):
         """ Check database connection. Reconnect if needed """

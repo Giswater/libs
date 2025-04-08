@@ -750,6 +750,7 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
 
     return tab_index
 
+
 def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[int]:
     """ Return page index searching by page name """
 
@@ -1451,7 +1452,6 @@ def show_exception_message(title=None, msg="", window_title="Information about e
                   "name|Message\\serror:"
     set_text_bold(dlg_info.tab_log_txt_infolog, pattern)
 
-
     dlg_info.show()
 
 
@@ -1499,7 +1499,6 @@ def fill_combo_unicodes(combo):
             unicode_list.append((str(item[0]), str(item[0])))
 
     fill_combo_values(combo, unicode_list)
-
 
 
 def set_table_model(dialog, table_object, table_name, expr_filter):

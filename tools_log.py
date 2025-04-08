@@ -58,7 +58,6 @@ class GwLogger(object):
         # Add file handler
         self.add_file_handler()
 
-
     def set_logger_parameters(self, min_log_level, log_limit_characters, log_db_limit_characters):
         """ Set logger parameters min_log_level, log_limit_characters, log_db_limit_characters """
 
@@ -81,7 +80,6 @@ class GwLogger(object):
         if isinstance(log_db_limit_characters, int):
             self.log_db_limit_characters = log_db_limit_characters
 
-
     def add_file_handler(self):
         """ Add file handler """
 
@@ -91,7 +89,6 @@ class GwLogger(object):
         self.fh = logging.FileHandler(self.filepath)
         self.fh.setFormatter(formatter)
         self.logger_file.addHandler(self.fh)
-
 
     def close_logger(self):
         """ Remove file handler """
@@ -104,16 +101,13 @@ class GwLogger(object):
         except Exception:
             pass
 
-
     def debug(self, msg=None, stack_level=2, stack_level_increase=0):
         """ Logger message into logger file with level DEBUG (10) """
         self._log(msg, logging.DEBUG, stack_level + stack_level_increase + 1)
 
-
     def info(self, msg=None, stack_level=2, stack_level_increase=0):
         """ Logger message into logger file with level INFO (20) """
         self._log(msg, logging.INFO, stack_level + stack_level_increase + 1)
-
 
     def warning(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
         """ Logger message into logger file with level WARNING (30) """
@@ -121,20 +115,17 @@ class GwLogger(object):
         if sum_error:
             self.num_errors += 1
 
-
     def error(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
         """ Logger message into logger file with level ERROR (40) """
         self._log(msg, logging.ERROR, stack_level + stack_level_increase + 1)
         if sum_error:
             self.num_errors += 1
 
-
     def critical(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
         """ Logger message into logger file with level CRITICAL (50) """
         self._log(msg, logging.CRITICAL, stack_level + stack_level_increase + 1)
         if sum_error:
             self.num_errors += 1
-
 
     def _log(self, msg=None, log_level=logging.INFO, stack_level=2):
         """ Logger message into logger file with selected level """

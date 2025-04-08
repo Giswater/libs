@@ -41,6 +41,7 @@ MESSAGE_LEVEL_SUCCESS = 3 # Green
 DEFAULT_MESSAGE_DURATION = 10
 MINIMUM_WARNING_DURATION = 10
 
+
 def get_feature_by_expr(layer, expr_filter):
 
     # Check filter and existence of fields
@@ -71,7 +72,7 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
         :param logger_file: Whether it should log the message in a file or not (bool)
     """
 
-    global user_parameters
+    global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get('show_message_durations')
@@ -116,7 +117,7 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
         :param logger_file: Whether it should log the message in a file or not (bool)
     """
 
-    global user_parameters
+    global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get('show_message_durations')
@@ -158,7 +159,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
         :param logger_file: Whether it should log the message in a file or not (bool)
     """
 
-    global user_parameters
+    global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get('show_message_durations')
@@ -925,7 +926,6 @@ def get_max_rectangle_from_coords(list_coord):
 
 def zoom_to_rectangle(x1, y1, x2, y2, margin=5, change_crs=True):
     """ Generate an extension on the canvas according to the received coordinates """
-
 
     rect = QgsRectangle(float(x1) + margin, float(y1) + margin, float(x2) - margin, float(y2) - margin)
     if str(lib_vars.data_epsg) == '2052' and str(lib_vars.project_epsg) == '102566' and change_crs:

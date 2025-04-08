@@ -105,7 +105,7 @@ def check_role(role_name, is_admin=None):
 def check_role_user(role_name, username=None):
     """ Check if current user belongs to @role_name """
 
-    global current_user
+    global current_user # noqa: F824
     # Check both @role_name and @username exists
     if not check_role(role_name):
         return False
@@ -127,7 +127,7 @@ def check_role_user(role_name, username=None):
 def check_super_user(username=None):
     """ Returns True if @username is a superuser """
 
-    global current_user
+    global current_user # noqa: F824
     if username is None:
         username = current_user
 
@@ -175,7 +175,7 @@ def check_pg_extension(extension, form_enabled=True):
 def get_current_user():
     """ Get current user connected to database """
 
-    global current_user
+    global current_user # noqa: F824
     if current_user:
         return current_user
 
@@ -223,8 +223,8 @@ def get_srid(tablename, schemaname=None):
 def set_database_connection():
     """ Set database connection """
 
-    global dao
-    global current_user
+    global dao  # noqa: F824
+    global current_user # noqa: F824
     dao = None
     lib_vars.session_vars['last_error'] = None
     lib_vars.session_vars['logged_status'] = False
@@ -247,7 +247,7 @@ def set_database_connection():
 def check_db_connection():
     """ Check database connection. Reconnect if needed """
 
-    global dao
+    global dao  # noqa: F824
     opened = True
     try:
         was_closed = dao.check_connection()
@@ -278,8 +278,8 @@ def get_pg_version():
 def connect_to_database(host, port, db, user, pwd, sslmode):
     """ Connect to database with selected parameters """
 
-    global dao
-    global current_user
+    global dao  # noqa: F824
+    global current_user # noqa: F824
     # Check if selected parameters is correct
     if None in (host, port, db, user, pwd):
         message = "Database connection error. Please check your connection parameters."
@@ -328,6 +328,7 @@ def create_qsqldatabase_connection(host, port, db, user, pwd):
         return False
     return status
 
+
 def reset_qsqldatabase_connection(dialog=iface):
     if not lib_vars.last_db_credentials:
         return False
@@ -364,7 +365,7 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
     """ Connect to database trough selected service
     This service must exist in file pg_service.conf """
 
-    global dao
+    global dao  # noqa: F824
     conn_string = f"service='{service}'"
     if sslmode:
         conn_string += f" sslmode={sslmode}"
@@ -440,11 +441,10 @@ def get_pgrouting_version():
     return pgrouting_version
 
 
-
 def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_conn=None, is_admin=None, is_thread=False):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
-    global dao
+    global dao  # noqa: F824
     if dao is None:
         tools_log.log_warning("The connection to the database is broken.", parameter=sql)
         return None
@@ -465,7 +465,7 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
 def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False, aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
-    global dao
+    global dao  # noqa: F824
     if dao is None:
         tools_log.log_warning("The connection to the database is broken.", parameter=sql)
         return None
@@ -502,7 +502,7 @@ def get_values_from_catalog(table_name, typevalue, order_by='id'):
 def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True, aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
-    global dao
+    global dao  # noqa: F824
     if log_sql:
         tools_log.log_db(sql, stack_level_increase=1)
     result = dao.execute_sql(sql, commit, aux_conn=aux_conn)
@@ -519,14 +519,14 @@ def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None,
 
 def cancel_pid(pid):
     """ Cancel one process by pid """
-    global dao
+    global dao  # noqa: F824
     return dao.cancel_pid(pid)
 
 
 def execute_returning(sql, log_sql=False, log_error=False, commit=True, is_thread=False, show_exception=True):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
-    global dao
+    global dao  # noqa: F824
     if log_sql:
         tools_log.log_db(sql, stack_level_increase=1)
     value = dao.execute_returning(sql, commit)
@@ -544,7 +544,7 @@ def execute_returning(sql, log_sql=False, log_error=False, commit=True, is_threa
 def set_search_path(schema_name):
     """ Set parameter search_path for current QGIS project """
 
-    global dao
+    global dao  # noqa: F824
     sql = f"SET search_path = {schema_name}, public;"
     execute_sql(sql)
     dao.set_search_path = sql
@@ -592,7 +592,7 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
     """ Get database parameters from layer @layer_name or database connection settings
     sslmode_default should be (disable, allow, prefer, require, verify-ca, verify-full)"""
 
-    global dao_db_credentials
+    global dao_db_credentials  # noqa: F824
     # Get layer @layer_name
     layer = tools_qgis.get_layer_by_tablename(layer_name)
 
@@ -705,7 +705,7 @@ def get_uri():
     :return: QgsDataSourceUri() with the connection established according to the parameters of the credentials.
     """
 
-    global dao_db_credentials
+    global dao_db_credentials  # noqa: F824
     uri = QgsDataSourceUri()
     sslmode_default = QgsDataSourceUri.SslMode.SslPrefer
     sslmode_creds: str = dao_db_credentials['sslmode']
@@ -740,7 +740,7 @@ def get_uri():
 def _get_sql(sql, log_sql=False, params=None):
     """ Generate SQL with params. Useful for debugging """
 
-    global dao
+    global dao  # noqa: F824
     if params:
         sql = dao.mogrify(sql, params)
     if log_sql:

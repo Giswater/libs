@@ -22,12 +22,18 @@ def get_ui_class(ui_file_name):
 
 
 FORM_CLASS = get_ui_class('show_info.ui')
+
+
 class ShowInfoUi(Dialog, FORM_CLASS):
     pass
 
+
 FORM_CLASS = get_ui_class('show_info.ui')
+
+
 class DialogTextUi(Dialog, FORM_CLASS):
     warn('This class is deprecated, use ShowInfoUi instead.', DeprecationWarning, stacklevel=2)
+
     def __init__(self, icon=None):
         super().__init__(icon)
         warn('This class is deprecated, use ShowInfoUi instead.', DeprecationWarning, stacklevel=2)
