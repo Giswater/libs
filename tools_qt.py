@@ -163,7 +163,7 @@ def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):
 
     if rows is None:
         return
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if clear_combo:
         widget.clear()
@@ -188,7 +188,7 @@ def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):
 
 def fill_combo_box_list(dialog, widget, list_object, allow_nulls=True, clear_combo=True):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget is None:
         return None
@@ -204,7 +204,7 @@ def fill_combo_box_list(dialog, widget, list_object, allow_nulls=True, clear_com
 def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format="yyyy/MM/dd hh:mm:ss"):
 
     date = None
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
@@ -223,7 +223,7 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
 
 def set_calendar(dialog, widget, date, default_current_date=True):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
@@ -249,7 +249,7 @@ def set_calendar(dialog, widget, date, default_current_date=True):
 
 def set_time(dialog, widget, time):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
@@ -264,7 +264,7 @@ def get_widget(dialog, widget):
     if isdeleted(dialog):
         return None
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     return widget
 
@@ -274,7 +274,7 @@ def get_widget_type(dialog, widget):
     if isdeleted(dialog):
         return None
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return None
@@ -403,7 +403,7 @@ def set_checked(dialog, widget, checked=True):
     elif str(checked) in ('false', 'f', 'False'):
         checked = False
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
@@ -413,7 +413,7 @@ def set_checked(dialog, widget, checked=True):
 
 def get_selected_item(dialog, widget, return_string_null=True):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if return_string_null:
         widget_text = "null"
@@ -427,7 +427,7 @@ def get_selected_item(dialog, widget, return_string_null=True):
 
 def set_selected_item(dialog, widget, text):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget:
         index = widget.findText(text)
@@ -438,7 +438,7 @@ def set_selected_item(dialog, widget, text):
 
 def set_current_index(dialog, widget, index):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget:
         if index == -1:
@@ -448,7 +448,7 @@ def set_current_index(dialog, widget, index):
 
 def set_widget_visible(dialog, widget, visible=True):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
         widget.setVisible(visible)
@@ -456,7 +456,7 @@ def set_widget_visible(dialog, widget, visible=True):
 
 def set_widget_enabled(dialog, widget, enabled=True):
 
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
         widget.setEnabled(enabled)
@@ -466,7 +466,7 @@ def add_image(dialog, widget, cat_shape):
     """  Set pictures for UD """
 
     element = cat_shape.lower()
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
@@ -512,7 +512,7 @@ def get_combo_value(dialog, widget, index=0, add_quote=False):
     value = -1
     if add_quote:
         value = ''
-    if type(widget) is str or type(widget) is str:
+    if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
         if isinstance(widget, QComboBox):
