@@ -1564,7 +1564,7 @@ def create_point(canvas, iface, event):
     y = event.pos().y()
     try:
         point = QgsMapToPixel.toMapCoordinates(canvas.getCoordinateTransform(), x, y)
-    except(TypeError, KeyError):
+    except (TypeError, KeyError):
         iface.actionPan().trigger()
         return False
 
