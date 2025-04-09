@@ -730,7 +730,7 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
     uri.setDataSource("", f"({query})", "", "", key_column)
 
     # Create a provisional layer
-    provisional_layer  = QgsVectorLayer(uri.uri(False), f"{layer_name}", "postgres")
+    provisional_layer = QgsVectorLayer(uri.uri(False), f"{layer_name}", "postgres")
 
     # Check if the provisional layer is valid
     if not provisional_layer.isValid():
@@ -1296,7 +1296,7 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
     # wait to simulate a flashing effect
     if duration_time is not None:
         # Qtimer singleShot works with ms, we manage transformation to seconds
-        QTimer.singleShot(int(duration_time)*1000, rubber_band.reset)
+        QTimer.singleShot(int(duration_time) * 1000, rubber_band.reset)
 
 
 def get_geometry_from_json(feature):
@@ -1555,7 +1555,7 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
     # wait to simulate a flashing effect
     if duration_time is not None:
         # Qtimer singleShot works with ms, we manage transformation to seconds
-        QTimer.singleShot(int(duration_time)*1000, rubber_band.reset)
+        QTimer.singleShot(int(duration_time) * 1000, rubber_band.reset)
 
 
 def create_point(canvas, iface, event):

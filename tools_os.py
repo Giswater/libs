@@ -146,7 +146,7 @@ def get_number_of_files(folder):
 def ireplace(old, new, text):
     """ Replaces @old by @new in @text (case-insensitive) """
 
-    return re.sub('(?i)'+re.escape(old), lambda m: new, text)
+    return re.sub('(?i)' + re.escape(old), lambda m: new, text)
 
 
 def manage_pg_service(section):
