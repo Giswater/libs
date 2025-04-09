@@ -105,7 +105,7 @@ def check_role(role_name, is_admin=None):
 def check_role_user(role_name, username=None):
     """ Check if current user belongs to @role_name """
 
-    global current_user # noqa: F824
+    global current_user  # noqa: F824
     # Check both @role_name and @username exists
     if not check_role(role_name):
         return False
@@ -127,7 +127,7 @@ def check_role_user(role_name, username=None):
 def check_super_user(username=None):
     """ Returns True if @username is a superuser """
 
-    global current_user # noqa: F824
+    global current_user  # noqa: F824
     if username is None:
         username = current_user
 
@@ -175,7 +175,7 @@ def check_pg_extension(extension, form_enabled=True):
 def get_current_user():
     """ Get current user connected to database """
 
-    global current_user # noqa: F824
+    global current_user  # noqa: F824
     if current_user:
         return current_user
 
@@ -224,7 +224,7 @@ def set_database_connection():
     """ Set database connection """
 
     global dao  # noqa: F824
-    global current_user # noqa: F824
+    global current_user  # noqa: F824
     dao = None
     lib_vars.session_vars['last_error'] = None
     lib_vars.session_vars['logged_status'] = False
@@ -279,7 +279,7 @@ def connect_to_database(host, port, db, user, pwd, sslmode):
     """ Connect to database with selected parameters """
 
     global dao  # noqa: F824
-    global current_user # noqa: F824
+    global current_user  # noqa: F824
     # Check if selected parameters is correct
     if None in (host, port, db, user, pwd):
         message = "Database connection error. Please check your connection parameters."

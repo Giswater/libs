@@ -32,10 +32,10 @@ from . import lib_vars
 user_parameters = {'log_sql': None, 'show_message_durations': None, 'aux_context': 'ui_message'}
 
 # Define message level constants
-MESSAGE_LEVEL_INFO = 0 # Blue
-MESSAGE_LEVEL_WARNING = 1 # Yellow
-MESSAGE_LEVEL_CRITICAL = 2 # Red
-MESSAGE_LEVEL_SUCCESS = 3 # Green
+MESSAGE_LEVEL_INFO = 0  # Blue
+MESSAGE_LEVEL_WARNING = 1  # Yellow
+MESSAGE_LEVEL_CRITICAL = 2  # Red
+MESSAGE_LEVEL_SUCCESS = 3  # Green
 
 # Define message duration constants
 DEFAULT_MESSAGE_DURATION = 10
