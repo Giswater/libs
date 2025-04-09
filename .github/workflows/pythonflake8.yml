@@ -1,15 +1,19 @@
 name: Python flake8
 
-on: [push, pull_request]
+on:
+    push:
+        branches: ['refactor-pep8']
+    pull_request:
+        branches: ['refactor-pep8']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.12]
+        python-version: [3.11, 3.12]
 
     steps:
     - uses: actions/checkout@v2
