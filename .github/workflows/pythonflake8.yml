@@ -7,7 +7,7 @@ on:
         branches: ['refactor-pep8']
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     strategy:
