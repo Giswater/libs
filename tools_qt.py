@@ -19,14 +19,14 @@ from warnings import warn
 from sip import isdeleted
 
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
-    QPersistentModelIndex, QCoreApplication, QTranslator, QEvent, QLocale
+    QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
 from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
     QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
     QToolButton, QDialog, QGridLayout, QTextBrowser
-from qgis.core import QgsExpression, QgsProject, QgsLayerTreeLayer
+from qgis.core import QgsExpression
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
 
@@ -742,7 +742,7 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
             if qtabwidget.widget(idx).objectName() == tab_name:
                 tab_index = idx
                 break
-    except Exception as e:
+    except Exception:
         tools_log.log_error("Tab not found.", parameter=tab_name)
 
     if tab_index == -1:
@@ -761,7 +761,7 @@ def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[
             if qtoolbox.widget(idx).objectName() == page_name:
                 page_index = idx
                 break
-    except Exception as e:
+    except Exception:
         tools_log.log_error("Page not found.", parameter=page_name)
 
     if page_index == -1:

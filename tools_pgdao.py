@@ -291,7 +291,7 @@ class GwPgDao(object):
         was_closed = False
         try:
             self.cursor.execute("SELECT 1")
-        except psycopg2.OperationalError as e:
+        except psycopg2.OperationalError:
             was_closed = True
             self.init_db()
         return was_closed

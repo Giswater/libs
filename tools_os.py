@@ -10,7 +10,6 @@ import os
 import pathlib
 import sys
 import subprocess
-import urllib.parse as parse
 import webbrowser
 import re
 from chardet import detect
