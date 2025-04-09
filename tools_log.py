@@ -164,7 +164,8 @@ def set_logger(logger_name, min_log_level=20):
         lib_vars.logger.min_message_level = values.get(int(min_log_level), 0)
 
 
-def log_debug(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0, tab_name=None):
+def log_debug(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
+              tab_name=None):
     """ Write debug message into QGIS Log Messages Panel """
 
     msg = _qgis_log_message(text, 0, context_name, parameter, tab_name)
@@ -172,7 +173,8 @@ def log_debug(text=None, context_name="giswater", parameter=None, logger_file=Tr
         lib_vars.logger.debug(msg, stack_level_increase=stack_level_increase)
 
 
-def log_info(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0, tab_name=None):
+def log_info(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
+             tab_name=None):
     """ Write information message into QGIS Log Messages Panel """
 
     msg = _qgis_log_message(text, 0, context_name, parameter, tab_name)
@@ -180,7 +182,8 @@ def log_info(text=None, context_name="giswater", parameter=None, logger_file=Tru
         lib_vars.logger.info(msg, stack_level_increase=stack_level_increase)
 
 
-def log_warning(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0, tab_name=None):
+def log_warning(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
+                tab_name=None):
     """ Write warning message into QGIS Log Messages Panel """
 
     msg = _qgis_log_message(text, 1, context_name, parameter, tab_name)
@@ -188,7 +191,8 @@ def log_warning(text=None, context_name="giswater", parameter=None, logger_file=
         lib_vars.logger.warning(msg, stack_level_increase=stack_level_increase)
 
 
-def log_error(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0, tab_name=None):
+def log_error(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
+              tab_name=None):
     """ Write error message into QGIS Log Messages Panel """
 
     msg = _qgis_log_message(text, 2, context_name, parameter, tab_name)

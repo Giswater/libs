@@ -166,7 +166,8 @@ def check_pg_extension(extension, form_enabled=True):
                     execute_sql(sql)
             return True, None
         elif form_enabled:
-            message = f"Unable to create '{extension}' extension. Packages must be installed, consult your administrator."
+            message = (f"Unable to create '{extension}' extension. "
+                      f"Packages must be installed, consult your administrator.")
             return False, message
 
     return True, None
@@ -372,11 +373,17 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
 
     # Get credentials from .pg_service.conf
     credentials = tools_os.manage_pg_service(service)
-    if all([credentials['host'], credentials['port'], credentials['dbname']]) and None in [credentials['user'], credentials['password']]:
+    if all([credentials['host'], credentials['port'], credentials['dbname']]) and \
+            None in [credentials['user'], credentials['password']]:
         if conn_info is None:
             conn_info = f"service='{service}'"
         (success, credentials['user'], credentials['password']) = \
-                QgsCredentials.instance().get(conn_info, credentials['user'], credentials['password'], f"Please enter the credentials for connection '{service}'")
+                QgsCredentials.instance().get(
+                    conn_info,
+                    credentials['user'],
+                    credentials['password'],
+                    f"Please enter the credentials for connection '{service}'"
+                )
 
         # Put the credentials back (for yourself and the provider), as QGIS removes it when you "get" it
         QgsCredentials.instance().put(conn_info, credentials['user'], credentials['password'])
@@ -462,7 +469,8 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
     return row
 
 
-def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False, aux_conn=None):
+def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False,
+             aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao  # noqa: F824
@@ -499,7 +507,8 @@ def get_values_from_catalog(table_name, typevalue, order_by='id'):
     return rows
 
 
-def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True, aux_conn=None):
+def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True,
+                aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao  # noqa: F824
@@ -570,7 +579,9 @@ def connect_to_database_credentials(credentials, conn_info=None, max_attempts=2)
 
     # Check if credential parameter 'service' is set
     if credentials.get('service'):
-        logged, credentials_pgservice = connect_to_database_service(credentials['service'], credentials['sslmode'], conn_info)
+        logged, credentials_pgservice = connect_to_database_service(
+            credentials['service'], credentials['sslmode'], conn_info
+        )
         credentials['user'] = credentials_pgservice['user']
         credentials['password'] = credentials_pgservice['password']
         return logged, credentials
@@ -611,7 +622,7 @@ def _get_credentials_from_layer(layer, sslmode_default):
         if credentials['service']:
             tools_log.log_info("Getting sslmode from .pg_service file")
             credentials_service = tools_os.manage_pg_service(credentials['service'])
-            credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
+            credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default  # noqa: E501
         else:
             settings = QSettings()
             settings.beginGroup("PostgreSQL/connections")

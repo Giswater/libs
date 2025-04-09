@@ -74,7 +74,7 @@ class GwHyperLinkLineEdit(QLineEdit):
     def mouseReleaseEvent(self, ev):
         if self.isReadOnly():
             self.clicked.emit()
-            self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")
+            self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")  # noqa: E501
 
 
 class GwEditDialog(QDialog):
@@ -91,7 +91,8 @@ class GwEditDialog(QDialog):
             self._update_data(result_id, columnname, new_value)
 ```
     """
-    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None, initial_value=None):
+    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None,
+                 initial_value=None):
         super(GwEditDialog, self).__init__(parent)
 
         self.setWindowTitle(title)
@@ -215,7 +216,8 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
     elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
             ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd'):
         date = widget.dateTime().toString(date_format)
-    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
+    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
+            ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
         date = widget.dateTime().toString(datetime_format)
 
     return date
@@ -558,7 +560,8 @@ def set_combo_value(combo, value, index, add_new=True):
     return False
 
 
-def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False, selected_id=None, index_to_compare=None):
+def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False,
+                      selected_id=None, index_to_compare=None):
     """
     Populate @combo with list @rows and show field @index_to_show
         :param combo: QComboBox widget to fill (QComboBox)
@@ -714,7 +717,7 @@ def get_col_index_by_col_name(qtable, column_name):
     model = qtable.model()
     columns_dict = qtable.property('columns')
     if not columns_dict:
-        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}
+        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}  # noqa: E501
         qtable.setProperty('columns', columns_dict)
     column_index = -1
     try:
