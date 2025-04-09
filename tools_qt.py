@@ -158,7 +158,7 @@ match_flags: Dict[QtMatchFlag, Qt.MatchFlag] = {
 }
 
 
-def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):
+def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):  # noqa: C901
 
     warn('This method is deprecated, use fill_combo_values instead.', DeprecationWarning, stacklevel=2)
 
