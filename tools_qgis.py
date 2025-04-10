@@ -23,7 +23,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog,
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsLayerTree
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -666,55 +666,25 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
     :param layer: (QgsVectorLayer)
     :param group: Name of the group that will be created in the toc (string)
     """
-
     if group is None:
         QgsProject.instance().addMapLayer(layer)
         return
 
     QgsProject.instance().addMapLayer(layer, False)
-    root: QgsLayerTree = QgsProject.instance().layerTreeRoot()
+    root = QgsProject.instance().layerTreeRoot()
     if root is None:
         msg = "QgsLayerTree not found for project."
         tools_log.log_error(msg)
         return
-    first_group = find_toc_group(root, group)
 
     if create_groups:
-        if not first_group:
-            first_group = root.insertGroup(0, group)
-        if first_group is None:
-            msg = f"Group '{group}' not found in layer tree."
-            tools_log.log_error(msg)
-            return
-        if not find_toc_group(first_group, sub_group):
-            second_group = first_group.insertGroup(0, sub_group)
-            if second_group is None:
-                msg = "Couldn't add group."
-                tools_log.log_error(msg)
-                return
-            if sub_sub_group and not find_toc_group(second_group, sub_sub_group):
-                second_group.insertGroup(0, sub_sub_group)
+        first_group, second_group, third_group = _create_group_structure(root, group, sub_group, sub_sub_group)
+    else:
+        first_group = find_toc_group(root, group)
+        second_group = find_toc_group(first_group, sub_group) if first_group and sub_group else None
+        third_group = find_toc_group(second_group, sub_sub_group) if second_group and sub_sub_group else None
 
-    if first_group and sub_group:
-        second_group = find_toc_group(first_group, sub_group)
-        if second_group:
-            third_group = find_toc_group(second_group, sub_sub_group)
-            if third_group:
-                third_group.insertLayer(0, layer)
-                iface.setActiveLayer(layer)
-                return
-            second_group.insertLayer(0, layer)
-            iface.setActiveLayer(layer)
-            return
-        first_group.insertLayer(0, layer)
-        iface.setActiveLayer(layer)
-        return
-
-    root = QgsProject.instance().layerTreeRoot()
-    my_group = root.findGroup("GW Layers")
-    if my_group is None:
-        my_group = root.insertGroup(0, "GW Layers")
-    my_group.insertLayer(0, layer)
+    _add_layer_to_group(layer, first_group, second_group, third_group)
 
 
 def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
@@ -1555,5 +1525,50 @@ def create_point(canvas, iface, event):
         return False
 
     return point
+
+
+def _create_group_structure(root, group, sub_group, sub_sub_group):
+    """Create the group structure if it doesn't exist"""
+    first_group = find_toc_group(root, group)
+    if not first_group:
+        first_group = root.insertGroup(0, group)
+    if first_group is None:
+        msg = f"Group '{group}' not found in layer tree."
+        tools_log.log_error(msg)
+        return None, None, None
+
+    second_group = None
+    third_group = None
+    if sub_group:
+        second_group = find_toc_group(first_group, sub_group)
+        if not second_group:
+            second_group = first_group.insertGroup(0, sub_group)
+            if second_group is None:
+                msg = "Couldn't add group."
+                tools_log.log_error(msg)
+                return first_group, None, None
+        if sub_sub_group:
+            third_group = find_toc_group(second_group, sub_sub_group)
+            if not third_group:
+                third_group = second_group.insertGroup(0, sub_sub_group)
+
+    return first_group, second_group, third_group
+
+
+def _add_layer_to_group(layer, first_group, second_group, third_group):
+    """Add layer to the appropriate group level"""
+    if third_group:
+        third_group.insertLayer(0, layer)
+    elif second_group:
+        second_group.insertLayer(0, layer)
+    elif first_group:
+        first_group.insertLayer(0, layer)
+    else:
+        root = QgsProject.instance().layerTreeRoot()
+        my_group = root.findGroup("GW Layers")
+        if my_group is None:
+            my_group = root.insertGroup(0, "GW Layers")
+        my_group.insertLayer(0, layer)
+    iface.setActiveLayer(layer)
 
 # endregion
