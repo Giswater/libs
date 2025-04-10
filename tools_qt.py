@@ -310,68 +310,46 @@ def get_widget_value(dialog, widget):
 
 
 def get_text(dialog, widget, add_quote=False, return_string_null=True):
+    """ Get text from widget """
 
     if isdeleted(dialog):
         return None
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
+
+    if not widget:
+        return "null" if return_string_null else ""
+
     text = None
-    if widget:
-        if type(widget) in (QLineEdit, QPushButton, QLabel, GwHyperLinkLabel, GwHyperLinkLineEdit):
-            text = widget.text()
-        elif type(widget) in (QDoubleSpinBox, QSpinBox):
-            # When the QDoubleSpinbox contains decimals, for example 2,0001 when collecting the value,
-            # the spinbox itself sends 2.0000999999, as in reality we only want, maximum 4 decimal places, we round up,
-            # thus fixing this small failure of the widget
-            text = round(widget.value(), 4)
-        elif type(widget) in (QTextEdit, QPlainTextEdit):
-            text = widget.toPlainText()
-        elif isinstance(widget, QComboBox):
-            text = widget.currentText()
-        elif type(widget) is QCheckBox:
-            value = is_checked(dialog, widget)
-            if type(value) is bool:
-                text = str(value)
-            else:
-                text = None
-        else:
-            return None
-
-        if text in (None, '') and return_string_null:
-            text = "null"
-        elif text in (None, ''):
-            text = ""
-        if add_quote and text != "null":
-            text = "'" + text + "'"
+    if type(widget) in (QLineEdit, QPushButton, QLabel, GwHyperLinkLabel, GwHyperLinkLineEdit):
+        text = _get_text_from_line_edit(widget)
+    elif type(widget) in (QDoubleSpinBox, QSpinBox):
+        text = _get_text_from_spinbox(widget)
+    elif type(widget) in (QTextEdit, QPlainTextEdit):
+        text = _get_text_from_text_edit(widget)
+    elif isinstance(widget, QComboBox):
+        text = _get_text_from_combo(widget)
+    elif type(widget) is QCheckBox:
+        text = _get_text_from_checkbox(dialog, widget)
     else:
-        if return_string_null:
-            text = "null"
-        else:
-            text = ""
+        return None
 
-    return text
+    return _handle_null_text(text, add_quote, return_string_null)
 
 
 def set_widget_text(dialog, widget, text):
+    """ Set text to widget """
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
 
-    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser):
-        if str(text) == 'None':
-            text = ""
-        widget.setText(f"{text}")
-    elif type(widget) is QPlainTextEdit:
-        if str(text) == 'None':
-            text = ""
-        widget.insertPlainText(f"{text}")
-    elif type(widget) is QDoubleSpinBox or type(widget) is QSpinBox:
-        if text == 'None' or text == 'null':
-            text = 0
-        widget.setValue(float(text))
+    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser, QPlainTextEdit):
+        _set_text_for_text_widgets(widget, text)
+    elif type(widget) in (QDoubleSpinBox, QSpinBox):
+        _set_text_for_spinbox(widget, text)
     elif isinstance(widget, QComboBox):
         set_selected_item(dialog, widget, text)
     elif type(widget) is QTimeEdit:
@@ -1737,5 +1715,63 @@ def _translate_standard_widget(widget, context_name, aux_context):
             widget.setText(text)
     _translate_tooltip(context_name, widget, aux_context=aux_context)
 
+
+def _get_text_from_line_edit(widget):
+    """Helper function to get text from QLineEdit and similar widgets"""
+    return widget.text()
+
+
+def _get_text_from_spinbox(widget):
+    """Helper function to get text from QDoubleSpinBox and QSpinBox"""
+    # When the QDoubleSpinbox contains decimals, for example 2,0001 when collecting the value,
+    # the spinbox itself sends 2.0000999999, as in reality we only want, maximum 4 decimal places, we round up,
+    # thus fixing this small failure of the widget
+    return round(widget.value(), 4)
+
+
+def _get_text_from_text_edit(widget):
+    """Helper function to get text from QTextEdit and QPlainTextEdit"""
+    return widget.toPlainText()
+
+
+def _get_text_from_combo(widget):
+    """Helper function to get text from QComboBox"""
+    return widget.currentText()
+
+
+def _get_text_from_checkbox(dialog, widget):
+    """Helper function to get text from QCheckBox"""
+    value = is_checked(dialog, widget)
+    if type(value) is bool:
+        return str(value)
+    return None
+
+
+def _handle_null_text(text, add_quote, return_string_null):
+    """Helper function to handle null/empty text cases"""
+    if text in (None, '') and return_string_null:
+        text = "null"
+    elif text in (None, ''):
+        text = ""
+    if add_quote and text != "null":
+        text = "'" + text + "'"
+    return text
+
+
+def _set_text_for_text_widgets(widget, text):
+    """Helper function to set text for text-based widgets"""
+    if str(text) == 'None':
+        text = ""
+    if type(widget) is QPlainTextEdit:
+        widget.insertPlainText(f"{text}")
+    else:
+        widget.setText(f"{text}")
+
+
+def _set_text_for_spinbox(widget, text):
+    """Helper function to set text for spinbox widgets"""
+    if text == 'None' or text == 'null':
+        text = 0
+    widget.setValue(float(text))
 
 # endregion
