@@ -1508,46 +1508,22 @@ def set_table_model(dialog, table_object, table_name, expr_filter):
     """ Sets a TableModel to @widget_name attached to
         @table_name and filter @expr_filter
     """
-
-    expr = None
-    if expr_filter:
-        # Check expression
-        (is_valid, expr) = check_expression_filter(expr_filter)
-        if not is_valid:
-            return expr
-
-    if lib_vars.schema_name and lib_vars.schema_name not in table_name:
-        table_name = f"{lib_vars.schema_name}.{table_name}"
-
-    # Set a model with selected filter expression
-    model = QSqlTableModel(db=lib_vars.qgis_db_credentials)
-    model.setTable(table_name)
-    model.setEditStrategy(QSqlTableModel.OnManualSubmit)
-    model.select()
-    if model.lastError().isValid():
-        if 'Unable to find table' in model.lastError().text():
-            tools_db.reset_qsqldatabase_connection()
-        else:
-            tools_qgis.show_warning(model.lastError().text())
+    # Validate expression
+    is_valid, expr = _validate_expression(expr_filter)
+    if not is_valid:
         return expr
 
-    # Attach model to selected widget
-    if type(table_object) is str:
-        widget = get_widget(dialog, table_object)
-        if widget is None:
-            message = "Widget not found"
-            tools_log.log_info(message, parameter=table_object)
-            return expr
-    elif type(table_object) is QTableView:
-        widget = table_object
-    else:
-        msg = "Table_object is not a table name or QTableView"
-        tools_log.log_info(msg)
+    # Create and configure model
+    model = _create_table_model(table_name)
+    if model is None:
         return expr
 
-    if isdeleted(widget):
-        return
+    # Get widget
+    widget = _get_widget_from_table_object(dialog, table_object)
+    if widget is None or isdeleted(widget):
+        return expr
 
+    # Apply model and filter
     if expr_filter:
         widget.setModel(model)
         widget.model().setFilter(expr_filter)
@@ -1610,55 +1586,15 @@ def _translate_widget(context_name, widget, aux_context='ui_message'):
     widget_name = ""
     try:
         if type(widget) is QTabWidget:
-            num_tabs = widget.count()
-            for i in range(0, num_tabs):
-                widget_name = widget.widget(i).objectName()
-                text = tr(widget_name, context_name, aux_context)
-                if text not in (widget_name, None, 'None'):
-                    widget.setTabText(i, text)
-                else:
-                    widget_text = widget.tabText(i)
-                    text = tr(widget_text, context_name, aux_context)
-                    if text != widget_text:
-                        widget.setTabText(i, text)
-                _translate_tooltip(context_name, widget, i, aux_context=aux_context)
+            _translate_tab_widget(widget, context_name, aux_context)
         elif type(widget) is QToolBox:
-            num_tabs = widget.count()
-            for i in range(0, num_tabs):
-                widget_name = widget.widget(i).objectName()
-                text = tr(widget_name, context_name, aux_context)
-                if text not in (widget_name, None, 'None'):
-                    widget.setItemText(i, text)
-                else:
-                    widget_text = widget.itemText(i)
-                    text = tr(widget_text, context_name, aux_context)
-                    if text != widget_text:
-                        widget.setItemText(i, text)
-                _translate_tooltip(context_name, widget.widget(i), aux_context=aux_context)
+            _translate_tool_box(widget, context_name, aux_context)
         elif type(widget) is QGroupBox:
-            widget_name = widget.objectName()
-            text = tr(widget_name, context_name, aux_context)
-            if text not in (widget_name, None, 'None'):
-                widget.setTitle(text)
-            else:
-                widget_title = widget.title()
-                text = tr(widget_title, context_name, aux_context)
-                if text != widget_title:
-                    widget.setTitle(text)
-            _translate_tooltip(context_name, widget, aux_context=aux_context)
-        elif type(widget) is QLineEdit or type(widget) is QTextEdit:
+            _translate_group_box(widget, context_name, aux_context)
+        elif type(widget) in (QLineEdit, QTextEdit):
             _translate_tooltip(context_name, widget, aux_context=aux_context)
         else:
-            widget_name = widget.objectName()
-            text = tr(widget_name, context_name, aux_context)
-            if text not in (widget_name, None, 'None'):
-                widget.setText(text)
-            else:
-                widget_text = widget.text()
-                text = tr(widget_text, context_name, aux_context)
-                if text != widget_text:
-                    widget.setText(text)
-            _translate_tooltip(context_name, widget, aux_context=aux_context)
+            _translate_standard_widget(widget, context_name, aux_context)
 
     except Exception as e:
         tools_log.log_info(f"{widget_name} --> {type(e).__name__} --> {e}")
@@ -1696,6 +1632,110 @@ def _set_model_by_list(string_list, proxy_model):
     model.setStringList(string_list)
     proxy_model.setSourceModel(model)
     proxy_model.setFilterKeyColumn(0)
+
+
+def _validate_expression(expr_filter):
+    """Helper function to validate expression filter"""
+    expr = None
+    if expr_filter:
+        (is_valid, expr) = check_expression_filter(expr_filter)
+        if not is_valid:
+            return None, expr
+    return True, expr
+
+
+def _create_table_model(table_name):
+    """Helper function to create and configure table model"""
+    if lib_vars.schema_name and lib_vars.schema_name not in table_name:
+        table_name = f"{lib_vars.schema_name}.{table_name}"
+
+    model = QSqlTableModel(db=lib_vars.qgis_db_credentials)
+    model.setTable(table_name)
+    model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+    model.select()
+
+    if model.lastError().isValid():
+        if 'Unable to find table' in model.lastError().text():
+            tools_db.reset_qsqldatabase_connection()
+        else:
+            tools_qgis.show_warning(model.lastError().text())
+        return None
+    return model
+
+
+def _get_widget_from_table_object(dialog, table_object):
+    """Helper function to get widget from table object"""
+    if type(table_object) is str:
+        widget = get_widget(dialog, table_object)
+        if widget is None:
+            tools_log.log_info("Widget not found", parameter=table_object)
+            return None
+    elif type(table_object) is QTableView:
+        widget = table_object
+    else:
+        tools_log.log_info("Table_object is not a table name or QTableView")
+        return None
+    return widget
+
+
+def _translate_tab_widget(widget, context_name, aux_context):
+    """Helper function to translate QTabWidget"""
+    num_tabs = widget.count()
+    for i in range(0, num_tabs):
+        widget_name = widget.widget(i).objectName()
+        text = tr(widget_name, context_name, aux_context)
+        if text not in (widget_name, None, 'None'):
+            widget.setTabText(i, text)
+        else:
+            widget_text = widget.tabText(i)
+            text = tr(widget_text, context_name, aux_context)
+            if text != widget_text:
+                widget.setTabText(i, text)
+        _translate_tooltip(context_name, widget, i, aux_context=aux_context)
+
+
+def _translate_tool_box(widget, context_name, aux_context):
+    """Helper function to translate QToolBox"""
+    num_tabs = widget.count()
+    for i in range(0, num_tabs):
+        widget_name = widget.widget(i).objectName()
+        text = tr(widget_name, context_name, aux_context)
+        if text not in (widget_name, None, 'None'):
+            widget.setItemText(i, text)
+        else:
+            widget_text = widget.itemText(i)
+            text = tr(widget_text, context_name, aux_context)
+            if text != widget_text:
+                widget.setItemText(i, text)
+        _translate_tooltip(context_name, widget.widget(i), aux_context=aux_context)
+
+
+def _translate_group_box(widget, context_name, aux_context):
+    """Helper function to translate QGroupBox"""
+    widget_name = widget.objectName()
+    text = tr(widget_name, context_name, aux_context)
+    if text not in (widget_name, None, 'None'):
+        widget.setTitle(text)
+    else:
+        widget_title = widget.title()
+        text = tr(widget_title, context_name, aux_context)
+        if text != widget_title:
+            widget.setTitle(text)
+    _translate_tooltip(context_name, widget, aux_context=aux_context)
+
+
+def _translate_standard_widget(widget, context_name, aux_context):
+    """Helper function to translate standard widgets"""
+    widget_name = widget.objectName()
+    text = tr(widget_name, context_name, aux_context)
+    if text not in (widget_name, None, 'None'):
+        widget.setText(text)
+    else:
+        widget_text = widget.text()
+        text = tr(widget_text, context_name, aux_context)
+        if text != widget_text:
+            widget.setText(text)
+    _translate_tooltip(context_name, widget, aux_context=aux_context)
 
 
 # endregion
