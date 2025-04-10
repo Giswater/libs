@@ -1359,46 +1359,32 @@ def manage_translation(context_name, dialog=None, log_info=False, plugin_dir=Non
         _translate_form(dialog, context_name)
 
 
+def _should_show_exception(description):
+    """Helper function to determine if exception should be shown"""
+    if not description:
+        return True
+
+    dont_show_list = ['unknown error', 'server closed the connection unexpectedly',
+                      'message contents do not agree with length in message', 'unexpected field count in']
+    for dont_show in dont_show_list:
+        if dont_show in description:
+            return False
+    if 'server sent data' in description and 'without prior row description' in description:
+        return False
+    return True
+
+
 def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_increase=0, filepath=None,
                         schema_name=None):
     """ Manage exception in database queries and show information to the user """
 
-    show_exception_msg = True
-    description = ""
-    if exception:
-        description = str(exception)
-        dont_show_list = ['unknown error', 'server closed the connection unexpectedly',
-                          'message contents do not agree with length in message', 'unexpected field count in']
-        for dont_show in dont_show_list:
-            if dont_show in description:
-                show_exception_msg = False
-                break
-        if 'server sent data' in description and 'without prior row description' in description:
-            show_exception_msg = False
+    show_exception_msg = _should_show_exception(str(exception) if exception else "")
 
     try:
-
         stack_level += stack_level_increase
-        if stack_level >= len(inspect.stack()):
-            stack_level = len(inspect.stack()) - 1
-        module_path = inspect.stack()[stack_level][1]
-        file_name = tools_os.get_relative_path(module_path, 2)
-        function_line = inspect.stack()[stack_level][2]
-        function_name = inspect.stack()[stack_level][3]
+        file_name, function_line, function_name = _get_stack_info(stack_level)
 
-        # Set exception message details
-        msg = ""
-        msg += f"File name: {file_name}\n"
-        msg += f"Function name: {function_name}\n"
-        msg += f"Line number: {function_line}\n"
-        if exception:
-            msg += f"Description:\n{description}\n"
-        if filepath:
-            msg += f"SQL file:\n{filepath}\n\n"
-        if sql:
-            msg += f"SQL:\n {sql}\n\n"
-        msg += f"Schema name: {schema_name}"
-
+        msg = _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name)
         lib_vars.session_vars['last_error_msg'] = msg
 
         # Show exception message in dialog and log it
@@ -1773,5 +1759,33 @@ def _set_text_for_spinbox(widget, text):
     if text == 'None' or text == 'null':
         text = 0
     widget.setValue(float(text))
+
+
+def _get_stack_info(stack_level):
+    """Helper function to get stack information"""
+    if stack_level >= len(inspect.stack()):
+        stack_level = len(inspect.stack()) - 1
+    module_path = inspect.stack()[stack_level][1]
+    file_name = tools_os.get_relative_path(module_path, 2)
+    function_line = inspect.stack()[stack_level][2]
+    function_name = inspect.stack()[stack_level][3]
+    return file_name, function_line, function_name
+
+
+def _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name):
+    """Helper function to build exception message"""
+    msg = ""
+    msg += f"File name: {file_name}\n"
+    msg += f"Function name: {function_name}\n"
+    msg += f"Line number: {function_line}\n"
+    if exception:
+        msg += f"Description:\n{str(exception)}\n"
+    if filepath:
+        msg += f"SQL file:\n{filepath}\n\n"
+    if sql:
+        msg += f"SQL:\n {sql}\n\n"
+    msg += f"Schema name: {schema_name}"
+    return msg
+
 
 # endregion
