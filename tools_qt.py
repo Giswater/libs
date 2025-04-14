@@ -923,7 +923,7 @@ def check_regex(widget, reg_exp, button, placeholder, text):
 
 
 def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableModel.OnManualSubmit,
-               sort_order=Qt.AscendingOrder):
+               sort_order=Qt.AscendingOrder, schema_name=None):
     """ Set a model with selected filter. Attach that model to selected table
     :param qtable: tableview where set the model (QTableView)
     :param table_name: database table name or view name (String)
@@ -932,8 +932,7 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
     :param sort_order: can be 0 or 1 (Qt.AscendingOrder or Qt.AscendingOrder)
     :return:
     """
-
-    if lib_vars.schema_name and lib_vars.schema_name not in table_name:
+    if not schema_name and lib_vars.schema_name and lib_vars.schema_name not in table_name:
         table_name = f"{lib_vars.schema_name}.{table_name}"
 
     # Set model
