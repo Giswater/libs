@@ -720,9 +720,7 @@ def get_uri():
     except ValueError:
         sslmode = sslmode_default
     if dao_db_credentials['service']:
-        uri.setConnection(dao_db_credentials['service'],
-            dao_db_credentials['db'], dao_db_credentials['user'],
-            dao_db_credentials['password'], sslmode)
+        uri.setConnection(dao_db_credentials['service'], None, None, None, sslmode)
     else:
         if tools_os.set_boolean(lib_vars.project_vars['store_credentials'], default=True):
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
@@ -730,7 +728,7 @@ def get_uri():
                 dao_db_credentials['password'], sslmode)
         else:
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
-                              dao_db_credentials['db'], '', '', sslmode)
+                              dao_db_credentials['db'], None, None, sslmode)
 
     return uri
 
