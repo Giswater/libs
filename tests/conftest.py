@@ -2,46 +2,55 @@ import os
 import sys
 import pytest
 from unittest.mock import MagicMock, patch
-from pathlib import Path
+
 
 # Add the plugin directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 # Mock Qt classes
 class MockQDialog:
     def __init__(self, *args, **kwargs):
         pass
 
+
 class MockQWidget:
     def __init__(self, *args, **kwargs):
         pass
+
 
 class MockQMainWindow:
     def __init__(self, *args, **kwargs):
         pass
 
+
 class MockQMessageBox:
     def __init__(self, *args, **kwargs):
         pass
 
+
 class MockQFileDialog:
     def __init__(self, *args, **kwargs):
         pass
+
 
 # Mock Dialog class
 class Dialog(MockQDialog):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
+
 # Mock FORM_CLASS
 class FormClass(MockQDialog):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
+
 # Mock ShowInfoUi class
 class ShowInfoUi(Dialog, FormClass):
     def __init__(self, *args, **kwargs):
         super().__init__()
+
 
 # Set up mocks before any imports
 def setup_qgis_mocks():
@@ -75,8 +84,10 @@ def setup_qgis_mocks():
     ui_manager_module.ShowInfoUi = ShowInfoUi
     sys.modules['libs.ui.ui_manager'] = ui_manager_module
 
+
 # Call setup_qgis_mocks immediately
 setup_qgis_mocks()
+
 
 @pytest.fixture
 def mock_file_dialog():

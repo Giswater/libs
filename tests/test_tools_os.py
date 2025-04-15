@@ -7,7 +7,8 @@ from pathlib import Path
 # Add the plugin directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from libs import tools_os
+from libs import tools_os  # noqa: E402
+
 
 def test_get_datadir():
     """Test get_datadir function"""
@@ -39,6 +40,7 @@ def test_get_datadir():
     with patch('sys.platform', 'invalid'):
         with pytest.raises(NotImplementedError):
             tools_os.get_datadir()
+
 
 def test_set_boolean():
     """Test set_boolean function"""
@@ -75,6 +77,7 @@ def test_set_boolean():
     assert tools_os.set_boolean("2", default=False) is False  # Not in bool_dict, should return default
     assert tools_os.set_boolean("-1", default=True) is True   # Not in bool_dict, should return default
 
+
 def test_get_values_from_dictionary():
     """Test get_values_from_dictionary function"""
     # Test basic dictionary
@@ -102,11 +105,13 @@ def test_get_values_from_dictionary():
     result = tools_os.get_values_from_dictionary(dup_dict)
     assert list(result) == [1, 1, 2]
 
+
 def test_open_file_path(mock_file_dialog):
     """Test open_file_path function"""
     path, filter_ = tools_os.open_file_path()
     assert path == "/test/path"
     assert filter_ == "All Files (*.*)"
+
 
 def test_get_relative_path():
     """Test get_relative_path function"""
@@ -140,6 +145,7 @@ def test_get_relative_path():
     # Test with level greater than path depth
     result = tools_os.get_relative_path("a/b.txt", 5)
     assert result.replace('\\', '/') == "a/b.txt"
+
 
 def test_ireplace():
     """Test ireplace function"""
