@@ -37,6 +37,8 @@ def get_datadir() -> pathlib.Path:
         return home / ".local/share"
     elif sys.platform == "darwin":
         return home / "Library/Application Support"
+    else:
+        raise NotImplementedError(f"Platform '{sys.platform}' is not supported")
 
 
 def open_file(file_path):
@@ -74,6 +76,10 @@ def get_encoding_type(file_path):
 
 
 def get_relative_path(filepath, levels=1):
+    """ Return relative path from @filepath with @levels """
+
+    if not filepath:
+        return filepath
 
     common = filepath
     for i in range(levels + 1):
@@ -97,8 +103,8 @@ def set_boolean(param, default=True):
         :return: default if param not in bool_dict (bool)
     """
 
-    bool_dict = {True: True, "TRUE": True, "True": True, "true": True,
-                 False: False, "FALSE": False, "False": False, "false": False}
+    bool_dict = {True: True, "TRUE": True, "True": True, "true": True, "1": True,
+                 False: False, "FALSE": False, "False": False, "false": False, "0": False}
 
     return bool_dict.get(param, default)
 
@@ -144,6 +150,10 @@ def get_number_of_files(folder):
 
 def ireplace(old, new, text):
     """ Replaces @old by @new in @text (case-insensitive) """
+
+    # Return original text if old string is empty
+    if not old:
+        return text
 
     return re.sub('(?i)' + re.escape(old), lambda m: new, text)
 
