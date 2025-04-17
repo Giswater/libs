@@ -1327,7 +1327,7 @@ def set_stylesheet(widget, style="border: 2px solid red"):
     widget.setStyleSheet(style)
 
 
-def tr(message, context_name="giswater", aux_context='ui_message'):
+def tr(message, context_name="giswater", aux_context='ui_message', default=None):
     """ Translate @message looking it in @context_name """
 
     if context_name is None:
@@ -1339,9 +1339,11 @@ def tr(message, context_name="giswater", aux_context='ui_message'):
     except TypeError:
         value = QCoreApplication.translate(context_name, str(message))
     finally:
-        # If not translation has been found, check into context @aux_context
+        # If not translation has been found, check into context @aux_context and @default
         if value == message:
             value = QCoreApplication.translate(aux_context, message)
+        if default is not None and value == message:
+            value = default
 
     return value
 
