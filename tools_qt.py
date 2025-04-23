@@ -11,7 +11,7 @@ import operator
 import sys
 import subprocess
 import traceback
-from typing import Dict, Literal, Optional
+from typing import Dict, Literal, Optional, Any, Union, List
 import webbrowser
 from functools import partial
 from encodings.aliases import aliases
@@ -33,7 +33,6 @@ from qgis.utils import iface
 from . import tools_log, tools_os, tools_qgis, tools_db
 from . import lib_vars
 from .ui.ui_manager import ShowInfoUi
-
 
 translator = QTranslator()
 dlg_info = ShowInfoUi()
@@ -1006,46 +1005,70 @@ def get_folder_path(dialog, widget):
     if folder_path:
         set_widget_text(dialog, widget, str(folder_path))
 
-def get_file(title, subtitle ,extension):
+def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     """ Get file path """
     result = QFileDialog.getOpenFileName(None, title, subtitle, extension)
     file_path_str: str = result[0]
     if file_path_str:
         return Path(file_path_str)
+    return None
 
 
-def get_save_file_path(dialog, widget, extension, message=""):
+def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str="", default_path: str = "", file_name: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file is None or file == '':
-        file = lib_vars.plugin_dir
+    if file in(None, 'null', ''):
+        if default_path != "":
+            file = default_path
+        else:
+            file = lib_vars.plugin_dir
+
+    if not file:
+        return ''
 
     # Get directory of that file
     folder_path = os.path.dirname(file)
     if not os.path.exists(folder_path):
         folder_path = os.path.dirname(__file__)
     os.chdir(folder_path)
-    file, _ = QFileDialog.getSaveFileName(None, message, "", extension)
+    file, _ = QFileDialog.getSaveFileName(None, tr(message), os.path.join(folder_path, file_name), extension)
     set_widget_text(dialog, widget, file)
 
+    return file
 
-def get_open_file_path(dialog, widget, extension, message=""):
+
+def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str ="", message: str="", default_path: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file is None or file == '':
-        file = lib_vars.plugin_dir
+    if file in(None, 'null', ''):
+        if default_path != "":
+            file = default_path
+        else:
+            file = lib_vars.plugin_dir
+
+    if not file:
+        return ''
 
     # Get directory of that file
     folder_path = os.path.dirname(file)
     if not os.path.exists(folder_path):
         folder_path = os.path.dirname(__file__)
     os.chdir(folder_path)
-    file, _ = QFileDialog.getOpenFileName(None, message, "", extension)
+    file, _ = QFileDialog.getOpenFileName(None, tr(message), "", extension)
     set_widget_text(dialog, widget, file)
+
+    return file
+
+
+def get_open_files_path(message: str="", file_types: str = "") -> List[str]:
+    """ Get file path """
+
+    files_path, _ = QFileDialog.getOpenFileNames(None, tr(message), "", file_types)
+    return files_path
 
 
 def hide_void_groupbox(dialog):

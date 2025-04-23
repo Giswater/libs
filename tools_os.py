@@ -14,9 +14,6 @@ import urllib.parse as parse
 import webbrowser
 import re
 from chardet import detect
-
-from qgis.PyQt.QtWidgets import QFileDialog
-
 from . import tools_log
 
 
@@ -102,13 +99,6 @@ def set_boolean(param, default=True):
                  False: False, "FALSE": False, "False": False, "false": False}
 
     return bool_dict.get(param, default)
-
-
-def open_file_path(msg="Select file", filter_="All (*.*)"):
-    """ Open QFileDialog """
-
-    path, filter_ = QFileDialog.getOpenFileName(None, msg, "", filter_)
-    return path, filter_
 
 
 def check_python_function(module, function_name):
