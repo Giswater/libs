@@ -18,8 +18,8 @@ from encodings.aliases import aliases
 from warnings import warn
 from sip import isdeleted
 from pathlib import Path
-from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
-    QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
+from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, \
+    pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
 from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
@@ -986,6 +986,7 @@ def get_folder_path(dialog, widget):
     if folder_path:
         set_widget_text(dialog, widget, str(folder_path))
 
+
 def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     """ Get file path """
     result = QFileDialog.getOpenFileName(None, title, subtitle, extension)
@@ -995,12 +996,13 @@ def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     return None
 
 
-def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str="", default_path: str = "", file_name: str = "") -> str:
+def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
+                       default_path: str = "", file_name: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in(None, 'null', ''):
+    if file in (None, 'null', ''):
         if default_path != "":
             file = default_path
         else:
@@ -1020,12 +1022,13 @@ def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
     return file
 
 
-def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str ="", message: str="", default_path: str = "") -> str:
+def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
+                       default_path: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in(None, 'null', ''):
+    if file in (None, 'null', ''):
         if default_path != "":
             file = default_path
         else:
@@ -1045,7 +1048,7 @@ def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
     return file
 
 
-def get_open_files_path(message: str="", file_types: str = "") -> List[str]:
+def get_open_files_path(message: str = "", file_types: str = "") -> List[str]:
     """ Get file path """
 
     files_path, _ = QFileDialog.getOpenFileNames(None, tr(message), "", file_types)
