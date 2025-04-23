@@ -1,7 +1,6 @@
 import os
 import sys
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 
 # Add the plugin directory to the Python path
