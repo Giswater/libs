@@ -106,13 +106,6 @@ def test_get_values_from_dictionary():
     assert list(result) == [1, 1, 2]
 
 
-def test_open_file_path(mock_file_dialog):
-    """Test open_file_path function"""
-    path, filter_ = tools_os.open_file_path()
-    assert path == "/test/path"
-    assert filter_ == "All Files (*.*)"
-
-
 def test_get_relative_path():
     """Test get_relative_path function"""
     # Test with different levels

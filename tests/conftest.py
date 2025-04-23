@@ -87,11 +87,3 @@ def setup_qgis_mocks():
 
 # Call setup_qgis_mocks immediately
 setup_qgis_mocks()
-
-
-@pytest.fixture
-def mock_file_dialog():
-    """Fixture to mock QFileDialog"""
-    with patch('libs.tools_os.QFileDialog') as mock:
-        mock.getOpenFileName.return_value = ("/test/path", "All Files (*.*)")
-        yield mock
