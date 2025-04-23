@@ -2,9 +2,9 @@ name: Python flake8
 
 on:
     push:
-        branches: ['refactor-pep8']
+        branches: ['master']
     pull_request:
-        branches: ['refactor-pep8']
+        branches: ['master']
 
 jobs:
   lint:
