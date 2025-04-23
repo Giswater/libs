@@ -166,7 +166,8 @@ def check_pg_extension(extension, form_enabled=True):
                     execute_sql(sql)
             return True, None
         elif form_enabled:
-            message = f"Unable to create '{extension}' extension. Packages must be installed, consult your administrator."
+            message = (f"Unable to create '{extension}' extension. "
+                      f"Packages must be installed, consult your administrator.")
             return False, message
 
     return True, None
@@ -372,11 +373,17 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
 
     # Get credentials from .pg_service.conf
     credentials = tools_os.manage_pg_service(service)
-    if all([credentials['host'], credentials['port'], credentials['dbname']]) and None in [credentials['user'], credentials['password']]:
+    if all([credentials['host'], credentials['port'], credentials['dbname']]) and \
+            None in [credentials['user'], credentials['password']]:
         if conn_info is None:
             conn_info = f"service='{service}'"
         (success, credentials['user'], credentials['password']) = \
-                QgsCredentials.instance().get(conn_info, credentials['user'], credentials['password'], f"Please enter the credentials for connection '{service}'")
+                QgsCredentials.instance().get(
+                    conn_info,
+                    credentials['user'],
+                    credentials['password'],
+                    f"Please enter the credentials for connection '{service}'"
+                )
 
         # Put the credentials back (for yourself and the provider), as QGIS removes it when you "get" it
         QgsCredentials.instance().put(conn_info, credentials['user'], credentials['password'])
@@ -462,7 +469,8 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
     return row
 
 
-def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False, aux_conn=None):
+def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False,
+             aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao  # noqa: F824
@@ -499,7 +507,8 @@ def get_values_from_catalog(table_name, typevalue, order_by='id'):
     return rows
 
 
-def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True, aux_conn=None):
+def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True,
+                aux_conn=None):
     """ Execute SQL. Check its result in log tables, and show it to the user """
 
     global dao  # noqa: F824
@@ -570,7 +579,9 @@ def connect_to_database_credentials(credentials, conn_info=None, max_attempts=2)
 
     # Check if credential parameter 'service' is set
     if credentials.get('service'):
-        logged, credentials_pgservice = connect_to_database_service(credentials['service'], credentials['sslmode'], conn_info)
+        logged, credentials_pgservice = connect_to_database_service(
+            credentials['service'], credentials['sslmode'], conn_info
+        )
         credentials['user'] = credentials_pgservice['user']
         credentials['password'] = credentials_pgservice['password']
         return logged, credentials
@@ -588,115 +599,122 @@ def connect_to_database_credentials(credentials, conn_info=None, max_attempts=2)
     return logged, credentials
 
 
+def _get_sslmode_from_settings(settings, sslmode_default):
+    """Get SSL mode from QGIS settings"""
+    sslmode_settings = settings.value('sslmode')
+    try:
+        sslmode_dict = {
+            0: 'prefer', 1: 'disable', 3: 'require',
+            'SslPrefer': 'prefer', 'SslDisable': 'disable', 'SslRequire': 'require', 'SslAllow': 'allow'
+        }
+        return sslmode_dict.get(sslmode_settings, sslmode_default)
+    except ValueError:
+        return sslmode_settings
+
+
+def _get_credentials_from_layer(layer, sslmode_default):
+    """Get database credentials from a QGIS layer"""
+    credentials = tools_qgis.get_layer_source(layer)
+    not_version = False
+
+    # Handle SSL mode
+    if not credentials['sslmode']:
+        if credentials['service']:
+            tools_log.log_info("Getting sslmode from .pg_service file")
+            credentials_service = tools_os.manage_pg_service(credentials['service'])
+            credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default  # noqa: E501
+        else:
+            settings = QSettings()
+            settings.beginGroup("PostgreSQL/connections")
+            if settings.value('selected'):
+                default_connection = settings.value('selected')
+                settings.endGroup()
+                settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
+                credentials['sslmode'] = _get_sslmode_from_settings(settings, sslmode_default)
+                settings.endGroup()
+
+    lib_vars.schema_name = credentials['schema']
+    return credentials, not_version
+
+
+def _get_credentials_from_settings(sslmode_default):
+    """Get database credentials from QGIS settings"""
+    settings = QSettings()
+    settings.beginGroup("PostgreSQL/connections")
+    default_connection = settings.value('selected')
+    settings.endGroup()
+
+    if not default_connection:
+        tools_log.log_warning("Error getting default connection (settings)")
+        lib_vars.session_vars['last_error'] = tools_qt.tr("Error getting default connection", "ui_message")
+        return None, True
+
+    settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
+    credentials = {
+        'db': None, 'schema': None, 'table': None, 'service': None,
+        'host': None, 'port': None, 'user': None, 'password': None, 'sslmode': None
+    }
+
+    credentials['host'] = settings.value('host') or 'localhost'
+    credentials['port'] = settings.value('port')
+    credentials['db'] = settings.value('database')
+    credentials['user'] = settings.value('username')
+    credentials['password'] = settings.value('password')
+    credentials['service'] = settings.value('service')
+
+    if credentials['service']:
+        tools_log.log_info("Getting sslmode from .pg_service file")
+        credentials_service = tools_os.manage_pg_service(credentials['service'])
+        credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
+    else:
+        credentials['sslmode'] = _get_sslmode_from_settings(settings, sslmode_default)
+
+    settings.endGroup()
+    return credentials, True
+
+
 def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node'):
-    """ Get database parameters from layer @layer_name or database connection settings
+    """Get database parameters from layer @layer_name or database connection settings
     sslmode_default should be (disable, allow, prefer, require, verify-ca, verify-full)"""
 
     global dao_db_credentials  # noqa: F824
-    # Get layer @layer_name
-    layer = tools_qgis.get_layer_by_tablename(layer_name)
 
-    # Get database connection settings
+    # Get layer and settings
+    layer = tools_qgis.get_layer_by_tablename(layer_name)
     settings = QSettings()
     settings.beginGroup("PostgreSQL/connections")
 
     if layer is None and settings is None:
-        not_version = False
         tools_log.log_warning(f"Layer '{layer_name}' is None and settings is None")
         lib_vars.session_vars['last_error'] = f"Layer not found: '{layer_name}'"
+        return None, False
+
+    # Get credentials based on available source
+    if layer:
+        credentials, not_version = _get_credentials_from_layer(layer, sslmode_default)
+    else:
+        credentials, not_version = _get_credentials_from_settings(sslmode_default)
+
+    if not credentials:
         return None, not_version
 
-    credentials: dict = None
-    not_version = True
+    # Connect to database
     if layer:
-
-        not_version = False
-        credentials = tools_qgis.get_layer_source(layer)
-
-        # If sslmode is not defined
-        sslmode = sslmode_default
-        if not credentials['sslmode']:
-            # If service is defined: get sslmode from .pg_service file
-            if credentials['service']:
-                tools_log.log_info(f"Getting sslmode from .pg_service file")
-                credentials_service = tools_os.manage_pg_service(credentials['service'])
-                sslmode = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
-            elif settings.value('selected'):
-                default_connection = settings.value('selected')
-                settings.endGroup()
-                settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
-                sslmode_settings = settings.value('sslmode')
-                settings.endGroup()
-                try:
-                    sslmode_dict = {
-                        0: 'prefer', 1: 'disable', 3: 'require',
-                        'SslPrefer': 'prefer', 'SslDisable': 'disable', 'SslRequire': 'require', 'SslAllow': 'allow'
-                    }
-                    sslmode = sslmode_dict.get(sslmode_settings, sslmode_default)
-                except ValueError:
-                    sslmode = sslmode_settings
-                credentials['sslmode'] = sslmode
-
-        lib_vars.schema_name = credentials['schema']
         conn_info = QgsDataSourceUri(layer.dataProvider().dataSourceUri()).connectionInfo()
         status, credentials = connect_to_database_credentials(credentials, conn_info)
         if not status:
             tools_log.log_warning("Error connecting to database (layer)")
-            lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", None, 'ui_message')
+            lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", "ui_message")
             return None, not_version
-
-        # Put the credentials back (for yourself and the provider), as QGIS removes it when you "get" it
         QgsCredentials.instance().put(conn_info, credentials['user'], credentials['password'])
-
-    elif settings:
-
-        not_version = True
-        default_connection = settings.value('selected')
-        settings.endGroup()
-        credentials = {'db': None, 'schema': None, 'table': None, 'service': None,
-                       'host': None, 'port': None, 'user': None, 'password': None, 'sslmode': None}
-
-        if default_connection:
-            settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
-            credentials['host'] = settings.value('host')
-            if settings.value('host') in (None, ""):
-                credentials['host'] = 'localhost'
-            credentials['port'] = settings.value('port')
-            credentials['db'] = settings.value('database')
-            credentials['user'] = settings.value('username')
-            credentials['password'] = settings.value('password')
-            credentials['service'] = settings.value('service')
-
-            sslmode_settings = settings.value('sslmode')
-            # If service is defined: get sslmode from .pg_service file
-            if credentials['service']:
-                tools_log.log_info(f"Getting sslmode from .pg_service file")
-                credentials_service = tools_os.manage_pg_service(credentials['service'])
-                sslmode = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
-            try:
-                sslmode_dict = {
-                    0: 'prefer', 1: 'disable', 3: 'require',
-                    'SslPrefer': 'prefer', 'SslDisable': 'disable', 'SslRequire': 'require', 'SslAllow': 'allow'
-                }
-                sslmode = sslmode_dict.get(sslmode_settings, sslmode_default)
-            except ValueError:
-                sslmode = sslmode_settings
-            credentials['sslmode'] = sslmode
-            settings.endGroup()
-
-            status, credentials = connect_to_database_credentials(credentials, max_attempts=0)
-            if not status:
-                tools_log.log_warning("Error connecting to database (settings)")
-                lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", None, 'ui_message')
-                return None, not_version
-
-        else:
-            tools_log.log_warning("Error getting default connection (settings)")
-            lib_vars.session_vars['last_error'] = tools_qt.tr("Error getting default connection", None, 'ui_message')
+    else:
+        status, credentials = connect_to_database_credentials(credentials, max_attempts=0)
+        if not status:
+            tools_log.log_warning("Error connecting to database (settings)")
+            lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", "ui_message")
             return None, not_version
 
     dao_db_credentials = credentials
-
     return credentials, not_version
 
 

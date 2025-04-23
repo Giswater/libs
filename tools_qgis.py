@@ -18,11 +18,12 @@ from random import randrange
 
 from qgis.PyQt.QtCore import Qt, QTimer, QSettings
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QTextEdit, QDialogButtonBox
+from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QTextEdit, \
+    QDialogButtonBox
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsLayerTree
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -59,8 +60,8 @@ def get_feature_by_expr(layer, expr_filter):
     return False
 
 
-def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, title="", logger_file=True,
-                 dialog=iface, sqlcontext=None):
+def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
+                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None):
     """
     Show message to the user with selected message level
         :param text: The text to be shown (String)
@@ -78,7 +79,7 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
     dev_duration = user_parameters.get('show_message_durations')
     # If is set, use this value
     if dev_duration not in (None, "None"):
-        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
             duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
@@ -92,7 +93,8 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
     try:
         if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and sqlcontext is not None:
             # show message with button with the sqlcontext
-            show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300), "Show more", message_level, duration, context_name, logger_file, dialog)
+            show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300),
+                                  "Show more", message_level, duration, context_name, logger_file, dialog)
         else:
             dialog.messageBar().pushMessage(title, msg, message_level, duration)
     except Exception as e:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
@@ -104,8 +106,8 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
         lib_vars.logger.info(text)
 
 
-def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True,
-                      dialog=iface):
+def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION,
+                      context_name="giswater", logger_file=True, dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
         :param text: The text to be shown (String)
@@ -146,8 +148,8 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
         lib_vars.logger.info(text)
 
 
-def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True,
-                          dialog=iface):
+def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO,
+                          duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True, dialog=iface):
     """
     Show message to the user with selected message level and a button to open the url
         :param text: The text to be shown (String)
@@ -165,7 +167,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
     dev_duration = user_parameters.get('show_message_durations')
     # If is set, use this value
     if dev_duration not in (None, "None") and duration > 0:
-        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:
+        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
             duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
@@ -188,7 +190,8 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
         lib_vars.logger.info(text)
 
 
-def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
+def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
+              title="", dialog=iface):
     """
     Show information message to the user
         :param text: The text to be shown (String)
@@ -201,7 +204,8 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", 
     show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
+def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
+                 title="", dialog=iface):
     """
     Show warning message to the user
         :param text: The text to be shown (String)
@@ -214,7 +218,8 @@ def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
     show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
+def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
+                  title="", dialog=iface):
     """
     Show critical message to the user
         :param text: The text to be shown (String)
@@ -227,7 +232,8 @@ def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswate
     show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog)
 
 
-def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True, title="", dialog=iface):
+def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
+                 title="", dialog=iface):
     """
     Show success message to the user
         :param text: The text to be shown (String)
@@ -660,55 +666,25 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
     :param layer: (QgsVectorLayer)
     :param group: Name of the group that will be created in the toc (string)
     """
-
     if group is None:
         QgsProject.instance().addMapLayer(layer)
         return
 
     QgsProject.instance().addMapLayer(layer, False)
-    root: QgsLayerTree = QgsProject.instance().layerTreeRoot()
+    root = QgsProject.instance().layerTreeRoot()
     if root is None:
         msg = "QgsLayerTree not found for project."
         tools_log.log_error(msg)
         return
-    first_group = find_toc_group(root, group)
 
     if create_groups:
-        if not first_group:
-            first_group = root.insertGroup(0, group)
-        if first_group is None:
-            msg = f"Group '{group}' not found in layer tree."
-            tools_log.log_error(msg)
-            return
-        if not find_toc_group(first_group, sub_group):
-            second_group = first_group.insertGroup(0, sub_group)
-            if second_group is None:
-                msg = "Couldn't add group."
-                tools_log.log_error(msg)
-                return
-            if sub_sub_group and not find_toc_group(second_group, sub_sub_group):
-                second_group.insertGroup(0, sub_sub_group)
+        first_group, second_group, third_group = _create_group_structure(root, group, sub_group, sub_sub_group)
+    else:
+        first_group = find_toc_group(root, group)
+        second_group = find_toc_group(first_group, sub_group) if first_group and sub_group else None
+        third_group = find_toc_group(second_group, sub_sub_group) if second_group and sub_sub_group else None
 
-    if first_group and sub_group:
-        second_group = find_toc_group(first_group, sub_group)
-        if second_group:
-            third_group = find_toc_group(second_group, sub_sub_group)
-            if third_group:
-                third_group.insertLayer(0, layer)
-                iface.setActiveLayer(layer)
-                return
-            second_group.insertLayer(0, layer)
-            iface.setActiveLayer(layer)
-            return
-        first_group.insertLayer(0, layer)
-        iface.setActiveLayer(layer)
-        return
-
-    root = QgsProject.instance().layerTreeRoot()
-    my_group = root.findGroup("GW Layers")
-    if my_group is None:
-        my_group = root.insertGroup(0, "GW Layers")
-    my_group.insertLayer(0, layer)
+    _add_layer_to_group(layer, first_group, second_group, third_group)
 
 
 def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
@@ -1145,7 +1121,7 @@ def set_layer_visible(layer, recursive=True, visible=True):
     try:
         if layer:
             if recursive:
-                QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityCheckedParentRecursive(visible)
+                QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityCheckedParentRecursive(visible)  # noqa: E501
             else:
                 QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityChecked(visible)
     except RuntimeError:
@@ -1544,10 +1520,55 @@ def create_point(canvas, iface, event):
     y = event.pos().y()
     try:
         point = QgsMapToPixel.toMapCoordinates(canvas.getCoordinateTransform(), x, y)
-    except(TypeError, KeyError):
+    except (TypeError, KeyError):
         iface.actionPan().trigger()
         return False
 
     return point
+
+
+def _create_group_structure(root, group, sub_group, sub_sub_group):
+    """Create the group structure if it doesn't exist"""
+    first_group = find_toc_group(root, group)
+    if not first_group:
+        first_group = root.insertGroup(0, group)
+    if first_group is None:
+        msg = f"Group '{group}' not found in layer tree."
+        tools_log.log_error(msg)
+        return None, None, None
+
+    second_group = None
+    third_group = None
+    if sub_group:
+        second_group = find_toc_group(first_group, sub_group)
+        if not second_group:
+            second_group = first_group.insertGroup(0, sub_group)
+            if second_group is None:
+                msg = "Couldn't add group."
+                tools_log.log_error(msg)
+                return first_group, None, None
+        if sub_sub_group:
+            third_group = find_toc_group(second_group, sub_sub_group)
+            if not third_group:
+                third_group = second_group.insertGroup(0, sub_sub_group)
+
+    return first_group, second_group, third_group
+
+
+def _add_layer_to_group(layer, first_group, second_group, third_group):
+    """Add layer to the appropriate group level"""
+    if third_group:
+        third_group.insertLayer(0, layer)
+    elif second_group:
+        second_group.insertLayer(0, layer)
+    elif first_group:
+        first_group.insertLayer(0, layer)
+    else:
+        root = QgsProject.instance().layerTreeRoot()
+        my_group = root.findGroup("GW Layers")
+        if my_group is None:
+            my_group = root.insertGroup(0, "GW Layers")
+        my_group.insertLayer(0, layer)
+    iface.setActiveLayer(layer)
 
 # endregion

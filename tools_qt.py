@@ -18,15 +18,15 @@ from encodings.aliases import aliases
 from warnings import warn
 from sip import isdeleted
 from pathlib import Path
-from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, pyqtSignal,\
-    QPersistentModelIndex, QCoreApplication, QTranslator, QEvent, QLocale
+from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, \
+    pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
 from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
     QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
     QToolButton, QDialog, QGridLayout, QTextBrowser
-from qgis.core import QgsExpression, QgsProject, QgsLayerTreeLayer
+from qgis.core import QgsExpression
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
 
@@ -73,7 +73,7 @@ class GwHyperLinkLineEdit(QLineEdit):
     def mouseReleaseEvent(self, ev):
         if self.isReadOnly():
             self.clicked.emit()
-            self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")
+            self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")  # noqa: E501
 
 
 class GwEditDialog(QDialog):
@@ -90,7 +90,8 @@ class GwEditDialog(QDialog):
             self._update_data(result_id, columnname, new_value)
 ```
     """
-    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None, initial_value=None):
+    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None,
+                 initial_value=None):
         super(GwEditDialog, self).__init__(parent)
 
         self.setWindowTitle(title)
@@ -156,7 +157,7 @@ match_flags: Dict[QtMatchFlag, Qt.MatchFlag] = {
 }
 
 
-def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):
+def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):  # noqa: C901
 
     warn('This method is deprecated, use fill_combo_values instead.', DeprecationWarning, stacklevel=2)
 
@@ -214,7 +215,8 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
     elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
             ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd'):
         date = widget.dateTime().toString(date_format)
-    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
+    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
+            ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
         date = widget.dateTime().toString(datetime_format)
 
     return date
@@ -307,68 +309,46 @@ def get_widget_value(dialog, widget):
 
 
 def get_text(dialog, widget, add_quote=False, return_string_null=True):
+    """ Get text from widget """
 
     if isdeleted(dialog):
         return None
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
+
+    if not widget:
+        return "null" if return_string_null else ""
+
     text = None
-    if widget:
-        if type(widget) in (QLineEdit, QPushButton, QLabel, GwHyperLinkLabel, GwHyperLinkLineEdit):
-            text = widget.text()
-        elif type(widget) in (QDoubleSpinBox, QSpinBox):
-            # When the QDoubleSpinbox contains decimals, for example 2,0001 when collecting the value,
-            # the spinbox itself sends 2.0000999999, as in reality we only want, maximum 4 decimal places, we round up,
-            # thus fixing this small failure of the widget
-            text = round(widget.value(), 4)
-        elif type(widget) in (QTextEdit, QPlainTextEdit):
-            text = widget.toPlainText()
-        elif isinstance(widget, QComboBox):
-            text = widget.currentText()
-        elif type(widget) is QCheckBox:
-            value = is_checked(dialog, widget)
-            if type(value) is bool:
-                text = str(value)
-            else:
-                text = None
-        else:
-            return None
-
-        if text in (None, '') and return_string_null:
-            text = "null"
-        elif text in (None, ''):
-            text = ""
-        if add_quote and text != "null":
-            text = "'" + text + "'"
+    if type(widget) in (QLineEdit, QPushButton, QLabel, GwHyperLinkLabel, GwHyperLinkLineEdit):
+        text = _get_text_from_line_edit(widget)
+    elif type(widget) in (QDoubleSpinBox, QSpinBox):
+        text = _get_text_from_spinbox(widget)
+    elif type(widget) in (QTextEdit, QPlainTextEdit):
+        text = _get_text_from_text_edit(widget)
+    elif isinstance(widget, QComboBox):
+        text = _get_text_from_combo(widget)
+    elif type(widget) is QCheckBox:
+        text = _get_text_from_checkbox(dialog, widget)
     else:
-        if return_string_null:
-            text = "null"
-        else:
-            text = ""
+        return None
 
-    return text
+    return _handle_null_text(text, add_quote, return_string_null)
 
 
 def set_widget_text(dialog, widget, text):
+    """ Set text to widget """
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
 
-    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser):
-        if str(text) == 'None':
-            text = ""
-        widget.setText(f"{text}")
-    elif type(widget) is QPlainTextEdit:
-        if str(text) == 'None':
-            text = ""
-        widget.insertPlainText(f"{text}")
-    elif type(widget) is QDoubleSpinBox or type(widget) is QSpinBox:
-        if text == 'None' or text == 'null':
-            text = 0
-        widget.setValue(float(text))
+    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser, QPlainTextEdit):
+        _set_text_for_text_widgets(widget, text)
+    elif type(widget) in (QDoubleSpinBox, QSpinBox):
+        _set_text_for_spinbox(widget, text)
     elif isinstance(widget, QComboBox):
         set_selected_item(dialog, widget, text)
     elif type(widget) is QTimeEdit:
@@ -557,7 +537,8 @@ def set_combo_value(combo, value, index, add_new=True):
     return False
 
 
-def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False, selected_id=None, index_to_compare=None):
+def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False,
+                      selected_id=None, index_to_compare=None):
     """
     Populate @combo with list @rows and show field @index_to_show
         :param combo: QComboBox widget to fill (QComboBox)
@@ -713,7 +694,7 @@ def get_col_index_by_col_name(qtable, column_name):
     model = qtable.model()
     columns_dict = qtable.property('columns')
     if not columns_dict:
-        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}
+        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}  # noqa: E501
         qtable.setProperty('columns', columns_dict)
     column_index = -1
     try:
@@ -741,7 +722,7 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
             if qtabwidget.widget(idx).objectName() == tab_name:
                 tab_index = idx
                 break
-    except Exception as e:
+    except Exception:
         tools_log.log_error("Tab not found.", parameter=tab_name)
 
     if tab_index == -1:
@@ -760,7 +741,7 @@ def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[
             if qtoolbox.widget(idx).objectName() == page_name:
                 page_index = idx
                 break
-    except Exception as e:
+    except Exception:
         tools_log.log_error("Page not found.", parameter=page_name)
 
     if page_index == -1:
@@ -1005,6 +986,7 @@ def get_folder_path(dialog, widget):
     if folder_path:
         set_widget_text(dialog, widget, str(folder_path))
 
+
 def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     """ Get file path """
     result = QFileDialog.getOpenFileName(None, title, subtitle, extension)
@@ -1014,12 +996,13 @@ def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     return None
 
 
-def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str="", default_path: str = "", file_name: str = "") -> str:
+def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
+                       default_path: str = "", file_name: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in(None, 'null', ''):
+    if file in (None, 'null', ''):
         if default_path != "":
             file = default_path
         else:
@@ -1039,12 +1022,13 @@ def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
     return file
 
 
-def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str ="", message: str="", default_path: str = "") -> str:
+def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
+                       default_path: str = "") -> str:
     """ Get file path """
 
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in(None, 'null', ''):
+    if file in (None, 'null', ''):
         if default_path != "":
             file = default_path
         else:
@@ -1064,7 +1048,7 @@ def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
     return file
 
 
-def get_open_files_path(message: str="", file_types: str = "") -> List[str]:
+def get_open_files_path(message: str = "", file_types: str = "") -> List[str]:
     """ Get file path """
 
     files_path, _ = QFileDialog.getOpenFileNames(None, tr(message), "", file_types)
@@ -1443,46 +1427,32 @@ def manage_translation(context_name, dialog=None, log_info=False, plugin_dir=Non
         _translate_form(dialog, context_name)
 
 
+def _should_show_exception(description):
+    """Helper function to determine if exception should be shown"""
+    if not description:
+        return True
+
+    dont_show_list = ['unknown error', 'server closed the connection unexpectedly',
+                      'message contents do not agree with length in message', 'unexpected field count in']
+    for dont_show in dont_show_list:
+        if dont_show in description:
+            return False
+    if 'server sent data' in description and 'without prior row description' in description:
+        return False
+    return True
+
+
 def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_increase=0, filepath=None,
                         schema_name=None):
     """ Manage exception in database queries and show information to the user """
 
-    show_exception_msg = True
-    description = ""
-    if exception:
-        description = str(exception)
-        dont_show_list = ['unknown error', 'server closed the connection unexpectedly',
-                          'message contents do not agree with length in message', 'unexpected field count in']
-        for dont_show in dont_show_list:
-            if dont_show in description:
-                show_exception_msg = False
-                break
-        if 'server sent data' in description and 'without prior row description' in description:
-            show_exception_msg = False
+    show_exception_msg = _should_show_exception(str(exception) if exception else "")
 
     try:
-
         stack_level += stack_level_increase
-        if stack_level >= len(inspect.stack()):
-            stack_level = len(inspect.stack()) - 1
-        module_path = inspect.stack()[stack_level][1]
-        file_name = tools_os.get_relative_path(module_path, 2)
-        function_line = inspect.stack()[stack_level][2]
-        function_name = inspect.stack()[stack_level][3]
+        file_name, function_line, function_name = _get_stack_info(stack_level)
 
-        # Set exception message details
-        msg = ""
-        msg += f"File name: {file_name}\n"
-        msg += f"Function name: {function_name}\n"
-        msg += f"Line number: {function_line}\n"
-        if exception:
-            msg += f"Description:\n{description}\n"
-        if filepath:
-            msg += f"SQL file:\n{filepath}\n\n"
-        if sql:
-            msg += f"SQL:\n {sql}\n\n"
-        msg += f"Schema name: {schema_name}"
-
+        msg = _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name)
         lib_vars.session_vars['last_error_msg'] = msg
 
         # Show exception message in dialog and log it
@@ -1570,46 +1540,22 @@ def set_table_model(dialog, table_object, table_name, expr_filter):
     """ Sets a TableModel to @widget_name attached to
         @table_name and filter @expr_filter
     """
-
-    expr = None
-    if expr_filter:
-        # Check expression
-        (is_valid, expr) = check_expression_filter(expr_filter)
-        if not is_valid:
-            return expr
-
-    if lib_vars.schema_name and lib_vars.schema_name not in table_name:
-        table_name = f"{lib_vars.schema_name}.{table_name}"
-
-    # Set a model with selected filter expression
-    model = QSqlTableModel(db=lib_vars.qgis_db_credentials)
-    model.setTable(table_name)
-    model.setEditStrategy(QSqlTableModel.OnManualSubmit)
-    model.select()
-    if model.lastError().isValid():
-        if 'Unable to find table' in model.lastError().text():
-            tools_db.reset_qsqldatabase_connection()
-        else:
-            tools_qgis.show_warning(model.lastError().text())
+    # Validate expression
+    is_valid, expr = _validate_expression(expr_filter)
+    if not is_valid:
         return expr
 
-    # Attach model to selected widget
-    if type(table_object) is str:
-        widget = get_widget(dialog, table_object)
-        if widget is None:
-            message = "Widget not found"
-            tools_log.log_info(message, parameter=table_object)
-            return expr
-    elif type(table_object) is QTableView:
-        widget = table_object
-    else:
-        msg = "Table_object is not a table name or QTableView"
-        tools_log.log_info(msg)
+    # Create and configure model
+    model = _create_table_model(table_name)
+    if model is None:
         return expr
 
-    if isdeleted(widget):
-        return
+    # Get widget
+    widget = _get_widget_from_table_object(dialog, table_object)
+    if widget is None or isdeleted(widget):
+        return expr
 
+    # Apply model and filter
     if expr_filter:
         widget.setModel(model)
         widget.model().setFilter(expr_filter)
@@ -1651,7 +1597,9 @@ def _add_translator(locale_path, log_info=False):
 def _translate_form(dialog, context_name, aux_context='ui_message'):
     """ Translate widgets of the form to current language """
 
-    type_widget_list = [QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QLineEdit, QTextEdit, QTabWidget, QToolBox]
+    type_widget_list = [
+        QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QLineEdit, QTextEdit, QTabWidget, QToolBox
+    ]
     for widget_type in type_widget_list:
         widget_list = dialog.findChildren(widget_type)
         for widget in widget_list:
@@ -1672,55 +1620,15 @@ def _translate_widget(context_name, widget, aux_context='ui_message'):
     widget_name = ""
     try:
         if type(widget) is QTabWidget:
-            num_tabs = widget.count()
-            for i in range(0, num_tabs):
-                widget_name = widget.widget(i).objectName()
-                text = tr(widget_name, context_name, aux_context)
-                if text not in (widget_name, None, 'None'):
-                    widget.setTabText(i, text)
-                else:
-                    widget_text = widget.tabText(i)
-                    text = tr(widget_text, context_name, aux_context)
-                    if text != widget_text:
-                        widget.setTabText(i, text)
-                _translate_tooltip(context_name, widget, i, aux_context=aux_context)
+            _translate_tab_widget(widget, context_name, aux_context)
         elif type(widget) is QToolBox:
-            num_tabs = widget.count()
-            for i in range(0, num_tabs):
-                widget_name = widget.widget(i).objectName()
-                text = tr(widget_name, context_name, aux_context)
-                if text not in (widget_name, None, 'None'):
-                    widget.setItemText(i, text)
-                else:
-                    widget_text = widget.itemText(i)
-                    text = tr(widget_text, context_name, aux_context)
-                    if text != widget_text:
-                        widget.setItemText(i, text)
-                _translate_tooltip(context_name, widget.widget(i), aux_context=aux_context)
+            _translate_tool_box(widget, context_name, aux_context)
         elif type(widget) is QGroupBox:
-            widget_name = widget.objectName()
-            text = tr(widget_name, context_name, aux_context)
-            if text not in (widget_name, None, 'None'):
-                widget.setTitle(text)
-            else:
-                widget_title = widget.title()
-                text = tr(widget_title, context_name, aux_context)
-                if text != widget_title:
-                    widget.setTitle(text)
-            _translate_tooltip(context_name, widget, aux_context=aux_context)
-        elif type(widget) is QLineEdit or type(widget) is QTextEdit:
+            _translate_group_box(widget, context_name, aux_context)
+        elif type(widget) in (QLineEdit, QTextEdit):
             _translate_tooltip(context_name, widget, aux_context=aux_context)
         else:
-            widget_name = widget.objectName()
-            text = tr(widget_name, context_name, aux_context)
-            if text not in (widget_name, None, 'None'):
-                widget.setText(text)
-            else:
-                widget_text = widget.text()
-                text = tr(widget_text, context_name, aux_context)
-                if text != widget_text:
-                    widget.setText(text)
-            _translate_tooltip(context_name, widget, aux_context=aux_context)
+            _translate_standard_widget(widget, context_name, aux_context)
 
     except Exception as e:
         tools_log.log_info(f"{widget_name} --> {type(e).__name__} --> {e}")
@@ -1760,6 +1668,196 @@ def _set_model_by_list(string_list, proxy_model):
     model.setStringList(string_list)
     proxy_model.setSourceModel(model)
     proxy_model.setFilterKeyColumn(0)
+
+
+def _validate_expression(expr_filter):
+    """Helper function to validate expression filter"""
+    expr = None
+    if expr_filter:
+        (is_valid, expr) = check_expression_filter(expr_filter)
+        if not is_valid:
+            return None, expr
+    return True, expr
+
+
+def _create_table_model(table_name):
+    """Helper function to create and configure table model"""
+    if lib_vars.schema_name and lib_vars.schema_name not in table_name:
+        table_name = f"{lib_vars.schema_name}.{table_name}"
+
+    model = QSqlTableModel(db=lib_vars.qgis_db_credentials)
+    model.setTable(table_name)
+    model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+    model.select()
+
+    if model.lastError().isValid():
+        if 'Unable to find table' in model.lastError().text():
+            tools_db.reset_qsqldatabase_connection()
+        else:
+            tools_qgis.show_warning(model.lastError().text())
+        return None
+    return model
+
+
+def _get_widget_from_table_object(dialog, table_object):
+    """Helper function to get widget from table object"""
+    if type(table_object) is str:
+        widget = get_widget(dialog, table_object)
+        if widget is None:
+            tools_log.log_info("Widget not found", parameter=table_object)
+            return None
+    elif type(table_object) is QTableView:
+        widget = table_object
+    else:
+        tools_log.log_info("Table_object is not a table name or QTableView")
+        return None
+    return widget
+
+
+def _translate_tab_widget(widget, context_name, aux_context):
+    """Helper function to translate QTabWidget"""
+    num_tabs = widget.count()
+    for i in range(0, num_tabs):
+        widget_name = widget.widget(i).objectName()
+        text = tr(widget_name, context_name, aux_context)
+        if text not in (widget_name, None, 'None'):
+            widget.setTabText(i, text)
+        else:
+            widget_text = widget.tabText(i)
+            text = tr(widget_text, context_name, aux_context)
+            if text != widget_text:
+                widget.setTabText(i, text)
+        _translate_tooltip(context_name, widget, i, aux_context=aux_context)
+
+
+def _translate_tool_box(widget, context_name, aux_context):
+    """Helper function to translate QToolBox"""
+    num_tabs = widget.count()
+    for i in range(0, num_tabs):
+        widget_name = widget.widget(i).objectName()
+        text = tr(widget_name, context_name, aux_context)
+        if text not in (widget_name, None, 'None'):
+            widget.setItemText(i, text)
+        else:
+            widget_text = widget.itemText(i)
+            text = tr(widget_text, context_name, aux_context)
+            if text != widget_text:
+                widget.setItemText(i, text)
+        _translate_tooltip(context_name, widget.widget(i), aux_context=aux_context)
+
+
+def _translate_group_box(widget, context_name, aux_context):
+    """Helper function to translate QGroupBox"""
+    widget_name = widget.objectName()
+    text = tr(widget_name, context_name, aux_context)
+    if text not in (widget_name, None, 'None'):
+        widget.setTitle(text)
+    else:
+        widget_title = widget.title()
+        text = tr(widget_title, context_name, aux_context)
+        if text != widget_title:
+            widget.setTitle(text)
+    _translate_tooltip(context_name, widget, aux_context=aux_context)
+
+
+def _translate_standard_widget(widget, context_name, aux_context):
+    """Helper function to translate standard widgets"""
+    widget_name = widget.objectName()
+    text = tr(widget_name, context_name, aux_context)
+    if text not in (widget_name, None, 'None'):
+        widget.setText(text)
+    else:
+        widget_text = widget.text()
+        text = tr(widget_text, context_name, aux_context)
+        if text != widget_text:
+            widget.setText(text)
+    _translate_tooltip(context_name, widget, aux_context=aux_context)
+
+
+def _get_text_from_line_edit(widget):
+    """Helper function to get text from QLineEdit and similar widgets"""
+    return widget.text()
+
+
+def _get_text_from_spinbox(widget):
+    """Helper function to get text from QDoubleSpinBox and QSpinBox"""
+    # When the QDoubleSpinbox contains decimals, for example 2,0001 when collecting the value,
+    # the spinbox itself sends 2.0000999999, as in reality we only want, maximum 4 decimal places, we round up,
+    # thus fixing this small failure of the widget
+    return round(widget.value(), 4)
+
+
+def _get_text_from_text_edit(widget):
+    """Helper function to get text from QTextEdit and QPlainTextEdit"""
+    return widget.toPlainText()
+
+
+def _get_text_from_combo(widget):
+    """Helper function to get text from QComboBox"""
+    return widget.currentText()
+
+
+def _get_text_from_checkbox(dialog, widget):
+    """Helper function to get text from QCheckBox"""
+    value = is_checked(dialog, widget)
+    if type(value) is bool:
+        return str(value)
+    return None
+
+
+def _handle_null_text(text, add_quote, return_string_null):
+    """Helper function to handle null/empty text cases"""
+    if text in (None, '') and return_string_null:
+        text = "null"
+    elif text in (None, ''):
+        text = ""
+    if add_quote and text != "null":
+        text = "'" + text + "'"
+    return text
+
+
+def _set_text_for_text_widgets(widget, text):
+    """Helper function to set text for text-based widgets"""
+    if str(text) == 'None':
+        text = ""
+    if type(widget) is QPlainTextEdit:
+        widget.insertPlainText(f"{text}")
+    else:
+        widget.setText(f"{text}")
+
+
+def _set_text_for_spinbox(widget, text):
+    """Helper function to set text for spinbox widgets"""
+    if text == 'None' or text == 'null':
+        text = 0
+    widget.setValue(float(text))
+
+
+def _get_stack_info(stack_level):
+    """Helper function to get stack information"""
+    if stack_level >= len(inspect.stack()):
+        stack_level = len(inspect.stack()) - 1
+    module_path = inspect.stack()[stack_level][1]
+    file_name = tools_os.get_relative_path(module_path, 2)
+    function_line = inspect.stack()[stack_level][2]
+    function_name = inspect.stack()[stack_level][3]
+    return file_name, function_line, function_name
+
+
+def _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name):
+    """Helper function to build exception message"""
+    msg = ""
+    msg += f"File name: {file_name}\n"
+    msg += f"Function name: {function_name}\n"
+    msg += f"Line number: {function_line}\n"
+    if exception:
+        msg += f"Description:\n{str(exception)}\n"
+    if filepath:
+        msg += f"SQL file:\n{filepath}\n\n"
+    if sql:
+        msg += f"SQL:\n {sql}\n\n"
+    msg += f"Schema name: {schema_name}"
+    return msg
 
 
 # endregion
