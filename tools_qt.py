@@ -1536,7 +1536,7 @@ def fill_combo_unicodes(combo):
     fill_combo_values(combo, unicode_list)
 
 
-def set_table_model(dialog, table_object, table_name, expr_filter):
+def set_table_model(dialog, table_object, table_name, expr_filter, columns_to_show: List[str] = list()):
     """ Sets a TableModel to @widget_name attached to
         @table_name and filter @expr_filter
     """
@@ -1562,6 +1562,12 @@ def set_table_model(dialog, table_object, table_name, expr_filter):
         widget.model().select()
     else:
         widget.setModel(None)
+
+    # Hide columns that are not in the list of columns to show
+    if columns_to_show:
+        for i in range(model.columnCount()):
+            if model.headerData(i, Qt.Horizontal) not in columns_to_show:
+                widget.hideColumn(i)
 
     return expr
 
