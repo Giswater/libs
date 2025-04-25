@@ -1699,15 +1699,18 @@ def _create_table_model(table_name):
     return model
 
 
-def _get_widget_from_table_object(dialog, table_object):
+def _get_widget_from_table_object(dialog, table_object: Union[str, QTableView]) -> Optional[QTableView]:
     """Helper function to get widget from table object"""
     if type(table_object) is str:
         widget = get_widget(dialog, table_object)
         if widget is None:
             tools_log.log_info("Widget not found", parameter=table_object)
             return None
+        if type(widget) is not QTableView:
+            tools_log.log_info("Widget is not a QTableView", parameter=table_object)
+            return None
     elif type(table_object) is QTableView:
-        widget = table_object
+        widget: QTableView = table_object
     else:
         tools_log.log_info("Table_object is not a table name or QTableView")
         return None
