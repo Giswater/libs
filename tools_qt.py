@@ -1181,7 +1181,7 @@ def document_open(qtable, field_name):
         webbrowser.open(path)
 
 
-def delete_rows_tableview(qtable):
+def delete_rows_tableview(qtable: QTableView):
     """ Delete record from selected rows in a QTableView """
 
     # Get selected rows. 0 is the column of the pk 0 'id'
@@ -1199,18 +1199,10 @@ def delete_rows_tableview(qtable):
     title = "Delete records"
     answer = show_question(message, title, ','.join(selected_id))
     if answer:
-        # Get current editStrategy
-        edit_strategy = qtable.model().editStrategy()
-
-        qtable.model().setEditStrategy(QSqlTableModel.OnManualSubmit)
         for model_index in qtable.selectionModel().selectedRows():
             index = QPersistentModelIndex(model_index)
             qtable.model().removeRow(index.row())
-        status = qtable.model().submitAll()
-        qtable.model().select()
-
-        # Return original editStrategy
-        qtable.model().setEditStrategy(edit_strategy)
+        status = qtable.model().submit()
 
         if not status:
             error = qtable.model().lastError().text()
@@ -1219,7 +1211,6 @@ def delete_rows_tableview(qtable):
         else:
             msg = "Record deleted"
             tools_qgis.show_info(msg)
-            qtable.model().select()
 
 
 def reset_model(dialog, table_object, feature_type):
