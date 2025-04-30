@@ -20,7 +20,8 @@ from sip import isdeleted
 from pathlib import Path
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, \
     pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
-from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator, QStandardItem, QStandardItemModel
+from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator, \
+    QStandardItem, QStandardItemModel
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
@@ -768,6 +769,7 @@ def onCellChanged(table, row, column):
                     return
         table.setRowCount(table.rowCount() - 1)
 
+
 def set_completer_object(
     completer: QCompleter,
     model: Union[QStandardItemModel, QStringListModel],
@@ -775,9 +777,11 @@ def set_completer_object(
     list_items: Union[List[str], List[Dict[str, Any]]],
     max_visible: int = 10
 ) -> None:
-    """ Set autocomplete of widget @table_object + "_id"
-        getting id's from selected @table_object.
-        WARNING: Each QLineEdit needs their own QCompleter and their own QStringListModel!!!
+    """Attach a QCompleter to a QLineEdit using the provided model and list_items.
+
+    Each QLineEdit must have its own QCompleter and QStringListModel/QStandardItemModel instance.
+    This function is typically used to provide autocomplete for fields like <table_object>_id,
+    where the completion list is derived from the selected table_object.
     """
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.setMaxVisibleItems(max_visible)
@@ -794,6 +798,7 @@ def set_completer_object(
 
     completer.setModel(model)
     widget.setCompleter(completer)
+
 
 def set_action_checked(action, enabled, dialog=None):
 
