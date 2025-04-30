@@ -20,7 +20,7 @@ from sip import isdeleted
 from pathlib import Path
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, \
     pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
-from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator
+from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator, QStandardItem, QStandardItemModel
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
@@ -768,20 +768,32 @@ def onCellChanged(table, row, column):
                     return
         table.setRowCount(table.rowCount() - 1)
 
-
-def set_completer_object(completer, model, widget, list_items, max_visible=10):
+def set_completer_object(
+    completer: QCompleter,
+    model: Union[QStandardItemModel, QStringListModel],
+    widget: QLineEdit,
+    list_items: Union[List[str], List[Dict[str, Any]]],
+    max_visible: int = 10
+) -> None:
     """ Set autocomplete of widget @table_object + "_id"
         getting id's from selected @table_object.
         WARNING: Each QLineEdit needs their own QCompleter and their own QStringListModel!!!
     """
-    # Set completer and model: add autocomplete in the widget
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.setMaxVisibleItems(max_visible)
-    widget.setCompleter(completer)
     completer.setCompletionMode(1)
-    model.setStringList(list_items)
-    completer.setModel(model)
 
+    if isinstance(model, QStandardItemModel):
+        data = {item['id']: item['idval'] for item in list_items}  # type: ignore
+        for _, value in data.items():
+            item = QStandardItem(value)
+            item.setData(value)
+            model.appendRow(item)
+    elif isinstance(model, QStringListModel):
+        model.setStringList(list_items)  # type: ignore
+
+    completer.setModel(model)
+    widget.setCompleter(completer)
 
 def set_action_checked(action, enabled, dialog=None):
 
