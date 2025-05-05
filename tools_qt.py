@@ -785,19 +785,45 @@ def set_completer_object(
     """
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.setMaxVisibleItems(max_visible)
-    completer.setCompletionMode(1)
+    completer.setCompletionMode(QCompleter.PopupCompletion)
 
     if isinstance(model, QStandardItemModel):
-        data = {item['id']: item['idval'] for item in list_items}  # type: ignore
-        for _, value in data.items():
-            item = QStandardItem(value)
-            item.setData(value)
+        seen = set()
+        model.clear()
+
+        for item_dict in list_items:
+            idval = str(item_dict['idval'])
+            if idval in seen:
+                continue  # skip duplicates
+            seen.add(idval)
+
+            idkey = item_dict['id']
+            item = QStandardItem(idval)
+            item.setData(idkey, Qt.UserRole)
             model.appendRow(item)
+
     elif isinstance(model, QStringListModel):
-        model.setStringList(list_items)  # type: ignore
+        model.setStringList(list_items)  # Not recommended for idval/id cases
 
     completer.setModel(model)
     widget.setCompleter(completer)
+
+    # --- Store the selected ID on completion ---
+    def on_completion(text: str):
+        for row in range(model.rowCount()):
+            item = model.item(row)
+            if item.text() == text:
+                selected_id = item.data(Qt.UserRole)
+                widget.setProperty("selected_id", selected_id)  # store the ID
+                break
+
+    completer.activated[str].connect(on_completion)
+
+    # Optional: clear selected_id if user changes the text manually
+    def on_text_changed(text: str):
+        widget.setProperty("selected_id", None)
+
+    widget.textEdited.connect(on_text_changed)
 
 
 def set_action_checked(action, enabled, dialog=None):
