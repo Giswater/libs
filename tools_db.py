@@ -341,7 +341,8 @@ def reset_qsqldatabase_connection(dialog=iface):
     pwd = lib_vars.last_db_credentials['pwd']
     QSqlDatabase.removeDatabase(lib_vars.plugin_name)
     create_qsqldatabase_connection(host, port, db, user, pwd)
-    tools_qgis.show_warning("Database connection reset, please try again", dialog=dialog)
+    msg = "Database connection reset, please try again"
+    tools_qgis.show_warning(msg, dialog=dialog)
 
 
 def fill_table_by_query(qtable, query):

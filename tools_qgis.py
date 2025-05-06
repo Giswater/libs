@@ -61,7 +61,7 @@ def get_feature_by_expr(layer, expr_filter):
 
 
 def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
-                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None):
+                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None, title_params=None):
     """
     Show message to the user with selected message level
         :param text: The text to be shown (String)
@@ -85,9 +85,13 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
             duration = int(dev_duration)
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'])
+        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'], list_params=msg_params)
         if parameter:
             msg += f": {parameter}"
+
+    tlt = ""
+    if title:
+        tlt = tools_qt.tr(title, context_name, user_parameters['aux_context'], list_params=title_params) if title else ""
 
     # Show message
     try:
@@ -96,10 +100,10 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
             show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300),
                                   "Show more", message_level, duration, context_name, logger_file, dialog)
         else:
-            dialog.messageBar().pushMessage(title, msg, message_level, duration)
+            dialog.messageBar().pushMessage(tlt, msg, message_level, duration)
     except Exception as e:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
         print("Exception show_message: ", e)
-        iface.messageBar().pushMessage(title, msg, message_level, duration)
+        iface.messageBar().pushMessage(tlt, msg, message_level, duration)
 
     # Check if logger to file
     if lib_vars.logger and logger_file:
@@ -149,7 +153,8 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
 
 
 def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO,
-                          duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True, dialog=iface):
+                          duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True, dialog=iface,
+                          text_params=None):
     """
     Show message to the user with selected message level and a button to open the url
         :param text: The text to be shown (String)
@@ -173,7 +178,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
             duration = int(dev_duration)
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'])
+        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'], list_params=text_params)
 
     # Create the message with the button
     widget = iface.messageBar().createMessage(f"{msg}")
@@ -191,7 +196,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
 
 
 def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-              title="", dialog=iface):
+              title="", dialog=iface, msg_params=None, title_params=None):
     """
     Show information message to the user
         :param text: The text to be shown (String)
@@ -201,11 +206,12 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", 
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
 
-    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog, 
+                 msg_params=msg_params, title_params=title_params)
 
 
 def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                 title="", dialog=iface):
+                 title="", dialog=iface, msg_params=None, title_params=None):
     """
     Show warning message to the user
         :param text: The text to be shown (String)
@@ -215,11 +221,12 @@ def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
 
-    show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog,
+                 msg_params=msg_params, title_params=title_params)
 
 
 def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                  title="", dialog=iface):
+                  title="", dialog=iface, msg_params=None, title_params=None):
     """
     Show critical message to the user
         :param text: The text to be shown (String)
@@ -229,11 +236,12 @@ def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswate
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
 
-    show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog,
+                 msg_params=msg_params, title_params=title_params)
 
 
 def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                 title="", dialog=iface):
+                 title="", dialog=iface, msg_params=None, title_params=None):
     """
     Show success message to the user
         :param text: The text to be shown (String)
@@ -243,10 +251,11 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
 
-    show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog)
+    show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog,
+                 msg_params=msg_params, title_params=title_params)
 
 
-def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200):
+def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200, context_name='giswater'):
     """
     Displays a dialog with the SQL context in a more detailed, error-specific format,
     allowing the user to copy the error message.
@@ -259,22 +268,28 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     """
 
     dialog = QDialog()
-    dialog.setWindowTitle(title or "SQL Context")
+
+    # Title translation
+    translated_title = tools_qt.tr(title or "SQL Context", context_name, user_parameters['aux_context'])
+    dialog.setWindowTitle(translated_title)
 
     dialog.setMinimumWidth(min_width)
     dialog.setMinimumHeight(min_height)
 
     layout = QVBoxLayout()
 
-    # Construct the full message
+    # Full message construction
+    message = "SQL Context"
+    sqlcontext_label = tools_qt.tr(message, context_name, user_parameters['aux_context'])
     if msg and sqlcontext:
-        full_message = f"{msg}\n\nSQL context:\n{sqlcontext}"
+        full_message = f"{msg}\n\n{sqlcontext_label}:\n{sqlcontext}"
     elif msg:
         full_message = msg
     elif sqlcontext:
-        full_message = f"SQL context:\n{sqlcontext}"
+        full_message = f"{sqlcontext_label}:\n{sqlcontext}"
     else:
-        full_message = "No SQL context available."
+        message = "No SQL context available."
+        full_message = tools_qt.tr(message, context_name, user_parameters['aux_context'])
 
     # Add the message text area to allow copying
     text_area = QTextEdit()

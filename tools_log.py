@@ -165,37 +165,37 @@ def set_logger(logger_name, min_log_level=20):
 
 
 def log_debug(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
-              tab_name=None):
+              tab_name=None, msg_params=None):
     """ Write debug message into QGIS Log Messages Panel """
 
-    msg = _qgis_log_message(text, 0, context_name, parameter, tab_name)
+    msg = _qgis_log_message(text, 0, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.debug(msg, stack_level_increase=stack_level_increase)
 
 
 def log_info(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
-             tab_name=None):
+             tab_name=None, msg_params=None):
     """ Write information message into QGIS Log Messages Panel """
 
-    msg = _qgis_log_message(text, 0, context_name, parameter, tab_name)
+    msg = _qgis_log_message(text, 0, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.info(msg, stack_level_increase=stack_level_increase)
 
 
 def log_warning(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
-                tab_name=None):
+                tab_name=None, msg_params=None):
     """ Write warning message into QGIS Log Messages Panel """
 
-    msg = _qgis_log_message(text, 1, context_name, parameter, tab_name)
+    msg = _qgis_log_message(text, 1, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.warning(msg, stack_level_increase=stack_level_increase)
 
 
 def log_error(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
-              tab_name=None):
+              tab_name=None, msg_params=None):
     """ Write error message into QGIS Log Messages Panel """
 
-    msg = _qgis_log_message(text, 2, context_name, parameter, tab_name)
+    msg = _qgis_log_message(text, 2, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.error(msg, stack_level_increase=stack_level_increase)
 
@@ -223,7 +223,7 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
         lib_vars.logger.info(text, stack_level_increase=stack_level_increase)
 
 
-def _qgis_log_message(text=None, message_level=0, context_name="giswater", parameter=None, tab_name=None):
+def _qgis_log_message(text=None, message_level=0, context_name="giswater", parameter=None, tab_name=None, msg_params=None):
     """
     Write message into QGIS Log Messages Panel with selected message level
         :param message_level: {INFO = 0, WARNING = 1, CRITICAL = 2, SUCCESS = 3, NONE = 4}
@@ -231,7 +231,7 @@ def _qgis_log_message(text=None, message_level=0, context_name="giswater", param
 
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name)
+        msg = tools_qt.tr(text, context_name, list_params=msg_params)
         if parameter:
             msg += f": {parameter}"
 

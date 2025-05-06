@@ -972,7 +972,8 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
         if 'Unable to find table' in model.lastError().text():
             tools_db.reset_qsqldatabase_connection()
         else:
-            tools_qgis.show_warning(f"fill_table: {model.lastError().text()}")
+            msg = "fill_table"
+            tools_qgis.show_warning(msg, parameter=model.lastError().text())
 
     # Attach model to tableview
     qtable.setModel(model)
@@ -1198,18 +1199,18 @@ def set_status(qtable, combo, pos_x, combo_pos, col_update):
 def document_open(qtable, field_name):
     """ Open selected document """
 
-    message = None
+    msg = None
 
     # Get selected rows
     field_index = qtable.model().fieldIndex(field_name)
     selected_list = qtable.selectionModel().selectedRows(field_index)
     if not selected_list:
-        message = "Any record selected"
+        msg = "Any record selected"
     elif len(selected_list) > 1:
-        message = "More then one document selected. Select just one document."
+        msg = "More then one document selected. Select just one document."
 
-    if message:
-        tools_qgis.show_warning(message)
+    if msg:
+        tools_qgis.show_warning(msg)
         return
     path = selected_list[0].data()
     # Check if file exist
@@ -1249,8 +1250,8 @@ def delete_rows_tableview(qtable: QTableView):
 
         if not status:
             error = qtable.model().lastError().text()
-            message = "Error deleting data"
-            tools_qgis.show_warning(message, parameter=error)
+            msg = "Error deleting data"
+            tools_qgis.show_warning(msg, parameter=error)
         else:
             msg = "Record deleted"
             tools_qgis.show_info(msg)
@@ -1310,7 +1311,8 @@ def show_warning_open_file(text, inf_text, file_path, context_name="giswater"):
     iface.messageBar().pushWidget(widget, 1)
 
 
-def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False):
+def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False, 
+                  msg_params=None, title_params=None):
     """ Ask question to the user """
 
     # Expert mode does not ask and accept all actions
@@ -1319,15 +1321,17 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
             return True
 
     msg_box = QMessageBox()
-    msg = tr(text, context_name)
+    msg = tr(text, context_name, list_params=msg_params)
     if parameter:
         msg += ": " + str(parameter)
     if len(msg) > 750:
         msg = msg[:750] + "\n[...]"
     msg_box.setText(msg)
+
     if title:
-        title = tr(title, context_name)
+        title = tr(title, context_name, list_params=title_params)
         msg_box.setWindowTitle(title)
+
     if inf_text:
         inf_text = tr(inf_text, context_name)
         if len(inf_text) > 500:
@@ -1353,12 +1357,12 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
         return False
 
 
-def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None):
+def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None, msg_params=None, title_params=None):
     """ Show information box to the user """
 
     msg = ""
     if text:
-        msg = tr(text, context_name)
+        msg = tr(text, context_name, list_params=msg_params)
         if parameter:
             msg += ": " + str(parameter)
 
@@ -1368,7 +1372,7 @@ def show_info_box(text, title=None, inf_text=None, context_name="giswater", para
     msg_box.setText(msg)
     msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
     if title:
-        title = tr(title, context_name)
+        title = tr(title, context_name, list_params=title_params)
         msg_box.setWindowTitle(title)
     if inf_text:
         inf_text = tr(inf_text, context_name)
@@ -1409,7 +1413,7 @@ def set_stylesheet(widget, style="border: 2px solid red"):
     widget.setStyleSheet(style)
 
 
-def tr(message, context_name="giswater", aux_context='ui_message', default=None):
+def tr(message, context_name="giswater", aux_context='ui_message', default=None, list_params=None):
     """ Translate @message looking it in @context_name """
 
     if context_name is None:
@@ -1426,6 +1430,14 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None)
             value = QCoreApplication.translate(aux_context, message)
         if default is not None and value == message:
             value = default
+
+    # Format the value with named or positional parameters
+    if list_params:
+        try:
+            value = value.format(*list_params)
+        except (IndexError, KeyError):
+            # Optional: Log this or ignore formatting failure
+            pass
 
     return value
 
@@ -1501,7 +1513,8 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
         manage_exception("Unhandled Error")
 
 
-def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None):
+def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
+                           context_name='giswater', title_params=None):
     """ Show exception message in dialog """
 
     # Show dialog only if we are not in a task process
@@ -1513,6 +1526,7 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     dlg_info.btn_close.clicked.connect(lambda: dlg_info.close())
     dlg_info.setWindowTitle(window_title)
     if title:
+        title = tr(title, context_name, list_params=title_params)
         dlg_info.lbl_text.setText(title)
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
     dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
