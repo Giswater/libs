@@ -223,7 +223,8 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
         lib_vars.logger.info(text, stack_level_increase=stack_level_increase)
 
 
-def _qgis_log_message(text=None, message_level=0, context_name="giswater", parameter=None, tab_name=None, msg_params=None):
+def _qgis_log_message(text=None, message_level=0, context_name="giswater", parameter=None, tab_name=None, 
+                      msg_params=None):
     """
     Write message into QGIS Log Messages Panel with selected message level
         :param message_level: {INFO = 0, WARNING = 1, CRITICAL = 2, SUCCESS = 3, NONE = 4}

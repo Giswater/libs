@@ -1357,7 +1357,8 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
         return False
 
 
-def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None, msg_params=None, title_params=None):
+def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None, 
+                  msg_params=None, title_params=None):
     """ Show information box to the user """
 
     msg = ""

@@ -61,7 +61,8 @@ def get_feature_by_expr(layer, expr_filter):
 
 
 def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
-                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None, title_params=None):
+                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None, 
+                 title_params=None):
     """
     Show message to the user with selected message level
         :param text: The text to be shown (String)
@@ -89,9 +90,7 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
         if parameter:
             msg += f": {parameter}"
 
-    tlt = ""
-    if title:
-        tlt = tools_qt.tr(title, context_name, user_parameters['aux_context'], list_params=title_params) if title else ""
+    tlt = tools_qt.tr(title, context_name, user_parameters['aux_context'], list_params=title_params) if title else ""
 
     # Show message
     try:
@@ -255,7 +254,8 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
                  msg_params=msg_params, title_params=title_params)
 
 
-def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200, context_name='giswater'):
+def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200, 
+                           context_name='giswater'):
     """
     Displays a dialog with the SQL context in a more detailed, error-specific format,
     allowing the user to copy the error message.
