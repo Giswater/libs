@@ -801,6 +801,8 @@ def set_completer_object(
             item = QStandardItem(idval)
             item.setData(idkey, Qt.UserRole)
             model.appendRow(item)
+        
+        completer.activated[str].connect(on_completion)
 
     elif isinstance(model, QStringListModel):
         model.setStringList(list_items)  # Not recommended for idval/id cases
@@ -816,8 +818,6 @@ def set_completer_object(
                 selected_id = item.data(Qt.UserRole)
                 widget.setProperty("selected_id", selected_id)  # store the ID
                 break
-
-    completer.activated[str].connect(on_completion)
 
     # Optional: clear selected_id if user changes the text manually
     def on_text_changed(text: str):
