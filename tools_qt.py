@@ -787,6 +787,19 @@ def set_completer_object(
     completer.setMaxVisibleItems(max_visible)
     completer.setCompletionMode(QCompleter.PopupCompletion)
 
+    # --- Store the selected ID on completion ---
+    def on_completion(text: str):
+        for row in range(model.rowCount()):
+            item = model.item(row)
+            if item.text() == text:
+                selected_id = item.data(Qt.UserRole)
+                widget.setProperty("selected_id", selected_id)  # store the ID
+                break
+
+    # Optional: clear selected_id if user changes the text manually
+    def on_text_changed(text: str):
+        widget.setProperty("selected_id", None)
+
     if isinstance(model, QStandardItemModel):
         seen = set()
         model.clear()
@@ -809,19 +822,6 @@ def set_completer_object(
 
     completer.setModel(model)
     widget.setCompleter(completer)
-
-    # --- Store the selected ID on completion ---
-    def on_completion(text: str):
-        for row in range(model.rowCount()):
-            item = model.item(row)
-            if item.text() == text:
-                selected_id = item.data(Qt.UserRole)
-                widget.setProperty("selected_id", selected_id)  # store the ID
-                break
-
-    # Optional: clear selected_id if user changes the text manually
-    def on_text_changed(text: str):
-        widget.setProperty("selected_id", None)
 
     widget.textEdited.connect(on_text_changed)
 
