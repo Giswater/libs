@@ -162,7 +162,7 @@ def manage_pg_service(section):
                              for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
 
     if all(invalid_service_files.values()):
-        tools_log.log_warning(f"Files defined in environment variables 'PGSERVICEFILE' and 'PGSYSCONFDIR' not found.")
+        tools_log.log_warning("Files defined in environment variables 'PGSERVICEFILE' and 'PGSYSCONFDIR' not found.")
         return credentials
 
     credentials = get_credentials_from_config(section, pgservice_file)
