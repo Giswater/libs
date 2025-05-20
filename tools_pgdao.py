@@ -139,9 +139,13 @@ class GwPgDao(object):
         self.last_error = None
         rows = None
         try:
-            cursor = self.get_cursor(aux_conn)
-            cursor.execute(sql)
-            rows = cursor.fetchall()
+            if aux_conn is not None:
+                cursor = self.get_cursor(aux_conn)
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+            else:
+                self.cursor_execute(sql)
+                rows = self.cursor.fetchall()
             if commit:
                 self.commit(aux_conn)
         except Exception as e:
