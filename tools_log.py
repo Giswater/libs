@@ -47,7 +47,8 @@ class GwLogger(object):
             filepath += "_" + tstamp
         filepath += ".log"
 
-        log_info(f"Log file: {filepath}", logger_file=False, tab_name=self.tab_python)
+        msg = "Log file"
+        log_info(msg, parameter=filepath, logger_file=False, tab_name=self.tab_python)
         if remove_previous and os.path.exists(filepath):
             os.remove(filepath)
         self.filepath = filepath
@@ -151,7 +152,9 @@ class GwLogger(object):
             self.logger_file.log(log_level, text)
 
         except Exception as e:
-            log_warning(f"Error logging: {e}", logger_file=False)
+            msg = "Error logging"
+            param = str(e)
+            log_warning(msg, parameter=param, logger_file=False)
 
 
 def set_logger(logger_name, min_log_level=20):

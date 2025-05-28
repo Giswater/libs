@@ -253,7 +253,7 @@ def set_time(dialog, widget, time):
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if widget is None:
+    if not widget:
         return
     if type(widget) is QTimeEdit:
         if time is None:
@@ -338,7 +338,7 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
     return _handle_null_text(text, add_quote, return_string_null)
 
 
-def set_widget_text(dialog, widget, text):
+def set_widget_text(dialog, widget, text, msg_params=None):
     """ Set text to widget """
 
     if type(widget) is str:
@@ -347,7 +347,7 @@ def set_widget_text(dialog, widget, text):
         return
 
     if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser, QPlainTextEdit):
-        _set_text_for_text_widgets(widget, text)
+        _set_text_for_text_widgets(widget, text, msg_params)
     elif type(widget) in (QDoubleSpinBox, QSpinBox):
         _set_text_for_spinbox(widget, text)
     elif isinstance(widget, QComboBox):
@@ -385,7 +385,7 @@ def set_checked(dialog, widget, checked=True):
 
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
-    if widget is None:
+    if not widget:
         return
     if type(widget) is QCheckBox or type(widget) is QRadioButton:
         widget.setChecked(bool(checked))
@@ -972,7 +972,7 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
         if 'Unable to find table' in model.lastError().text():
             tools_db.reset_qsqldatabase_connection()
         else:
-            msg = "fill_table"
+            msg = "Fill table"
             tools_qgis.show_warning(msg, parameter=model.lastError().text())
 
     # Attach model to tableview
@@ -1281,15 +1281,17 @@ def get_feature_by_id(layer, id, field_id=None):
     return False
 
 
-def show_details(detail_text, title=None, inf_text=None):
+def show_details(detail_text, title=None, inf_text=None, text_params=None, title_params=None):
     """ Shows a message box with detail information """
 
     iface.messageBar().clearWidgets()
     msg_box = QMessageBox()
     msg_box.setIcon(QMessageBox.Information)
-    msg_box.setText(detail_text)
+    if detail_text:
+        detail_text = tr(detail_text, list_params=text_params)
+        msg_box.setText(detail_text)
     if title:
-        title = tr(title)
+        title = tr(title, list_params=title_params)
         msg_box.setWindowTitle(title)
     if inf_text:
         inf_text = tr(inf_text)
@@ -1300,10 +1302,10 @@ def show_details(detail_text, title=None, inf_text=None):
     msg_box.exec_()
 
 
-def show_warning_open_file(text, inf_text, file_path, context_name="giswater"):
+def show_warning_open_file(text, inf_text, file_path, context_name="giswater", text_params=None):
     """ Show warning message with a button to open @file_path """
 
-    widget = iface.messageBar().createMessage(tr(text, context_name), tr(inf_text))
+    widget = iface.messageBar().createMessage(tr(text, context_name, list_params=text_params), tr(inf_text))
     button = QPushButton(widget)
     button.setText(tr("Open file"))
     button.clicked.connect(partial(tools_os.open_file, file_path))
@@ -1437,7 +1439,6 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
         try:
             value = value.format(*list_params)
         except (IndexError, KeyError):
-            # Optional: Log this or ignore formatting failure
             pass
 
     return value
@@ -1515,7 +1516,7 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
 
 
 def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
-                           context_name='giswater', title_params=None):
+                           context_name='giswater', title_params=None, msg_params=None):
     """ Show exception message in dialog """
 
     # Show dialog only if we are not in a task process
@@ -1525,10 +1526,12 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     lib_vars.session_vars['last_error_msg'] = None
     dlg_info.btn_accept.setVisible(False)
     dlg_info.btn_close.clicked.connect(lambda: dlg_info.close())
-    dlg_info.setWindowTitle(window_title)
+    dlg_info.setWindowTitle(tr(window_title))
     if title:
         title = tr(title, context_name, list_params=title_params)
         dlg_info.lbl_text.setText(title)
+    if msg:
+        msg = tr(msg, context_name, list_params=msg_params)
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
     dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
     if pattern is None:
@@ -1550,15 +1553,19 @@ def manage_exception(title=None, description=None, sql=None, schema_name=None):
 
     # Set exception message details
     msg = ""
-    msg += f"Error type: {exc_type}\n"
-    msg += f"File name: {file_name}\n"
-    msg += f"Line number: {exc_tb.tb_lineno}\n"
+    msg += f"{tr("Error type")}: {exc_type}\n"
+    msg += f"{tr("File name")}: {file_name}\n"
+    msg += f"{tr("Line number")}: {exc_tb.tb_lineno}\n"
     msg += f"{trace}\n"
     if description:
-        msg += f"Description: {description}\n"
+        msg += f"{tr("Description")}: {description}\n"
     if sql:
-        msg += f"SQL:\n {sql}\n\n"
-    msg += f"Schema name: {schema_name}"
+        msg += f"{tr("SQL")}:\n {sql}\n\n"
+    msg += f"{tr("Schema name")}: {schema_name}"
+
+    # Translate title if exist
+    if title:
+        title = tr(title)
 
     # Show exception message in dialog and log it
     show_exception_message(title, msg)
@@ -1874,10 +1881,12 @@ def _handle_null_text(text, add_quote, return_string_null):
     return text
 
 
-def _set_text_for_text_widgets(widget, text):
+def _set_text_for_text_widgets(widget, text, msg_params=None):
     """Helper function to set text for text-based widgets"""
     if str(text) == 'None':
         text = ""
+    else:
+        text = tr(f"{text}", list_params=msg_params)
     if type(widget) is QPlainTextEdit:
         widget.insertPlainText(f"{text}")
     else:
@@ -1904,17 +1913,19 @@ def _get_stack_info(stack_level):
 
 def _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name):
     """Helper function to build exception message"""
+        # Set exception message details
     msg = ""
-    msg += f"File name: {file_name}\n"
-    msg += f"Function name: {function_name}\n"
-    msg += f"Line number: {function_line}\n"
+    msg += f"{tr("File name")}: {file_name}\n"
+    msg += f"{tr("Function name")}: {function_name}\n"
+    msg += f"{tr("Line number")}: {function_line}\n"
     if exception:
-        msg += f"Description:\n{str(exception)}\n"
+        msg += f"{tr("Description")}:\n{str(exception)}\n"
     if filepath:
-        msg += f"SQL file:\n{filepath}\n\n"
+        msg += f"{tr("SQL File")}:\n{filepath}\n\n"
     if sql:
-        msg += f"SQL:\n {sql}\n\n"
-    msg += f"Schema name: {schema_name}"
+        msg += f"{tr("SQL")}:\n {sql}\n\n"
+    msg += f"{tr("Schema name")}: {schema_name}"
+
     return msg
 
 
