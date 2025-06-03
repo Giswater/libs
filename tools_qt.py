@@ -1512,7 +1512,8 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
         tools_log.log_warning(msg, stack_level_increase=2)
 
     except Exception:
-        manage_exception("Unhandled Error")
+        title = "Unhandled Error"
+        manage_exception(title)
 
 
 def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
@@ -1553,15 +1554,15 @@ def manage_exception(title=None, description=None, sql=None, schema_name=None):
 
     # Set exception message details
     msg = ""
-    msg += f"{tr("Error type")}: {exc_type}\n"
-    msg += f"{tr("File name")}: {file_name}\n"
-    msg += f"{tr("Line number")}: {exc_tb.tb_lineno}\n"
+    msg += f'''{tr("Error type")}: {exc_type}\n'''
+    msg += f'''{tr("File name")}: {file_name}\n'''
+    msg += f'''{tr("Line number")}: {exc_tb.tb_lineno}\n'''
     msg += f"{trace}\n"
     if description:
-        msg += f"{tr("Description")}: {description}\n"
+        msg += f'''{tr("Description")}: {description}\n'''
     if sql:
-        msg += f"{tr("SQL")}:\n {sql}\n\n"
-    msg += f"{tr("Schema name")}: {schema_name}"
+        msg += f'''{tr("SQL")}:\n {sql}\n\n'''
+    msg += f'''{tr("Schema name")}: {schema_name}'''
 
     # Translate title if exist
     if title:
