@@ -1916,16 +1916,16 @@ def _build_exception_message(file_name, function_line, function_name, exception,
     """Helper function to build exception message"""
         # Set exception message details
     msg = ""
-    msg += f"{tr("File name")}: {file_name}\n"
-    msg += f"{tr("Function name")}: {function_name}\n"
-    msg += f"{tr("Line number")}: {function_line}\n"
+    msg += f'''{tr("File name")}: {file_name}\n'''
+    msg += f'''{tr("Function name")}: {function_name}\n'''
+    msg += f'''{tr("Line number")}: {function_line}\n'''
     if exception:
-        msg += f"{tr("Description")}:\n{str(exception)}\n"
+        msg += f'''{tr("Description")}:\n{str(exception)}\n'''
     if filepath:
-        msg += f"{tr("SQL File")}:\n{filepath}\n\n"
+        msg += f'''{tr("SQL File")}:\n{filepath}\n\n'''
     if sql:
-        msg += f"{tr("SQL")}:\n {sql}\n\n"
-    msg += f"{tr("Schema name")}: {schema_name}"
+        msg += f'''{tr("SQL")}:\n {sql}\n\n'''
+    msg += f'''{tr("Schema name")}: {schema_name}'''
 
     return msg
 
