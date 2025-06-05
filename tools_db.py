@@ -253,13 +253,18 @@ def check_db_connection():
     try:
         was_closed = dao.check_connection()
         if was_closed:
-            tools_log.log_warning("Database connection was closed and reconnected")
+            msg = "Database connection was closed and reconnected"
+            tools_log.log_warning(msg)
             opened = lib_vars.qgis_db_credentials.open()
             if not opened:
                 msg = lib_vars.qgis_db_credentials.lastError().databaseText()
-                tools_log.log_warning(f"Database connection error (QSqlDatabase): {msg}")
+                msg = "Database connection error ({0    }): {1}"
+                msg_params = ("QSqlDatabase", msg,)
+                tools_log.log_warning(msg, msg_params=msg_params)
     except Exception as e:
-        tools_log.log_warning(f"check_db_connection Exception: {e}")
+        msg = "{0} Exception: {1}"
+        msg_params = ("check_db_connection", e,)
+        tools_log.log_warning(msg, msg_params=msg_params)
     finally:
         return opened
 
@@ -300,7 +305,9 @@ def connect_to_database(host, port, db, user, pwd, sslmode):
     dao = tools_pgdao.GwPgDao()
     dao.set_params(host, port, db, user, pwd, sslmode)
     status = dao.init_db()
-    tools_log.log_info(f"PostgreSQL PID: {dao.pid}")
+    msg = "PostgreSQL PID: {0}"
+    msg_params = (dao.pid,)
+    tools_log.log_info(msg, msg_params=msg_params)
     if not status:
         msg = "Database connection error (psycopg2). Please open plugin log file to get more details"
         lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
@@ -409,7 +416,9 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
         dao = tools_pgdao.GwPgDao()
         dao.set_conn_string(conn_string)
         status = dao.init_db()
-        tools_log.log_info(f"PostgreSQL PID: {dao.pid}")
+        msg = "PostgreSQL PID: {0}"
+        msg_params = (dao.pid,)
+        tools_log.log_info(msg, msg_params=msg_params)
         if not status:
             msg = "Service database connection error (psycopg2). Please open plugin log file to get more details"
             lib_vars.session_vars['last_error'] = tools_qt.tr(msg)
@@ -454,7 +463,8 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
 
     global dao  # noqa: F824
     if dao is None:
-        tools_log.log_warning("The connection to the database is broken.", parameter=sql)
+        msg = "The connection to the database is broken."
+        tools_log.log_warning(msg, parameter=sql)
         return None
     sql = _get_sql(sql, log_sql, params)
     row = dao.get_row(sql, commit, aux_conn=aux_conn)
@@ -465,7 +475,8 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
         if lib_vars.session_vars['last_error'] and not is_thread:
             tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
         elif lib_vars.session_vars['last_error'] is None and log_info:
-            tools_log.log_info("Any record found", parameter=sql, stack_level_increase=1)
+            msg = "Any record found"
+            tools_log.log_info(msg, parameter=sql, stack_level_increase=1)
 
     return row
 
@@ -476,7 +487,8 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
 
     global dao  # noqa: F824
     if dao is None:
-        tools_log.log_warning("The connection to the database is broken.", parameter=sql)
+        msg = "The connection to the database is broken."
+        tools_log.log_warning(msg, parameter=sql)
         return None
     sql = _get_sql(sql, log_sql, params)
     rows = None
@@ -487,7 +499,8 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
         if lib_vars.session_vars['last_error'] and not is_thread:
             tools_qt.manage_exception_db(lib_vars.session_vars['last_error'], sql)
         elif lib_vars.session_vars['last_error'] is None and log_info:
-            tools_log.log_info("Any record found", parameter=sql, stack_level_increase=1)
+            msg = "Any record found"
+            tools_log.log_info(msg, parameter=sql, stack_level_increase=1)
     else:
         if add_empty_row:
             rows = [('', '')]
@@ -621,7 +634,9 @@ def _get_credentials_from_layer(layer, sslmode_default):
     # Handle SSL mode
     if not credentials['sslmode']:
         if credentials['service']:
-            tools_log.log_info("Getting sslmode from .pg_service file")
+            msg = "Getting {0} from .{1} file"
+            msg_params = ("sslmode", "pg_service",)
+            tools_log.log_info(msg, msg_params=msg_params)
             credentials_service = tools_os.manage_pg_service(credentials['service'])
             credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default  # noqa: E501
         else:
@@ -646,7 +661,8 @@ def _get_credentials_from_settings(sslmode_default):
     settings.endGroup()
 
     if not default_connection:
-        tools_log.log_warning("Error getting default connection (settings)")
+        msg = "Error getting default connection (settings)"
+        tools_log.log_warning(msg)
         lib_vars.session_vars['last_error'] = tools_qt.tr("Error getting default connection", "ui_message")
         return None, True
 
@@ -664,7 +680,9 @@ def _get_credentials_from_settings(sslmode_default):
     credentials['service'] = settings.value('service')
 
     if credentials['service']:
-        tools_log.log_info("Getting sslmode from .pg_service file")
+        msg = "Getting {0} from .{1} file"
+        msg_params = ("sslmode", "pg_service",)
+        tools_log.log_info(msg, msg_params=msg_params)
         credentials_service = tools_os.manage_pg_service(credentials['service'])
         credentials['sslmode'] = credentials_service['sslmode'] if credentials_service['sslmode'] else sslmode_default
     else:
@@ -686,7 +704,9 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
     settings.beginGroup("PostgreSQL/connections")
 
     if layer is None and settings is None:
-        tools_log.log_warning(f"Layer '{layer_name}' is None and settings is None")
+        msg = "Layer '{0}' is None and settings is None"
+        msg_params = (layer_name,)
+        tools_log.log_warning(msg, msg_params=msg_params)
         lib_vars.session_vars['last_error'] = f"Layer not found: '{layer_name}'"
         return None, False
 
@@ -704,14 +724,16 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
         conn_info = QgsDataSourceUri(layer.dataProvider().dataSourceUri()).connectionInfo()
         status, credentials = connect_to_database_credentials(credentials, conn_info)
         if not status:
-            tools_log.log_warning("Error connecting to database (layer)")
+            msg = "Error connecting to database (layer)"
+            tools_log.log_warning(msg)
             lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", "ui_message")
             return None, not_version
         QgsCredentials.instance().put(conn_info, credentials['user'], credentials['password'])
     else:
         status, credentials = connect_to_database_credentials(credentials, max_attempts=0)
         if not status:
-            tools_log.log_warning("Error connecting to database (settings)")
+            msg = "Error connecting to database (settings)"
+            tools_log.log_warning(msg)
             lib_vars.session_vars['last_error'] = tools_qt.tr("Error connecting to database", "ui_message")
             return None, not_version
 

@@ -162,15 +162,21 @@ def manage_pg_service(section):
                              for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
 
     if all(invalid_service_files.values()):
-        tools_log.log_warning("Files defined in environment variables 'PGSERVICEFILE' and 'PGSYSCONFDIR' not found.")
+        msg = "Files defined in environment variables '{0}' and '{1}' not found."
+        msg_params = ("PGSERVICEFILE", "PGSYSCONFDIR",)
+        tools_log.log_warning(msg, msg_params=msg_params)
         return credentials
 
     credentials = get_credentials_from_config(section, pgservice_file)
     if not any([credentials['host'], credentials['port'], credentials['dbname']]):
-        tools_log.log_info(f"Connection '{section}' not found in the file '{pgservice_file}'. Trying in '{sysconf_dir}'...")  # noqa: E501
+        msg = "Connection '{0}' not found in the file '{1}'. Trying in '{2}'..."
+        msg_params = (section, pgservice_file, sysconf_dir,)
+        tools_log.log_info(msg, msg_params=msg_params)
         credentials = get_credentials_from_config(section, sysconf_dir)
         if not any([credentials['host'], credentials['port'], credentials['dbname']]):
-            tools_log.log_warning(f"Connection '{section}' not found in the file '{sysconf_dir}'")
+            msg = "Connection '{0}' not found in the file '{1}'"
+            msg_params = (section, sysconf_dir,)
+            tools_log.log_warning(msg, msg_params=msg_params)
             return credentials
 
     return credentials
@@ -185,7 +191,9 @@ def get_credentials_from_config(section, config_file) -> dict:
             if config_parser.has_section(section):
                 params = config_parser.items(section)
                 if not params:
-                    tools_log.log_warning(f"No parameters found in section {section}")
+                    msg = "No parameters found in section {0}"
+                    msg_params = (section,)
+                    tools_log.log_warning(msg, msg_params=msg_params)
                     return credentials
                 for param in params:
                     credentials[param[0]] = param[1]

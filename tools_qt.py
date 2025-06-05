@@ -724,7 +724,8 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
                 tab_index = idx
                 break
     except Exception:
-        tools_log.log_error("Tab not found.", parameter=tab_name)
+        msg = "Tab not found."
+        tools_log.log_error(msg, parameter=tab_name)
 
     if tab_index == -1:
         tab_index = None
@@ -743,7 +744,8 @@ def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[
                 page_index = idx
                 break
     except Exception:
-        tools_log.log_error("Page not found.", parameter=page_name)
+        msg = "Page not found."
+        tools_log.log_error(msg, parameter=page_name)
 
     if page_index == -1:
         page_index = None
@@ -860,8 +862,8 @@ def check_expression_filter(expr_filter, log_info=False):
         tools_log.log_info(expr_filter)
     expr = QgsExpression(expr_filter)
     if expr.hasParserError():
-        message = "Expression Error"
-        tools_log.log_warning(message, parameter=expr_filter)
+        msg = "Expression Error"
+        tools_log.log_warning(msg, parameter=expr_filter)
         return False, expr
 
     return True, expr
@@ -1458,13 +1460,15 @@ def manage_translation(context_name, dialog=None, log_info=False, plugin_dir=Non
     locale_path = os.path.join(plugin_dir, 'i18n', f'{plugin_name}_{locale}.qm')
     if not os.path.exists(locale_path):
         if log_info:
-            tools_log.log_info("Locale not found", parameter=locale_path)
+            msg = "Locale not found"
+            tools_log.log_info(msg, parameter=locale_path)
         locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name}_en_US.qm')
         # If English locale file not found, exit function
         # It means that probably that form has not been translated yet
         if not os.path.exists(locale_path):
             if log_info:
-                tools_log.log_info("Locale not found", parameter=locale_path)
+                msg = "Locale not found"
+                tools_log.log_info(msg, parameter=locale_path)
             return
 
     # Add translation file
@@ -1508,7 +1512,8 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
             title = "Database error"
             show_exception_message(title, msg)
         else:
-            tools_log.log_warning("Exception message not shown to user")
+            message = "Exception message not shown to user"
+            tools_log.log_warning(message)
         tools_log.log_warning(msg, stack_level_increase=2)
 
     except Exception:
@@ -1651,10 +1656,12 @@ def _add_translator(locale_path, log_info=False):
         translator.load(locale_path)
         QCoreApplication.installTranslator(translator)
         if log_info:
-            tools_log.log_info("Add translator", parameter=locale_path)
+            msg = "Add translator"
+            tools_log.log_info(msg, parameter=locale_path)
     else:
         if log_info:
-            tools_log.log_info("Locale not found", parameter=locale_path)
+            msg = "Locale not found"
+            tools_log.log_info(msg, parameter=locale_path)
 
 
 def _translate_form(dialog, context_name, aux_context='ui_message'):
@@ -1694,7 +1701,9 @@ def _translate_widget(context_name, widget, aux_context='ui_message'):
             _translate_standard_widget(widget, context_name, aux_context)
 
     except Exception as e:
-        tools_log.log_info(f"{widget_name} --> {type(e).__name__} --> {e}")
+        msg = "{0} --> {1} --> {2}"
+        msg_params = (widget_name, type(e).__name__, e)
+        tools_log.log_info(msg, msg_params=msg_params)
 
 
 def _translate_tooltip(context_name, widget, idx=None, aux_context='ui_message'):
@@ -1767,15 +1776,20 @@ def _get_widget_from_table_object(dialog, table_object: Union[str, QTableView]) 
     if type(table_object) is str:
         widget = get_widget(dialog, table_object)
         if widget is None:
-            tools_log.log_info("Widget not found", parameter=table_object)
+            msg = "Widget not found"
+            tools_log.log_info(msg, parameter=table_object)
             return None
         if type(widget) is not QTableView:
-            tools_log.log_info("Widget is not a QTableView", parameter=table_object)
+            msg = "Widget is not a QTableView"
+            msg_params = ("QTableView",)
+            tools_log.log_info(msg, parameter=table_object, msg_params=msg_params)
             return None
     elif type(table_object) is QTableView:
         widget: QTableView = table_object
     else:
-        tools_log.log_info("Table_object is not a table name or QTableView")
+        msg = "{0} is not a table name or {1}"
+        msg_params = ("Table_object", "QTableView")
+        tools_log.log_info(msg, list_params=msg_params)
         return None
     return widget
 

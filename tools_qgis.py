@@ -658,7 +658,8 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         if 'main_schema' in lib_vars.project_vars:
             schema_name = lib_vars.project_vars['main_schema']
         else:
-            tools_log.log_warning("Key not found", parameter='main_schema')
+            msg = "Key not found"
+            tools_log.log_warning(msg, parameter='main_schema')
 
     for cur_layer in layers:
         uri_table = get_layer_source_table_name(cur_layer)
@@ -671,7 +672,8 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         show_warning("Layer not found", parameter=tablename)
 
     if layer is None and log_info:
-        tools_log.log_info("Layer not found", parameter=tablename)
+        msg = "Layer not found"
+        tools_log.log_info(msg, parameter=tablename)
 
     return layer
 
@@ -725,7 +727,8 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
 
     # Check if the provisional layer is valid
     if not provisional_layer.isValid():
-        tools_log.log_error("Layer failed to load!", parameter=querytext)
+        msg = "Layer failed to load!"
+        tools_log.log_error(msg, parameter=querytext)
         return
 
     # Check if the geometry column exists in the provisional layer
@@ -739,7 +742,8 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
 
     # Check if the layer is valid
     if not layer.isValid():
-        tools_log.log_error("Layer failed to load!", parameter=querytext)
+        msg = "Layer failed to load!"
+        tools_log.log_error(msg, parameter=querytext)
         return
 
     # Add the layer to the project
@@ -800,7 +804,8 @@ def get_points_from_geometry(layer, feature):
         list_points = f'"x1":{init_point.x()}, "y1":{init_point.y()}'
         list_points += f', "x2":{last_point.x()}, "y2":{last_point.y()}'
     else:
-        tools_log.log_info("NO FEATURE TYPE DEFINED")
+        msg = "NO FEATURE TYPE DEFINED"
+        tools_log.log_info(msg)
 
     return list_points
 
@@ -811,19 +816,25 @@ def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
     try:
         iface.mapCanvas().xyCoordinates.disconnect()
     except TypeError as e:
-        tools_log.log_info(f"{type(e).__name__} --> {e}")
+        msg = "{0} --> {1}"
+        msg_params = (type(e).__name__, e,)
+        tools_log.log_info(msg, msg_params=msg_params)
 
     if emit_point is not None:
         try:
             emit_point.canvasClicked.disconnect()
         except TypeError as e:
-            tools_log.log_info(f"{type(e).__name__} --> {e}")
+            msg = "{0} --> {1}"
+            msg_params = (type(e).__name__, e,)
+            tools_log.log_info(msg, msg_params=msg_params)
 
     if vertex_marker is not None:
         try:
             vertex_marker.hide()
         except AttributeError as e:
-            tools_log.log_info(f"{type(e).__name__} --> {e}")
+            msg = "{0} --> {1}"
+            msg_params = (type(e).__name__, e,)
+            tools_log.log_info(msg, msg_params=msg_params)
 
     if action_pan:
         iface.actionPan().trigger()
@@ -1110,7 +1121,8 @@ def get_layer_by_layername(layername, log_info=False):
         layer = layer[0]
     elif not layer and log_info:
         layer = None
-        tools_log.log_info("Layer not found", parameter=layername)
+        msg = "Layer not found"
+        tools_log.log_info(msg, parameter=layername)
 
     return layer
 
@@ -1164,11 +1176,13 @@ def load_qml(layer, qml_path):
         return False
 
     if not os.path.exists(qml_path):
-        tools_log.log_warning("File not found", parameter=qml_path)
+        msg = "File not found"
+        tools_log.log_warning(msg, parameter=qml_path)
         return False
 
     if not qml_path.endswith(".qml"):
-        tools_log.log_warning("File extension not valid", parameter=qml_path)
+        msg = "File extension not valid"
+        tools_log.log_warning(msg, parameter=qml_path)
         return False
 
     layer.loadNamedStyle(qml_path)
@@ -1313,7 +1327,9 @@ def get_geometry_from_json(feature):
         geometry = f"{type_}{coordinates}"
         return QgsGeometry.fromWkt(geometry)
     except (AttributeError, TypeError, IndexError) as e:
-        tools_log.log_info(f"{type(e).__name__} --> {e}")
+        msg = "{0} --> {1}"
+        msg_params = (type(e).__name__, e,)
+        tools_log.log_info(msg, msg_params=msg_params)
         return None
 
 
@@ -1329,7 +1345,9 @@ def get_locale():
             locale = QSettings().value('locale/userLocale')
     except AttributeError as e:
         locale = "en_US"
-        tools_log.log_info(f"{type(e).__name__} --> {e}")
+        msg = "{0} --> {1}"
+        msg_params = (type(e).__name__, e,)
+        tools_log.log_info(msg, msg_params=msg_params)
     finally:
         if locale in (None, ''):
             locale = "en_US"
@@ -1548,8 +1566,9 @@ def _create_group_structure(root, group, sub_group, sub_sub_group):
     if not first_group:
         first_group = root.insertGroup(0, group)
     if first_group is None:
-        msg = f"Group '{group}' not found in layer tree."
-        tools_log.log_error(msg)
+        msg = "Group '{0}' not found in layer tree."
+        msg_params = (group,)
+        tools_log.log_error(msg, msg_params=msg_params)
         return None, None, None
 
     second_group = None
