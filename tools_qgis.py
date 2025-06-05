@@ -794,18 +794,22 @@ def get_points_from_geometry(layer, feature):
     list_points = None
 
     geom = feature.geometry()
-    if layer.geometryType() == 0:
-        points = geom.asPoint()
-        list_points = f'"x1":{points.x()}, "y1":{points.y()}'
-    elif layer.geometryType() in (1, 2):
-        points = geom.asPolyline()
-        init_point = points[0]
-        last_point = points[-1]
-        list_points = f'"x1":{init_point.x()}, "y1":{init_point.y()}'
-        list_points += f', "x2":{last_point.x()}, "y2":{last_point.y()}'
-    else:
-        msg = "NO FEATURE TYPE DEFINED"
-        tools_log.log_info(msg)
+
+    try:
+        if layer.geometryType() == 0:
+            points = geom.asPoint()
+            list_points = f'"x1":{points.x()}, "y1":{points.y()}'
+        elif layer.geometryType() in (1, 2):
+            points = geom.asPolyline()
+            init_point = points[0]
+            last_point = points[-1]
+            list_points = f'"x1":{init_point.x()}, "y1":{init_point.y()}'
+            list_points += f', "x2":{last_point.x()}, "y2":{last_point.y()}'
+        else:
+            msg = "NO FEATURE TYPE DEFINED"
+            tools_log.log_info(msg)
+    except Exception as e:
+        pass
 
     return list_points
 
@@ -1198,7 +1202,7 @@ def set_margin(layer, margin):
         return
 
     extent = QgsRectangle()
-    extent.setMinimal()
+    extent.setNull()
     extent.combineExtentWith(layer.extent())
     xmin = extent.xMinimum() - margin
     ymin = extent.yMinimum() - margin
