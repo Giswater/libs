@@ -808,7 +808,7 @@ def get_points_from_geometry(layer, feature):
         else:
             msg = "NO FEATURE TYPE DEFINED"
             tools_log.log_info(msg)
-    except Exception as e:
+    except Exception:
         pass
 
     return list_points
