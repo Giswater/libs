@@ -1358,6 +1358,34 @@ def get_locale():
         return locale
 
 
+def get_locale_schema():
+    """ Get locale of the schema """
+    locale = "en_US"
+    try:
+        current_schema = lib_vars.schema_name
+        if current_schema:
+            # Remove schema quotes for check_table function
+            current_schema_no_quotes = current_schema.replace('"', '')
+            if tools_db.check_table(tablename="sys_version", schemaname=current_schema_no_quotes):
+                table = f"{current_schema}.sys_version"
+                sql = f"SELECT language FROM {table};"
+                row = tools_db.get_row(sql, log_info=False)
+                if row and row[0]:
+                    locale = row[0]
+            else:
+                # If table does not exist, try to get global locale
+                locale = get_locale()
+        else:
+            # If schema is not defined, try to get global locale
+            locale = get_locale()
+    except Exception as e:
+        msg = "Error getting locale from schema: {0}"
+        msg_params = (e,)
+        tools_log.log_info(msg, msg_params=msg_params)
+
+    return locale
+
+
 def highlight_features_by_id(qtable, layer_name, field_id, rubber_band, width, selected, deselected):
 
     rubber_band.reset()

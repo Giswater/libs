@@ -210,12 +210,12 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
     if type(text) is dict:
         text = json.dumps(text)
 
-    msg = (f'<font color="blue"><{bold}>{header}: </font>'
+    msg_ = (f'<font color="blue"><{bold}>{header}: </font>'
            f'<font color="{color}"><{bold}>{text}</font>')
     limit = 200
     if lib_vars.logger and lib_vars.logger.log_db_limit_characters:
         limit = lib_vars.logger.log_db_limit_characters
-    msg = (msg[:limit] + '...') if len(msg) > limit and bold == '' else msg
+    msg = (msg_[:limit] + '...') if len(msg_) > limit and bold == '' else msg_
 
     # Check session parameter 'min_message_level' to know if we need to log message in QGIS Log Messages Panel
     if lib_vars.logger and message_level >= lib_vars.logger.min_message_level:
