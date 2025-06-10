@@ -6,7 +6,7 @@ or (at your option) any later version.
 """
 # -*- coding: utf-8 -*-
 from qgis.PyQt.QtSql import QSqlDatabase, QSqlQueryModel
-from qgis.core import QgsCredentials, QgsDataSourceUri
+from qgis.core import QgsCredentials, QgsDataSourceUri, QgsWkbTypes
 from qgis.PyQt.QtCore import QSettings
 
 from qgis.utils import iface
@@ -741,7 +741,7 @@ def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node')
     return credentials, not_version
 
 
-def get_uri():
+def get_uri(tablename=None, geom=None, schema_name=None):
     """ Set the component parts of a RDBMS data source URI
     :return: QgsDataSourceUri() with the connection established according to the parameters of the credentials.
     """
@@ -761,17 +761,31 @@ def get_uri():
     except ValueError:
         sslmode = sslmode_default
     if dao_db_credentials['service']:
-        uri.setConnection(dao_db_credentials['service'], None, None, None, sslmode)
+        uri.setConnection(dao_db_credentials['service'], None, None, '', sslmode)
     else:
         if tools_os.set_boolean(lib_vars.project_vars['store_credentials'], default=True):
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
                 dao_db_credentials['db'], dao_db_credentials['user'],
-                dao_db_credentials['password'], sslmode)
+                '', sslmode)
         else:
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
-                              dao_db_credentials['db'], None, None, sslmode)
-
-    return uri
+                              dao_db_credentials['db'], None, '', sslmode)
+    if geom is not None and geom != 'None' and tablename is not None:
+        geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = '{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
+        match geom_type[0]:
+            case 'POINT':
+                uri.setWkbType(QgsWkbTypes.Point)
+            case 'LINESTRING':
+                uri.setWkbType(QgsWkbTypes.LineString)
+            case 'POLYGON':
+                uri.setWkbType(QgsWkbTypes.Polygon)
+            case 'MULTIPOLYGON':
+                uri.setWkbType(QgsWkbTypes.MultiPolygon)
+            case _:
+                uri.setWkbType(QgsWkbTypes.Point)
+        return uri, True
+    else:
+        return uri, False
 
 # region private functions
 
