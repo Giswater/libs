@@ -1424,17 +1424,29 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
     if context_name is None:
         context_name = lib_vars.plugin_name
 
-    value = None
-    try:
-        value = QCoreApplication.translate(context_name, message)
-    except TypeError:
-        value = QCoreApplication.translate(context_name, str(message))
-    finally:
-        # If not translation has been found, check into context @aux_context and @default
-        if value == message:
-            value = QCoreApplication.translate(aux_context, message)
-        if default is not None and value == message:
-            value = default
+    str_message = str(message)
+    if '\n' in str_message:
+        print(f'str_message- {str_message}')
+        # For strings with newlines, translate each line separately
+        lines = str_message.split('\n')
+        translated_lines = []
+        for line in lines:
+            print(f'line- {line}')
+            translated_line = QCoreApplication.translate(context_name, line)    
+            print(f'translated_line- {translated_line}')
+            if translated_line == line:  # if no translation found, try aux_context
+                translated_line = QCoreApplication.translate(aux_context, line)
+            translated_lines.append(translated_line)
+        value = '\n'.join(translated_lines)
+    else:
+        # Logic for strings without newlines
+        value = QCoreApplication.translate(context_name, str_message)
+        if value == str_message:  # if no translation found, try aux_context
+            value = QCoreApplication.translate(aux_context, str_message)
+
+    # If not translation has been found, use default
+    if value == str_message and default is not None:
+        value = default
 
     # Format the value with named or positional parameters
     if list_params:
@@ -1541,8 +1553,9 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
     dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
     if pattern is None:
-        pattern = "File\\sname:|Function\\sname:|Line\\snumber:|SQL:|SQL\\sfile:|Detail:|Context:|Description|Schema " \
-                  "name|Message\\serror:"
+        pattern = f'''{tr('File name')}:|{tr('Function name')}:|{tr('Line number')}:|{tr('SQL')}:|{tr('SQL File')}:
+                    |{tr('Detail')}:|{tr('Context')}:|{tr('Description')}:|{tr('Schema name')}:|{tr('Message error')}:
+                    |{tr('Error type')}:'''
     set_text_bold(dlg_info.tab_log_txt_infolog, pattern)
 
     dlg_info.show()
