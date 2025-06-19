@@ -781,6 +781,8 @@ def get_uri(tablename=None, geom=None, schema_name=None):
                 uri.setWkbType(QgsWkbTypes.Polygon)
             case 'MULTIPOLYGON':
                 uri.setWkbType(QgsWkbTypes.MultiPolygon)
+            case 'MULTILINESTRING':
+                uri.setWkbType(QgsWkbTypes.MultiLineString)
             case _:
                 uri.setWkbType(QgsWkbTypes.Point)
         return uri, True
