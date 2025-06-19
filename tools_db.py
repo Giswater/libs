@@ -772,19 +772,58 @@ def get_uri(tablename=None, geom=None, schema_name=None):
                               dao_db_credentials['db'], None, '', sslmode)
     if geom is not None and geom != 'None' and tablename is not None:
         geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = '{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
-        match geom_type[0]:
-            case 'POINT':
-                uri.setWkbType(QgsWkbTypes.Point)
-            case 'LINESTRING':
-                uri.setWkbType(QgsWkbTypes.LineString)
-            case 'POLYGON':
-                uri.setWkbType(QgsWkbTypes.Polygon)
-            case 'MULTIPOLYGON':
-                uri.setWkbType(QgsWkbTypes.MultiPolygon)
-            case 'MULTILINESTRING':
-                uri.setWkbType(QgsWkbTypes.MultiLineString)
-            case _:
-                uri.setWkbType(QgsWkbTypes.Point)
+        if geom_type:
+            match geom_type[0].upper():
+                case 'POINT':
+                    uri.setWkbType(QgsWkbTypes.Point)
+                case 'LINESTRING':
+                    uri.setWkbType(QgsWkbTypes.LineString)
+                case 'POLYGON':
+                    uri.setWkbType(QgsWkbTypes.Polygon)
+                case 'MULTIPOINT':
+                    uri.setWkbType(QgsWkbTypes.MultiPoint)
+                case 'MULTILINESTRING':
+                    uri.setWkbType(QgsWkbTypes.MultiLineString)
+                case 'MULTIPOLYGON':
+                    uri.setWkbType(QgsWkbTypes.MultiPolygon)
+                case 'POINTZ':
+                    uri.setWkbType(QgsWkbTypes.PointZ)
+                case 'LINESTRINGZ':
+                    uri.setWkbType(QgsWkbTypes.LineStringZ)
+                case 'POLYGONZ':
+                    uri.setWkbType(QgsWkbTypes.PolygonZ)
+                case 'MULTIPOINTZ':
+                    uri.setWkbType(QgsWkbTypes.MultiPointZ)
+                case 'MULTILINESTRINGZ':
+                    uri.setWkbType(QgsWkbTypes.MultiLineStringZ)
+                case 'MULTIPOLYGONZ':
+                    uri.setWkbType(QgsWkbTypes.MultiPolygonZ)
+                case 'POINTM':
+                    uri.setWkbType(QgsWkbTypes.PointM)
+                case 'LINESTRINGM':
+                    uri.setWkbType(QgsWkbTypes.LineStringM)
+                case 'POLYGONM':
+                    uri.setWkbType(QgsWkbTypes.PolygonM)
+                case 'MULTIPOINTM':
+                    uri.setWkbType(QgsWkbTypes.MultiPointM)
+                case 'MULTILINESTRINGM':
+                    uri.setWkbType(QgsWkbTypes.MultiLineStringM)
+                case 'MULTIPOLYGONM':
+                    uri.setWkbType(QgsWkbTypes.MultiPolygonM)
+                case 'POINTZM':
+                    uri.setWkbType(QgsWkbTypes.PointZM)
+                case 'LINESTRINGZM':
+                    uri.setWkbType(QgsWkbTypes.LineStringZM)
+                case 'POLYGONZM':
+                    uri.setWkbType(QgsWkbTypes.PolygonZM)
+                case 'MULTIPOINTZM':
+                    uri.setWkbType(QgsWkbTypes.MultiPointZM)
+                case 'MULTILINESTRINGZM':
+                    uri.setWkbType(QgsWkbTypes.MultiLineStringZM)
+                case 'MULTIPOLYGONZM':
+                    uri.setWkbType(QgsWkbTypes.MultiPolygonZM)
+                case _:
+                    uri.setWkbType(QgsWkbTypes.Point)
         return uri, True
     else:
         return uri, False
