@@ -1426,14 +1426,11 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
 
     str_message = str(message)
     if '\n' in str_message:
-        print(f'str_message- {str_message}')
         # For strings with newlines, translate each line separately
         lines = str_message.split('\n')
         translated_lines = []
         for line in lines:
-            print(f'line- {line}')
-            translated_line = QCoreApplication.translate(context_name, line)    
-            print(f'translated_line- {translated_line}')
+            translated_line = QCoreApplication.translate(context_name, line)
             if translated_line == line:  # if no translation found, try aux_context
                 translated_line = QCoreApplication.translate(aux_context, line)
             translated_lines.append(translated_line)
@@ -1507,7 +1504,7 @@ def _should_show_exception(description):
 
 
 def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_increase=0, filepath=None,
-                        schema_name=None):
+                        schema_name=None, pause_on_exception=False):
     """ Manage exception in database queries and show information to the user """
 
     show_exception_msg = _should_show_exception(str(exception) if exception else "")
@@ -1523,6 +1520,8 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
         if show_exception_msg:
             title = "Database error"
             show_exception_message(title, msg)
+            if pause_on_exception:
+                pause()
         else:
             message = "Exception message not shown to user"
             tools_log.log_warning(message)
@@ -1531,6 +1530,17 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
     except Exception:
         title = "Unhandled Error"
         manage_exception(title)
+
+
+def pause():
+    """Pause execution until user clicks accept on dialog"""
+    
+    dlg_info.btn_accept.setVisible(True)
+    dlg_info.btn_close.setVisible(False)
+    dlg_info.btn_accept.clicked.connect(lambda: dlg_info.close())
+    dlg_info.exec_()
+
+
 
 
 def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
