@@ -807,6 +807,7 @@ def get_uri(tablename=None, geom=None, schema_name=None):
 
 # region private functions
 
+
 def _get_sql(sql, log_sql=False, params=None):
     """ Generate SQL with params. Useful for debugging """
 
