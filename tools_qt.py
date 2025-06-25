@@ -1541,8 +1541,6 @@ def pause():
     dlg_info.exec_()
 
 
-
-
 def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
                            context_name='giswater', title_params=None, msg_params=None):
     """ Show exception message in dialog """

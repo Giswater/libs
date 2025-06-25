@@ -771,7 +771,8 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
                               dao_db_credentials['db'], None, '', sslmode)
     if geom is not None and geom != 'None' and tablename is not None:
-        geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = '{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
+        geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = "
+                                      f"'{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
         if geom_type:
             match geom_type[0].upper():
                 case 'POINT':
