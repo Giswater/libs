@@ -773,64 +773,60 @@ def get_uri(tablename=None, geom=None, schema_name=None):
     if geom is not None and geom != 'None' and tablename is not None:
         geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = "
                                       f"'{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
-        if geom_type:
-            match geom_type[0].upper():
-                case 'POINT':
-                    uri.setWkbType(QgsWkbTypes.Point)
-                case 'LINESTRING':
-                    uri.setWkbType(QgsWkbTypes.LineString)
-                case 'POLYGON':
-                    uri.setWkbType(QgsWkbTypes.Polygon)
-                case 'MULTIPOINT':
-                    uri.setWkbType(QgsWkbTypes.MultiPoint)
-                case 'MULTILINESTRING':
-                    uri.setWkbType(QgsWkbTypes.MultiLineString)
-                case 'MULTIPOLYGON':
-                    uri.setWkbType(QgsWkbTypes.MultiPolygon)
-                case 'POINTZ':
-                    uri.setWkbType(QgsWkbTypes.PointZ)
-                case 'LINESTRINGZ':
-                    uri.setWkbType(QgsWkbTypes.LineStringZ)
-                case 'POLYGONZ':
-                    uri.setWkbType(QgsWkbTypes.PolygonZ)
-                case 'MULTIPOINTZ':
-                    uri.setWkbType(QgsWkbTypes.MultiPointZ)
-                case 'MULTILINESTRINGZ':
-                    uri.setWkbType(QgsWkbTypes.MultiLineStringZ)
-                case 'MULTIPOLYGONZ':
-                    uri.setWkbType(QgsWkbTypes.MultiPolygonZ)
-                case 'POINTM':
-                    uri.setWkbType(QgsWkbTypes.PointM)
-                case 'LINESTRINGM':
-                    uri.setWkbType(QgsWkbTypes.LineStringM)
-                case 'POLYGONM':
-                    uri.setWkbType(QgsWkbTypes.PolygonM)
-                case 'MULTIPOINTM':
-                    uri.setWkbType(QgsWkbTypes.MultiPointM)
-                case 'MULTILINESTRINGM':
-                    uri.setWkbType(QgsWkbTypes.MultiLineStringM)
-                case 'MULTIPOLYGONM':
-                    uri.setWkbType(QgsWkbTypes.MultiPolygonM)
-                case 'POINTZM':
-                    uri.setWkbType(QgsWkbTypes.PointZM)
-                case 'LINESTRINGZM':
-                    uri.setWkbType(QgsWkbTypes.LineStringZM)
-                case 'POLYGONZM':
-                    uri.setWkbType(QgsWkbTypes.PolygonZM)
-                case 'MULTIPOINTZM':
-                    uri.setWkbType(QgsWkbTypes.MultiPointZM)
-                case 'MULTILINESTRINGZM':
-                    uri.setWkbType(QgsWkbTypes.MultiLineStringZM)
-                case 'MULTIPOLYGONZM':
-                    uri.setWkbType(QgsWkbTypes.MultiPolygonZM)
-                case _:
-                    uri.setWkbType(QgsWkbTypes.Point)
+        if geom_type[0].upper() == 'POINT':
+            uri.setWkbType(QgsWkbTypes.Point)
+        elif geom_type[0].upper() == 'LINESTRING':
+            uri.setWkbType(QgsWkbTypes.LineString)
+        elif geom_type[0].upper() == 'POLYGON':
+            uri.setWkbType(QgsWkbTypes.Polygon)
+        elif geom_type[0].upper() == 'MULTIPOINT':
+            uri.setWkbType(QgsWkbTypes.MultiPoint)
+        elif geom_type[0].upper() == 'MULTILINESTRING':
+            uri.setWkbType(QgsWkbTypes.MultiLineString)
+        elif geom_type[0].upper() == 'MULTIPOLYGON':
+            uri.setWkbType(QgsWkbTypes.MultiPolygon)
+        elif geom_type[0].upper() == 'POINTZ':
+            uri.setWkbType(QgsWkbTypes.PointZ)
+        elif geom_type[0].upper() == 'LINESTRINGZ':
+            uri.setWkbType(QgsWkbTypes.LineStringZ)
+        elif geom_type[0].upper() == 'POLYGONZ':
+            uri.setWkbType(QgsWkbTypes.PolygonZ)
+        elif geom_type[0].upper() == 'MULTIPOINTZ':
+            uri.setWkbType(QgsWkbTypes.MultiPointZ)
+        elif geom_type[0].upper() == 'MULTILINESTRINGZ':
+            uri.setWkbType(QgsWkbTypes.MultiLineStringZ)
+        elif geom_type[0].upper() == 'MULTIPOLYGONZ':
+            uri.setWkbType(QgsWkbTypes.MultiPolygonZ)
+        elif geom_type[0].upper() == 'POINTM':
+            uri.setWkbType(QgsWkbTypes.PointM)
+        elif geom_type[0].upper() == 'LINESTRINGM':
+            uri.setWkbType(QgsWkbTypes.LineStringM)
+        elif geom_type[0].upper() == 'POLYGONM':
+            uri.setWkbType(QgsWkbTypes.PolygonM)
+        elif geom_type[0].upper() == 'MULTIPOINTM':
+            uri.setWkbType(QgsWkbTypes.MultiPointM)
+        elif geom_type[0].upper() == 'MULTILINESTRINGM':
+            uri.setWkbType(QgsWkbTypes.MultiLineStringM)
+        elif geom_type[0].upper() == 'MULTIPOLYGONM':
+            uri.setWkbType(QgsWkbTypes.MultiPolygonM)
+        elif geom_type[0].upper() == 'POINTZM':
+            uri.setWkbType(QgsWkbTypes.PointZM)
+        elif geom_type[0].upper() == 'LINESTRINGZM':
+            uri.setWkbType(QgsWkbTypes.LineStringZM)
+        elif geom_type[0].upper() == 'POLYGONZM':
+            uri.setWkbType(QgsWkbTypes.PolygonZM)
+        elif geom_type[0].upper() == 'MULTIPOINTZM':
+            uri.setWkbType(QgsWkbTypes.MultiPointZM)
+        elif geom_type[0].upper() == 'MULTILINESTRINGZM':
+            uri.setWkbType(QgsWkbTypes.MultiLineStringZM)
+        elif geom_type[0].upper() == 'MULTIPOLYGONZM':
+            uri.setWkbType(QgsWkbTypes.MultiPolygonZM)
+        else:
+            uri.setWkbType(QgsWkbTypes.Point)
         return uri, True
-    else:
-        return uri, False
+    return uri, False
 
 # region private functions
-
 
 def _get_sql(sql, log_sql=False, params=None):
     """ Generate SQL with params. Useful for debugging """
