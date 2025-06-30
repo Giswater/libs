@@ -819,6 +819,7 @@ def _get_sql(sql, log_sql=False, params=None):
 
     return sql
 
+
 def get_cm_user_role():
         """Get user role from database"""
 
