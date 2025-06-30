@@ -821,14 +821,18 @@ def _get_sql(sql, log_sql=False, params=None):
 
 
 def get_cm_user_role():
-        """Get user role from database"""
+    """Get user role from the cm database schema, if it exists."""
 
-        sql = f"""
-            SELECT t.role_id
-            FROM cm.cat_user AS u
-            JOIN cm.cat_team AS t ON u.team_id = t.team_id
-            WHERE u.username = '{get_current_user()}'
-        """
-        return get_row(sql)
+    # First, check if the 'cm' schema exists to avoid errors on projects without it.
+    if not check_schema('cm'):
+        return None
+
+    sql = f"""
+        SELECT t.role_id
+        FROM cm.cat_user AS u
+        JOIN cm.cat_team AS t ON u.team_id = t.team_id
+        WHERE u.username = '{get_current_user()}'
+    """
+    return get_row(sql)
 
 # endregion
