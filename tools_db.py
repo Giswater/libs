@@ -819,5 +819,15 @@ def _get_sql(sql, log_sql=False, params=None):
 
     return sql
 
+def get_cm_user_role():
+        """Get user role from database"""
+
+        sql = f"""
+            SELECT t.role_id
+            FROM cm.cat_user AS u
+            JOIN cm.cat_team AS t ON u.team_id = t.team_id
+            WHERE u.username = '{get_current_user()}'
+        """
+        return get_row(sql)
 
 # endregion
