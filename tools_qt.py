@@ -787,7 +787,7 @@ def set_completer_object(
     """
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.setMaxVisibleItems(max_visible)
-    completer.setCompletionMode(QCompleter.PopupCompletion)
+    completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
 
     # --- Store the selected ID on completion ---
     def on_completion(text: str):
