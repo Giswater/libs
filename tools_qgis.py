@@ -710,7 +710,7 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
     """ Creates a QVectorLayer and adds it to the project """
 
     # Define your PostgreSQL connection parameters
-    uri = tools_db.get_uri()
+    uri, _ = tools_db.get_uri()
 
     # Modify the query to include a unique identifier if key_column is not provided
     if key_column is None:
