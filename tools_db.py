@@ -765,8 +765,8 @@ def get_uri(tablename=None, geom=None, schema_name=None):
     else:
         if tools_os.set_boolean(lib_vars.project_vars['store_credentials'], default=True):
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
-                dao_db_credentials['db'], dao_db_credentials['user'],
-                '', sslmode)
+                dao_db_credentials['db'], dao_db_credentials['user'], dao_db_credentials['password'],
+                sslmode)
         else:
             uri.setConnection(dao_db_credentials['host'], dao_db_credentials['port'],
                               dao_db_credentials['db'], None, '', sslmode)
