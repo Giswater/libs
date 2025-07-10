@@ -798,9 +798,19 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             'MULTIPOINTZM': QgsWkbTypes.MultiPointZM,
             'MULTILINESTRINGZM': QgsWkbTypes.MultiLineStringZM,
             'MULTIPOLYGONZM': QgsWkbTypes.MultiPolygonZM,
+            'MULTICURVE': QgsWkbTypes.MultiCurve,
         }
         geom_key = geom_type[0].upper()
-        wkb_type = geom_type_map.get(geom_key, QgsWkbTypes.Point)
+        
+        if geom_key not in geom_type_map:
+            msg = "Geometry type ({0}) not found in layer: {1}"
+            msg_params = (geom_type[0], tablename)
+            tools_qgis.show_warning(msg, msg_params=msg_params)
+            wkb_type = QgsWkbTypes.Point
+            uri.setWkbType(wkb_type)
+            return uri, False
+
+        wkb_type = geom_type_map.get(geom_key)  
         uri.setWkbType(wkb_type)
         return uri, True
     return uri, False
