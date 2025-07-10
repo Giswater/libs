@@ -653,7 +653,6 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         return None
 
     # Iterate over all layers
-    layer = None
     if schema_name is None:
         if 'main_schema' in lib_vars.project_vars:
             schema_name = lib_vars.project_vars['main_schema']
@@ -661,12 +660,7 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
             msg = "Key not found"
             tools_log.log_warning(msg, parameter='main_schema')
 
-    for cur_layer in layers:
-        uri_table = get_layer_source_table_name(cur_layer)
-        table_schema = get_layer_schema(cur_layer)
-        if (uri_table is not None and uri_table == tablename) and schema_name in ('', None, table_schema):
-            layer = cur_layer
-            break
+    layer = find_matching_layer(layers, tablename, schema_name)
     
     if show_warning_:
         if layer is None:
@@ -682,8 +676,20 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
             msg = "Layer is broken"
             tools_log.log_info(msg, parameter=tablename)
     
-
     return layer
+
+
+def find_matching_layer(layers, tablename, schema_name):
+    for cur_layer in layers:
+        uri_table = get_layer_source_table_name(cur_layer)
+        table_schema = get_layer_schema(cur_layer)
+        if (
+            uri_table is not None and
+            uri_table == tablename and
+            schema_name in ('', None, table_schema)
+        ):
+            return cur_layer
+    return None
 
 
 def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None):
