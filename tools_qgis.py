@@ -667,13 +667,21 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         if (uri_table is not None and uri_table == tablename) and schema_name in ('', None, table_schema):
             layer = cur_layer
             break
+    
+    if show_warning_:
+        if layer is None:
+            show_warning("Layer not found", parameter=tablename)
+        elif not layer.isValid():
+            show_warning("Layer is broken", parameter=tablename)
 
-    if layer is None and show_warning_:
-        show_warning("Layer not found", parameter=tablename)
-
-    if layer is None and log_info:
-        msg = "Layer not found"
-        tools_log.log_info(msg, parameter=tablename)
+    if log_info:
+        if layer is None:
+            msg = "Layer not found"
+            tools_log.log_info(msg, parameter=tablename)
+        elif not layer.isValid():
+            msg = "Layer is broken"
+            tools_log.log_info(msg, parameter=tablename)
+    
 
     return layer
 
