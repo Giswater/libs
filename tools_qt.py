@@ -1455,37 +1455,33 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
     return value
 
 
-def manage_translation(context_name, dialog=None, log_info=False, plugin_dir=None, plugin_name=None):
-    """ Manage locale and corresponding 'i18n' file """
+def translate_am_cm(schema_name):
+    """ Translate AM and CM toolbars """
 
-    # Get locale of QGIS application
+    # Get locale and schema lang
     locale = tools_qgis.get_locale_schema()
+    lang = tools_db.get_rows(f"SELECT language FROM {schema_name}.sys_version")
 
-    if plugin_dir is None:
-        plugin_dir = lib_vars.plugin_dir
-    if plugin_name is None:
-        plugin_name = lib_vars.plugin_name
+    # Determine if translation is necessary
+    if lang == locale or locale == 'no_TR':
+        return
+    
+    # Get file path
+    plugin_dir = lib_vars.plugin_dir
+    file_path = f"{plugin_dir}{os.sep}dbmodel{os.sep}{schema_name}{os.sep}i18n{os.sep}{lang[0][0]}{os.sep}{lang[0][0]}.sql"
+    if not os.path.exists(file_path):
+        return
+    
+    # Execute SQL statements
+    with open(file_path, 'r', encoding='utf-8') as file:
+        sql = file.read()
+        statements = sql.split(';')
+        for stmt in statements:
+            if stmt.strip():
+                tools_db.execute_sql(stmt.strip(), log_sql=False, commit=True)
 
-    locale_path = os.path.join(plugin_dir, 'i18n', f'{plugin_name}_{locale}.qm')
-    if not os.path.exists(locale_path):
-        if log_info:
-            msg = "Locale not found"
-            tools_log.log_info(msg, parameter=locale_path)
-        locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name}_en_US.qm')
-        # If English locale file not found, exit function
-        # It means that probably that form has not been translated yet
-        if not os.path.exists(locale_path):
-            if log_info:
-                msg = "Locale not found"
-                tools_log.log_info(msg, parameter=locale_path)
-            return
-
-    # Add translation file
-    _add_translator(locale_path)
-
-    # If dialog is set, then translate form
-    if dialog:
-        _translate_form(dialog, context_name)
+    sql = f"UPDATE cm.sys_version SET language = '{locale}'"
+    tools_db.execute_sql(sql, log_sql=False, commit=True)
 
 
 def _should_show_exception(description):
