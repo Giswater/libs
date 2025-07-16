@@ -1669,9 +1669,25 @@ def create_datetime(object_name, allow_null=True, set_cal_popup=True, display_fo
 
 # region private functions
 
-
-def _add_translator(locale_path, log_info=False):
+def _add_translator(log_info=False):
     """ Add translation file to the list of translation files to be used for translations """
+
+     # Get locale of QGIS application
+    locale = tools_qgis.get_locale_schema()
+    print(f"locale__: {locale}")
+
+    locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name.lower()}_{locale}.qm')
+    if not os.path.exists(locale_path):
+        if log_info:
+            msg = "Locale not found"
+            tools_log.log_info(msg, parameter=locale_path)
+        locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name}_en_US.qm')
+        # If English locale file not found, exit function
+        if not os.path.exists(locale_path):
+            if log_info:
+                msg = "English locale not found"
+                tools_log.log_info(msg, parameter=locale_path)
+            return
 
     if os.path.exists(locale_path):
         translator.load(locale_path)
@@ -1685,7 +1701,7 @@ def _add_translator(locale_path, log_info=False):
             tools_log.log_info(msg, parameter=locale_path)
 
 
-def _translate_form(dialog, context_name, aux_context='ui_message'):
+def _translate_form(context_name, dialog, aux_context='ui_message'):
     """ Translate widgets of the form to current language """
 
     type_widget_list = [
