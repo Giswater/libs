@@ -1461,14 +1461,15 @@ def translate_am_cm(schema_name):
     # Get locale and schema lang
     locale = tools_qgis.get_locale_schema()
     lang = tools_db.get_rows(f"SELECT language FROM {schema_name}.sys_version")
+    lang = lang[0][0]
 
     # Determine if translation is necessary
     if lang == locale or locale == 'no_TR':
         return
     
     # Get file path
-    plugin_dir = lib_vars.plugin_dir
-    file_path = f"{plugin_dir}{os.sep}dbmodel{os.sep}{schema_name}{os.sep}i18n{os.sep}{lang[0][0]}{os.sep}{lang[0][0]}.sql"
+    plugin_dir = lib_vars.plugin_dir   
+    file_path = f"{plugin_dir}{os.sep}dbmodel{os.sep}{schema_name}{os.sep}i18n{os.sep}{lang}{os.sep}{lang}.sql"
     if not os.path.exists(file_path):
         return
     
@@ -1664,6 +1665,7 @@ def create_datetime(object_name, allow_null=True, set_cal_popup=True, display_fo
     return widget
 
 # region private functions
+
 
 def _add_translator(log_info=False):
     """ Add translation file to the list of translation files to be used for translations """
