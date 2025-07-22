@@ -13,6 +13,7 @@ import subprocess
 import webbrowser
 import re
 from chardet import detect
+from typing import Any, Iterator
 from . import tools_log
 
 
@@ -85,19 +86,27 @@ def get_relative_path(filepath, levels=1):
     return os.path.relpath(filepath, common)
 
 
-def get_values_from_dictionary(dictionary):
-    """ Return values from @dictionary """
+def get_values_from_dictionary(dictionary: dict) -> Iterator[Any]:
+    """ 
+    Return values from @dictionary 
+    
+    :param dictionary: The dictionary to get the values from.
+
+    :return Iterator[Any]: An iterator of the values of the dictionary.
+    """
 
     list_values = iter(dictionary.values())
     return list_values
 
 
-def set_boolean(param, default=True):
+def set_boolean(param: str | bool, default: bool = True) -> bool:
     """
     Receives a string and returns a bool
-        :param param: String to cast (String)
-        :param default: Value to return if the parameter is not one of the keys of the dictionary of values (Boolean)
-        :return: default if param not in bool_dict (bool)
+
+    :param param: String to cast (String)
+    :param default: Value to return if the parameter is not one of the keys of the dictionary of values (Boolean)
+
+    :return: default if param not in bool_dict (bool)
     """
 
     bool_dict = {True: True, "TRUE": True, "True": True, "true": True, "1": True,
