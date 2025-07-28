@@ -692,7 +692,7 @@ def _get_credentials_from_settings(sslmode_default):
     return credentials, True
 
 
-def get_layer_source_from_credentials(sslmode_default, layer_name='v_edit_node'):
+def get_layer_source_from_credentials(sslmode_default, layer_name='ve_node'):
     """Get database parameters from layer @layer_name or database connection settings
     sslmode_default should be (disable, allow, prefer, require, verify-ca, verify-full)"""
 

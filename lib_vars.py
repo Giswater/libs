@@ -22,7 +22,7 @@ project_vars['main_schema'] = None      # gwMainSchema
 project_vars['project_role'] = None     # gwProjectRole
 project_vars['project_type'] = None     # gwProjectType
 project_vars['store_credentials'] = None  # gwStoreCredentials
-data_epsg = None                        # SRID retrieved from QGIS project layer "v_edit_node"
+data_epsg = None                        # SRID retrieved from QGIS project layer "ve_node"
 project_epsg = None                     # EPSG of QGIS project
 
 # region Dynamic Variables (variables may change value during user's session)
