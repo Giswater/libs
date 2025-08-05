@@ -514,6 +514,8 @@ def set_combo_value(combo, value, index, add_new=True):
         :param add_new: if True it will add the value even if it's not in the combo
     """
 
+    if combo is None:
+        return False
     for i in range(0, combo.count()):
         elem = combo.itemData(i)
         if elem is not None and str(value) == str(elem[index]):
@@ -816,7 +818,7 @@ def set_completer_object(
             item = QStandardItem(idval)
             item.setData(idkey, Qt.UserRole)
             model.appendRow(item)
-        
+
         completer.activated[str].connect(on_completion)
 
     elif isinstance(model, QStringListModel):
@@ -1315,7 +1317,7 @@ def show_warning_open_file(text, inf_text, file_path, context_name="giswater", t
     iface.messageBar().pushWidget(widget, 1)
 
 
-def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False, 
+def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False,
                   msg_params=None, title_params=None):
     """ Ask question to the user """
 
@@ -1361,7 +1363,7 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
         return False
 
 
-def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None, 
+def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None,
                   msg_params=None, title_params=None):
     """ Show information box to the user """
 
@@ -1466,13 +1468,13 @@ def translate_am_cm(schema_name):
     # Determine if translation is necessary
     if lang == locale or locale == 'no_TR':
         return
-    
+
     # Get file path
-    plugin_dir = lib_vars.plugin_dir   
+    plugin_dir = lib_vars.plugin_dir
     file_path = f"{plugin_dir}{os.sep}dbmodel{os.sep}{schema_name}{os.sep}i18n{os.sep}{lang}{os.sep}{lang}.sql"
     if not os.path.exists(file_path):
         return
-    
+
     # Execute SQL statements
     with open(file_path, 'r', encoding='utf-8') as file:
         sql = file.read()
@@ -1531,7 +1533,7 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
 
 def pause():
     """Pause execution until user clicks accept on dialog"""
-    
+
     dlg_info.btn_accept.setVisible(True)
     dlg_info.btn_close.setVisible(False)
     dlg_info.btn_accept.clicked.connect(lambda: dlg_info.close())
