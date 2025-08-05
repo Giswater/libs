@@ -13,7 +13,7 @@ import subprocess
 import webbrowser
 import re
 from chardet import detect
-from typing import Any, Iterator
+from typing import Any, Iterator, Union
 from . import tools_log
 
 
@@ -99,7 +99,7 @@ def get_values_from_dictionary(dictionary: dict) -> Iterator[Any]:
     return list_values
 
 
-def set_boolean(param: str | bool, default: bool = True) -> bool:
+def set_boolean(param: Union[str, bool], default: bool = True) -> bool:
     """
     Receives a string and returns a bool
 
