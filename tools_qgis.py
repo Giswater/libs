@@ -1491,6 +1491,7 @@ def get_epsg():
         epsg = None
     return epsg
 
+
 def get_composer(removed=None):
     """ Get all composers from current QGis project """
 
