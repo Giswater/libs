@@ -111,7 +111,10 @@ class GwEditDialog(QDialog):
         elif widget_type == "QComboBox":
             self.widget = QComboBox(self)
             if options:
-                self.widget.addItems(options)
+                try:
+                    self.widget.addItems(options)
+                except Exception:
+                    fill_combo_values(self.widget, options)
         elif widget_type == "QCheckBox":
             self.widget = QCheckBox(self)
         else:
@@ -138,9 +141,9 @@ class GwEditDialog(QDialog):
         elif isinstance(self.widget, QTextEdit):
             return self.widget.toPlainText()
         elif isinstance(self.widget, QComboBox):
-            return self.widget.currentText()
+            return get_combo_value(self, self.widget)
         elif isinstance(self.widget, QCheckBox):
-            return self.widget.isChecked()
+            return is_checked(self, self.widget)
         else:
             return None
 
