@@ -23,7 +23,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog,
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsPrintLayout
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -1491,6 +1491,23 @@ def get_epsg():
         epsg = None
     return epsg
 
+def get_composer(removed=None):
+    """ Get all composers from current QGis project """
+
+    composers = '"{'
+    active_composers = get_composers_list()
+
+    for composer in active_composers:
+        if type(composer) is QgsPrintLayout:  # TODO: use isinstance(composer, QgsPrintLayout)
+            if composer != removed and composer.name():
+                cur = composer.name()
+                composers += cur + ', '
+    if len(composers) > 2:
+        composers = composers[:-2] + '}"'
+    else:
+        composers += '}"'
+    return composers
+    
 
 # region private functions
 
