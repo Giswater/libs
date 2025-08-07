@@ -630,18 +630,27 @@ def get_layer_schema(layer):
 def get_primary_key(layer=None):
     """ Get primary key of selected layer """
 
-    uri_pk = None
     if layer is None:
         layer = iface.activeLayer()
     if layer is None:
-        return uri_pk
-    uri = layer.dataProvider().dataSourceUri().lower()
-    pos_ini = uri.find('key=')
-    pos_end = uri.rfind('srid=')
-    if pos_ini != -1:
-        uri_pk = uri[pos_ini + 5:pos_end - 2]
-
-    return uri_pk
+        return None
+    
+    # Check if it's a PostgreSQL layer
+    if layer.providerType() != 'postgres':
+        return None
+    
+    try:
+        uri = layer.dataProvider().dataSourceUri()
+        
+        # Parse URI and find key parameter
+        for part in shlex.split(uri):
+            if part.startswith('key='):
+                return part.split('=', 1)[1]
+        
+        return None
+        
+    except Exception:
+        return None
 
 
 def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schema_name=None):
