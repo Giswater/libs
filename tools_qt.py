@@ -344,21 +344,24 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
 def set_widget_text(dialog, widget, text, msg_params=None):
     """ Set text to widget """
 
-    if type(widget) is str:
-        widget = dialog.findChild(QWidget, widget)
-    if widget is None:
-        return
+    try:
+        if type(widget) is str:
+            widget = dialog.findChild(QWidget, widget)
+        if widget is None:
+            return
 
-    if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser, QPlainTextEdit):
-        _set_text_for_text_widgets(widget, text, msg_params)
-    elif type(widget) in (QDoubleSpinBox, QSpinBox):
-        _set_text_for_spinbox(widget, text)
-    elif isinstance(widget, QComboBox):
-        set_selected_item(dialog, widget, text)
-    elif type(widget) is QTimeEdit:
-        set_time(dialog, widget, text)
-    elif type(widget) is QCheckBox:
-        set_checked(dialog, widget, text)
+        if type(widget) in (QLabel, QLineEdit, QTextEdit, QPushButton, QTextBrowser, QPlainTextEdit):
+            _set_text_for_text_widgets(widget, text, msg_params)
+        elif type(widget) in (QDoubleSpinBox, QSpinBox):
+            _set_text_for_spinbox(widget, text)
+        elif isinstance(widget, QComboBox):
+            set_selected_item(dialog, widget, text)
+        elif type(widget) is QTimeEdit:
+            set_time(dialog, widget, text)
+        elif type(widget) is QCheckBox:
+            set_checked(dialog, widget, text)
+    except RuntimeError:
+        pass
 
 
 def is_checked(dialog, widget):
