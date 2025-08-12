@@ -582,7 +582,7 @@ def get_layer_source_table_name(layer):
         return None
 
     provider = layer.providerType()
-    if provider == 'postgres':
+    if provider in ['postgres', 'gdal']:
         uri = layer.dataProvider().dataSourceUri().lower()
         pos_ini = uri.find('table=')
         total = len(uri)
