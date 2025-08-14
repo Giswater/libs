@@ -448,21 +448,34 @@ def set_widget_enabled(dialog, widget, enabled=True):
         widget.setEnabled(enabled)
 
 
-def add_image(dialog, widget, cat_shape):
+def add_image(dialog, widget, path_img):
     """  Set pictures for UD """
 
-    element = cat_shape.lower()
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
     if type(widget) is QLabel:
-        plugin_dir = os.path.dirname(__file__)
-        pic_file = os.path.join(plugin_dir, f'resources{os.sep}png', '' + element + '')
-        pixmap = QPixmap(pic_file)
+        
+        # Check if file exists
+        if not os.path.exists(path_img):
+            return
+            
+        pixmap = QPixmap(path_img)
+        
+        if pixmap.isNull():
+            return
+            
+        # Set the pixmap
         widget.setPixmap(pixmap)
+        
+        # Ensure the label is visible and properly sized
+        widget.setVisible(True)
         widget.show()
-
+        
+        # Force update
+        widget.update()
+        
 
 def set_autocompleter(combobox, list_items=None):
     """ Iterate over the items in the QCombobox, create a list,
