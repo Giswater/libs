@@ -23,7 +23,7 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog,
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsPrintLayout
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsPrintLayout, Qgis
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -725,6 +725,23 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
         third_group = find_toc_group(second_group, sub_sub_group) if second_group and sub_sub_group else None
 
     _add_layer_to_group(layer, first_group, second_group, third_group)
+
+
+def hide_node_from_treeview(node, root, ltv):
+    #root = QgsProject.instance().layerTreeRoot()
+    #ltv = global_vars.iface.layerTreeView()
+    # Find the layer tree node for this layer
+    index = get_node_index(node, ltv)
+    ltv.setRowHidden(index.row(), index.parent(), True)
+    node.setCustomProperty('nodeHidden', 'true')
+    ltv.setCurrentIndex(get_node_index(root, ltv))
+    
+
+def get_node_index(node, ltv):
+    if Qgis.QGIS_VERSION_INT >= 31800:
+        return ltv.node2index(node)  # Takes proxy model into account, introduced in QGIS 3.18
+    else:  # Older QGIS versions
+        return ltv.layerTreeModel().node2index(node)
 
 
 def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
