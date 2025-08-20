@@ -23,7 +23,8 @@ from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog,
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, QgsPrintLayout, Qgis
+    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, \
+    QgsPrintLayout, Qgis, QgsLayerTreeGroup, QgsLayerTreeLayer
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -728,9 +729,7 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
 
 
 def hide_node_from_treeview(node, root, ltv):
-    #root = QgsProject.instance().layerTreeRoot()
-    #ltv = global_vars.iface.layerTreeView()
-    # Find the layer tree node for this layer
+    # Hide the node from the tree view
     index = get_node_index(node, ltv)
     ltv.setRowHidden(index.row(), index.parent(), True)
     node.setCustomProperty('nodeHidden', 'true')
