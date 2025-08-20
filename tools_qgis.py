@@ -24,7 +24,7 @@ from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
     QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, \
-    QgsPrintLayout, Qgis, QgsLayerTreeGroup, QgsLayerTreeLayer
+    QgsPrintLayout, Qgis
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -738,8 +738,9 @@ def hide_node_from_treeview(node, root, ltv):
 
 def get_node_index(node, ltv):
     if Qgis.QGIS_VERSION_INT >= 31800:
-        return ltv.node2index(node)  # Takes proxy model into account, introduced in QGIS 3.18
-    else:  # Older QGIS versions
+        return ltv.node2index(node)
+    else:
+        # Older QGIS versions
         return ltv.layerTreeModel().node2index(node)
 
 
