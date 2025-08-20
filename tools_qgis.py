@@ -744,6 +744,15 @@ def get_node_index(node, ltv):
         return ltv.layerTreeModel().node2index(node)
 
 
+def restore_hidden_nodes():
+    root = QgsProject.instance().layerTreeRoot()
+    ltv = iface.layerTreeView()
+
+    for node in root.children():
+        if node.customProperty('nodeHidden', '') == 'true':
+            hide_node_from_treeview(node, root, ltv)
+
+
 def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
                          key_column: Optional[str] = None, geom_column: Optional[str] = "the_geom",
                          group: Optional[str] = None):
