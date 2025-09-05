@@ -21,7 +21,7 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QTextEdit, \
     QDialogButtonBox
 from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
-    QgsSnappingUtils, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
+    QgsSnappingUtils, QgsSnappingConfig, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
     QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, \
     QgsPrintLayout, Qgis
@@ -813,6 +813,34 @@ def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
         snapping_type = QgsPointLocator.All
 
     QgsSnappingUtils.LayerConfig(layer, snapping_type, tolerance, QgsTolerance.Pixels)
+
+
+def set_project_snapping_settings():
+    """ Set project snapping settings """
+    project = QgsProject.instance()
+    cfg = QgsSnappingConfig(project.snappingConfig())
+
+    # Global snapping ON, all layers, 15 px
+    cfg.setEnabled(True)
+    cfg.setMode(QgsSnappingConfig.AllLayers)
+    cfg.setTolerance(15.0)
+    cfg.setUnits(QgsTolerance.Pixels)
+
+    # Vertex + Segment
+    try:
+        # QGIS ≥ 3.22+
+        flags = Qgis.SnappingTypes(Qgis.SnappingType.Vertex | Qgis.SnappingType.Segment)
+        cfg.setTypeFlag(flags)
+    except Exception:
+        # Older API
+        cfg.setTypeFlag(QgsSnappingConfig.VertexFlag | QgsSnappingConfig.SegmentFlag)
+
+    project.setSnappingConfig(cfg)
+    mc = iface.mapCanvas()
+    if mc:
+        mc.snappingUtils().setConfig(cfg)
+
+    return True
 
 
 def select_features_by_ids(feature_type, expr, layers=None):
