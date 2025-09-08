@@ -815,25 +815,49 @@ def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
     QgsSnappingUtils.LayerConfig(layer, snapping_type, tolerance, QgsTolerance.Pixels)
 
 
-def set_project_snapping_settings():
-    """ Set project snapping settings """
+def set_project_snapping_settings(enabled=None, mode=None, tolerance=None, units=None, snapping_types=None):
+    """
+    Set project snapping settings.
+
+    - On project creation (no arguments provided): Applies a full default configuration.
+    - On project load (arguments provided): Updates only the specified settings.
+    """
     project = QgsProject.instance()
-    cfg = QgsSnappingConfig(project.snappingConfig())
+    cfg = project.snappingConfig()
 
-    # Global snapping ON, all layers, 15 px
-    cfg.setEnabled(True)
-    cfg.setMode(QgsSnappingConfig.AllLayers)
-    cfg.setTolerance(15.0)
-    cfg.setUnits(QgsTolerance.Pixels)
+    is_create_project_mode = all(arg is None for arg in (enabled, mode, tolerance, units, snapping_types))
 
-    # Vertex + Segment
-    try:
-        # QGIS ≥ 3.22+
-        flags = Qgis.SnappingTypes(Qgis.SnappingType.Vertex | Qgis.SnappingType.Segment)
-        cfg.setTypeFlag(flags)
-    except Exception:
-        # Older API
-        cfg.setTypeFlag(QgsSnappingConfig.VertexFlag | QgsSnappingConfig.SegmentFlag)
+    if is_create_project_mode:
+        # Apply a comprehensive default configuration for new projects.
+        cfg.setEnabled(True)
+        cfg.setMode(QgsSnappingConfig.AllLayers)
+        cfg.setTolerance(15.0)
+        cfg.setUnits(QgsTolerance.Pixels)
+        try:
+            # QGIS >= 3.22 API for snapping types
+            flags = Qgis.SnappingTypes(Qgis.SnappingType.Vertex | Qgis.SnappingType.Segment)
+            cfg.setTypeFlag(flags)
+        except AttributeError:
+            # Fallback for older QGIS APIs
+            cfg.setTypeFlag(QgsSnappingConfig.VertexFlag | QgsSnappingConfig.SegmentFlag)
+    else:
+        # Apply only the settings that were explicitly passed to the function.
+        if enabled is not None:
+            cfg.setEnabled(enabled)
+        if mode is not None:
+            cfg.setMode(mode)
+        if tolerance is not None:
+            cfg.setTolerance(tolerance)
+        if units is not None:
+            cfg.setUnits(units)
+        if snapping_types is not None:
+            try:
+                # QGIS >= 3.22 API
+                flags = Qgis.SnappingTypes(snapping_types)
+                cfg.setTypeFlag(flags)
+            except AttributeError:
+                # Fallback for older QGIS APIs
+                cfg.setTypeFlag(snapping_types)
 
     project.setSnappingConfig(cfg)
     mc = iface.mapCanvas()
