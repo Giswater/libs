@@ -33,8 +33,6 @@ session_vars['threads'] = []               # An instance of the different thread
 session_vars['dialog_docker'] = None       # An instance of GwDocker from "/core/ui/docker.py" which is used to mount a docker form
 session_vars['info_docker'] = None         # An instance of current status of the info docker form configured by user. Can be True or False
 session_vars['docker_type'] = None         # An instance of current status of the docker form configured by user. Can be configured "qgis_info_docker" and "qgis_form_docker"
-session_vars['current_selections'] = None  # An instance of the current selections docker.
-session_vars['current_psector'] = None 
 session_vars['logged_status'] = None       # An instance of connection status. Can be True or False
 session_vars['last_focus'] = None          # An instance of the last focused dialog's tag
 # endregion
