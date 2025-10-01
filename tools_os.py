@@ -195,17 +195,21 @@ def get_credentials_from_config(section, config_file) -> dict:
     credentials = {'host': None, 'port': None, 'dbname': None, 'user': None, 'password': None, 'sslmode': None}
     try:
         with open(config_file, 'r') as file:
-            config_parser = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
-            config_parser.read_file(file)
-            if config_parser.has_section(section):
-                params = config_parser.items(section)
-                if not params:
-                    msg = "No parameters found in section {0}"
-                    msg_params = (section,)
-                    tools_log.log_warning(msg, msg_params=msg_params)
-                    return credentials
-                for param in params:
-                    credentials[param[0]] = param[1]
+            # Strip leading whitespace from each line to handle malformed section headers
+            cleaned_lines = [line.lstrip() for line in file]
+
+        config_parser = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
+        config_parser.read_string(''.join(cleaned_lines))
+
+        if config_parser.has_section(section):
+            params = config_parser.items(section)
+            if not params:
+                msg = "No parameters found in section {0}"
+                msg_params = (section,)
+                tools_log.log_warning(msg, msg_params=msg_params)
+                return credentials
+            for param in params:
+                credentials[param[0]] = param[1]
     except (configparser.DuplicateSectionError, FileNotFoundError) as e:
         tools_log.log_warning(e)
     except TypeError:
