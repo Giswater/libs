@@ -321,7 +321,7 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
 
-    if not widget:
+    if widget is None:
         return "null" if return_string_null else ""
 
     text = None
