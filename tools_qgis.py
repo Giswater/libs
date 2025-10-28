@@ -1555,9 +1555,9 @@ def check_query_layer(layer):
         # TODO:: Find differences between PostgreSQL and query layers, and replace this if condition.
         table_uri = layer.dataProvider().dataSourceUri()
         if layer is None \
-                or getattr(layer, 'isSqlQuery', False) \
+                or type(layer) is not QgsVectorLayer \
                 or 'SELECT row_number() over ()' in str(table_uri) \
-                or type(layer) is not QgsVectorLayer:
+                or layer.isSqlQuery():
             return False
         return True
     except Exception:
