@@ -62,7 +62,7 @@ def get_feature_by_expr(layer, expr_filter):
 
 
 def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
-                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None, 
+                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None,
                  title_params=None):
     """
     Show message to the user with selected message level
@@ -206,7 +206,7 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", 
         :param logger_file: Whether it should log the message in a file or not (bool)
         :param title: The title of the message (String) """
 
-    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog, 
+    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog,
                  msg_params=msg_params, title_params=title_params)
 
 
@@ -255,7 +255,7 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
                  msg_params=msg_params, title_params=title_params)
 
 
-def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200, 
+def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200,
                            context_name='giswater'):
     """
     Displays a dialog with the SQL context in a more detailed, error-specific format,
@@ -635,21 +635,21 @@ def get_primary_key(layer=None):
         layer = iface.activeLayer()
     if layer is None:
         return None
-    
+
     # Check if it's a PostgreSQL layer
     if layer.providerType() != 'postgres':
         return None
-    
+
     try:
         uri = layer.dataProvider().dataSourceUri()
-        
+
         # Parse URI and find key parameter
         for part in shlex.split(uri):
             if part.startswith('key='):
                 return part.split('=', 1)[1]
-        
+
         return None
-        
+
     except Exception:
         return None
 
@@ -671,7 +671,7 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
             tools_log.log_warning(msg, parameter='main_schema')
 
     layer = find_matching_layer(layers, tablename, schema_name)
-    
+
     if show_warning_:
         if layer is None:
             show_warning("Layer not found", parameter=tablename)
@@ -685,7 +685,7 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
         elif not layer.isValid():
             msg = "Layer is broken"
             tools_log.log_info(msg, parameter=tablename)
-    
+
     return layer
 
 
@@ -734,7 +734,7 @@ def hide_node_from_treeview(node, root, ltv):
     ltv.setRowHidden(index.row(), index.parent(), True)
     node.setCustomProperty('nodeHidden', 'true')
     ltv.setCurrentIndex(get_node_index(root, ltv))
-    
+
 
 def get_node_index(node, ltv):
     if Qgis.QGIS_VERSION_INT >= 31800:
@@ -1591,7 +1591,7 @@ def get_composer(removed=None):
     else:
         composers += '}"'
     return composers
-    
+
 
 # region private functions
 
