@@ -1336,9 +1336,56 @@ def show_warning_open_file(text, inf_text, file_path, context_name="giswater", t
     iface.messageBar().pushWidget(widget, 1)
 
 
+def _manage_messagebox_buttons(buttons):
+    """ Convert list of button names to QMessageBox flags and determine default button
+    
+    Args:
+        buttons: List of button names like ["Yes", "No"] or None for default ["Ok", "Cancel"]
+        
+    Returns:
+        tuple: (button_flags, default_button)
+    """
+    button_map = {
+        "Yes": QMessageBox.Yes,
+        "No": QMessageBox.No,
+        "Ok": QMessageBox.Ok,
+        "Cancel": QMessageBox.Cancel,
+        "Save": QMessageBox.Save,
+        "Discard": QMessageBox.Discard,
+        "Close": QMessageBox.Close,
+        "Apply": QMessageBox.Apply,
+    }
+    
+    # Set buttons (default to Ok/Cancel if not specified)
+    if buttons is None:
+        buttons = ["Ok", "Cancel"]
+    
+    button_flags = QMessageBox.NoButton
+    for btn_name in buttons:
+        if btn_name in button_map:
+            button_flags |= button_map[btn_name]
+    
+    # Set default button (first positive action button)
+    if "Yes" in buttons:
+        default_button = QMessageBox.Yes
+    elif "Ok" in buttons:
+        default_button = QMessageBox.Ok
+    elif "Save" in buttons:
+        default_button = QMessageBox.Save
+    else:
+        default_button = button_map.get(buttons[0], QMessageBox.Ok)
+    
+    return button_flags, default_button
+
+
 def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False,
-                  msg_params=None, title_params=None):
-    """ Ask question to the user """
+                  msg_params=None, title_params=None, buttons=None):
+    """ Ask question to the user 
+    
+    Args:
+        buttons: List of button names like ["Yes", "No"] or ["Save", "Discard"]. 
+                 Defaults to ["Ok", "Cancel"] if None.
+    """
 
     # Expert mode does not ask and accept all actions
     if lib_vars.user_level['level'] not in (None, 'None') and not force_action:
@@ -1362,8 +1409,11 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
         if len(inf_text) > 500:
             inf_text = inf_text[:500] + "\n[...]"
         msg_box.setInformativeText(inf_text)
-    msg_box.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-    msg_box.setDefaultButton(QMessageBox.Ok)
+    
+    # Get button configuration
+    button_flags, default_button = _manage_messagebox_buttons(buttons)
+    msg_box.setStandardButtons(button_flags)
+    msg_box.setDefaultButton(default_button)
     msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
 
     # Set icon for the type of message
@@ -1376,9 +1426,10 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
     msg_box.setWindowIcon(giswater_icon)
 
     ret = msg_box.exec_()
-    if ret == QMessageBox.Ok:
+    # Return True for positive actions (Yes, Ok, Save, Apply)
+    if ret in (QMessageBox.Ok, QMessageBox.Yes, QMessageBox.Save, QMessageBox.Apply):
         return True
-    elif ret == QMessageBox.Discard:
+    else:
         return False
 
 
