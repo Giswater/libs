@@ -34,10 +34,10 @@ from . import lib_vars
 user_parameters = {'log_sql': None, 'show_message_durations': None, 'aux_context': 'ui_message'}
 
 # Define message level constants
-MESSAGE_LEVEL_INFO = 0  # Blue
-MESSAGE_LEVEL_WARNING = 1  # Yellow
-MESSAGE_LEVEL_CRITICAL = 2  # Red
-MESSAGE_LEVEL_SUCCESS = 3  # Green
+MESSAGE_LEVEL_INFO = Qgis.MessageLevel.Info  # Blue
+MESSAGE_LEVEL_WARNING = Qgis.MessageLevel.Warning  # Yellow
+MESSAGE_LEVEL_CRITICAL = Qgis.MessageLevel.Critical  # Red
+MESSAGE_LEVEL_SUCCESS = Qgis.MessageLevel.Success  # Green
 
 # Define message duration constants
 DEFAULT_MESSAGE_DURATION = 10
