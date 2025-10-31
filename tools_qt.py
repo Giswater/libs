@@ -838,7 +838,7 @@ def set_completer_object(
             item.setData(idkey, Qt.ItemDataRole.UserRole)
             model.appendRow(item)
 
-        completer.activated[str].connect(on_completion)
+        completer.textActivated[str].connect(on_completion)
 
     elif isinstance(model, QStringListModel):
         model.setStringList(list_items)  # Not recommended for idval/id cases
