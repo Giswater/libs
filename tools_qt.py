@@ -16,7 +16,7 @@ import webbrowser
 from functools import partial
 from encodings.aliases import aliases
 from warnings import warn
-from sip import isdeleted
+from qgis.PyQt.sip import isdeleted
 from pathlib import Path
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegularExpression, \
     pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
