@@ -198,7 +198,7 @@ def get_credentials_from_config(section, config_file) -> dict:
             # Strip leading whitespace from each line to handle malformed section headers
             cleaned_lines = [line.lstrip() for line in file]
 
-        config_parser = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
+        config_parser = configparser.ConfigParser(comment_prefixes=[";", "#"], allow_no_value=True, strict=False)
         config_parser.read_string(''.join(cleaned_lines))
 
         if config_parser.has_section(section):
