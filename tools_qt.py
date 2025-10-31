@@ -18,9 +18,9 @@ from encodings.aliases import aliases
 from warnings import warn
 from sip import isdeleted
 from pathlib import Path
-from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegExp, \
+from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegularExpression, \
     pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
-from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegExpValidator, \
+from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegularExpressionValidator, \
     QStandardItem, QStandardItemModel
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
@@ -86,7 +86,7 @@ class GwEditDialog(QDialog):
         edit_dialog = GwEditDialog(dialog, title=f"Edit {header}", 
                                    label_text=f"Set new '{header}' value for result '{result_id}':", 
                                    widget_type="QTextEdit", initial_value=value)
-        if edit_dialog.exec_() == QDialog.Accepted:
+        if edit_dialog.exec_() == QDialog.DialogCode.Accepted:
             new_value = edit_dialog.get_value()
             self._update_data(result_id, columnname, new_value)
 ```
@@ -153,11 +153,11 @@ class GwEditDialog(QDialog):
 
 QtMatchFlag = Literal['starts', 'contains', 'ends', 'exact', 'regex']
 match_flags: Dict[QtMatchFlag, Qt.MatchFlag] = {
-    'starts': Qt.MatchStartsWith,
-    'contains': Qt.MatchContains,
-    'ends': Qt.MatchEndsWith,
-    'exact': Qt.MatchExactly,
-    'regex': Qt.MatchRegularExpression,
+    'starts': Qt.MatchFlag.MatchStartsWith,
+    'contains': Qt.MatchFlag.MatchContains,
+    'ends': Qt.MatchFlag.MatchEndsWith,
+    'exact': Qt.MatchFlag.MatchExactly,
+    'regex': Qt.MatchFlag.MatchRegularExpression,
 }
 
 
@@ -456,26 +456,26 @@ def add_image(dialog, widget, path_img):
     if widget is None:
         return
     if type(widget) is QLabel:
-        
+
         # Check if file exists
         if not os.path.exists(path_img):
             return
-            
+
         pixmap = QPixmap(path_img)
-        
+
         if pixmap.isNull():
             return
-            
+
         # Set the pixmap
         widget.setPixmap(pixmap)
-        
+
         # Ensure the label is visible and properly sized
         widget.setVisible(True)
         widget.show()
-        
+
         # Force update
         widget.update()
-        
+
 
 def set_autocompleter(combobox, list_items=None):
     """ Iterate over the items in the QCombobox, create a list,
@@ -492,7 +492,7 @@ def set_autocompleter(combobox, list_items=None):
     # Set up the completer without changing the combobox's model
     completer = QCompleter(proxy_model, combobox)
     completer.setCompletionColumn(0)
-    completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+    completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
     combobox.setCompleter(completer)
 
 
@@ -614,7 +614,7 @@ def set_combo_item_unselectable_by_id(qcombo, list_id=[]):
     for x in range(0, qcombo.count()):
         if x in list_id:
             index = qcombo.model().index(x, 0)
-            qcombo.model().setData(index, 0, Qt.UserRole - 1)
+            qcombo.model().setData(index, 0, Qt.ItemDataRole.UserRole - 1)
 
 
 def set_combo_item_selectable_by_id(qcombo, list_id=[]):
@@ -623,7 +623,7 @@ def set_combo_item_selectable_by_id(qcombo, list_id=[]):
     for x in range(0, qcombo.count()):
         if x in list_id:
             index = qcombo.model().index(x, 0)
-            qcombo.model().setData(index, (1 | 32), Qt.UserRole - 1)
+            qcombo.model().setData(index, (1 | 32), Qt.ItemDataRole.UserRole - 1)
 
 
 def set_combo_item_select_unselectable(qcombo, list_id=[], column=0, opt=0):
@@ -639,7 +639,7 @@ def set_combo_item_select_unselectable(qcombo, list_id=[], column=0, opt=0):
         elem = qcombo.itemData(x)
         if str(elem[column]) in list_id:
             index = qcombo.model().index(x, 0)
-            qcombo.model().setData(index, opt, Qt.UserRole - 1)
+            qcombo.model().setData(index, opt, Qt.ItemDataRole.UserRole - 1)
 
 
 def remove_tab(tab_widget, tab_name):
@@ -660,7 +660,7 @@ def enable_tab_by_tab_name(tab_widget, tab_name, enable):
             break
 
 
-def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator().StandardNotation,
+def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator.Notation.StandardNotation,
                      locale=None):
     """
     Create and apply a validator for doubles to ensure the number is within a maximum and minimum values
@@ -696,9 +696,9 @@ def enable_dialog(dialog, enable, ignore_widgets=['', None]):
                 widget.setEnabled(enable)
 
 
-def set_tableview_config(widget, selection=QAbstractItemView.SelectRows, edit_triggers=QTableView.NoEditTriggers,
+def set_tableview_config(widget, selection=QAbstractItemView.SelectionBehavior.SelectRows, edit_triggers=QTableView.EditTrigger.NoEditTriggers,
                          sectionResizeMode=3, stretchLastSection=True, sortingEnabled=True,
-                         selectionMode=QAbstractItemView.ExtendedSelection):
+                         selectionMode=QAbstractItemView.SelectionMode.ExtendedSelection):
     """ Set QTableView configurations """
 
     widget.setSelectionBehavior(selection)
@@ -716,7 +716,7 @@ def get_col_index_by_col_name(qtable, column_name):
     model = qtable.model()
     columns_dict = qtable.property('columns')
     if not columns_dict:
-        columns_dict = {model.headerData(i, Qt.Horizontal): model.headerData(i, Qt.Horizontal) for i in range(model.columnCount())}  # noqa: E501
+        columns_dict = {model.headerData(i, Qt.Orientation.Horizontal): model.headerData(i, Qt.Orientation.Horizontal) for i in range(model.columnCount())}  # noqa: E501
         qtable.setProperty('columns', columns_dict)
     column_index = -1
     try:
@@ -724,7 +724,7 @@ def get_col_index_by_col_name(qtable, column_name):
         column_index = record.indexOf(column_name)
     except AttributeError:
         for x in range(0, model.columnCount()):
-            if columns_dict.get(model.headerData(x, Qt.Horizontal)) == column_name:
+            if columns_dict.get(model.headerData(x, Qt.Orientation.Horizontal)) == column_name:
                 column_index = x
                 break
 
@@ -806,16 +806,16 @@ def set_completer_object(
     This function is typically used to provide autocomplete for fields like <table_object>_id,
     where the completion list is derived from the selected table_object.
     """
-    completer.setCaseSensitivity(Qt.CaseInsensitive)
+    completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setMaxVisibleItems(max_visible)
-    completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+    completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
 
     # --- Store the selected ID on completion ---
     def on_completion(text: str):
         for row in range(model.rowCount()):
             item = model.item(row)
             if item.text() == text:
-                selected_id = item.data(Qt.UserRole)
+                selected_id = item.data(Qt.ItemDataRole.UserRole)
                 widget.setProperty("selected_id", selected_id)  # store the ID
                 break
 
@@ -835,7 +835,7 @@ def set_completer_object(
 
             idkey = item_dict['id']
             item = QStandardItem(idval)
-            item.setData(idkey, Qt.UserRole)
+            item.setData(idkey, Qt.ItemDataRole.UserRole)
             model.appendRow(item)
 
         completer.activated[str].connect(on_completion)
@@ -866,13 +866,13 @@ def set_calendar_empty(widget):
 
 def add_horizontal_spacer():
 
-    widget = QSpacerItem(10, 10, QSizePolicy.Expanding, QSizePolicy.Minimum)
+    widget = QSpacerItem(10, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
     return widget
 
 
 def add_verticalspacer():
 
-    widget = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    widget = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     return widget
 
 
@@ -968,14 +968,14 @@ def check_regex(widget, reg_exp, button, placeholder, text):
             button.setEnabled(True)
 
 
-def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableModel.OnManualSubmit,
-               sort_order=Qt.AscendingOrder, schema_name=None):
+def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableModel.EditStrategy.OnManualSubmit,
+               sort_order=Qt.SortOrder.AscendingOrder, schema_name=None):
     """ Set a model with selected filter. Attach that model to selected table
     :param qtable: tableview where set the model (QTableView)
     :param table_name: database table name or view name (String)
     :param expr_filter: expression to filter the model (String)
-    :param edit_strategy: (QSqlTableModel.OnFieldChange, QSqlTableModel.OnManualSubmit, QSqlTableModel.OnRowChange)
-    :param sort_order: can be 0 or 1 (Qt.AscendingOrder or Qt.AscendingOrder)
+    :param edit_strategy: (QSqlTableModel.EditStrategy.OnFieldChange, QSqlTableModel.EditStrategy.OnManualSubmit, QSqlTableModel.EditStrategy.OnRowChange)
+    :param sort_order: can be 0 or 1 (Qt.SortOrder.AscendingOrder or Qt.SortOrder.AscendingOrder)
     :return:
     """
     if not schema_name and lib_vars.schema_name and lib_vars.schema_name not in table_name:
@@ -1030,7 +1030,7 @@ def set_selection_behavior(dialog):
     # Get objects of type: QTableView
     widget_list = dialog.findChildren(QTableView)
     for widget in widget_list:
-        widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        widget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         widget.horizontalHeader().setSectionResizeMode(3)
         widget.horizontalHeader().setStretchLastSection(True)
 
@@ -1046,7 +1046,7 @@ def get_folder_path(dialog, widget):
     # Open dialog to select folder
     os.chdir(folder_path)
     file_dialog = QFileDialog()
-    file_dialog.setFileMode(QFileDialog.Directory)
+    file_dialog.setFileMode(QFileDialog.FileMode.Directory)
     message = "Select folder"
     folder_path = file_dialog.getExistingDirectory(
         parent=None, caption=tr(message), directory=folder_path)
@@ -1147,10 +1147,10 @@ def set_completer_lineedit(qlineedit, list_items):
     """
 
     completer = QCompleter()
-    completer.setCaseSensitivity(Qt.CaseInsensitive)
+    completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setMaxVisibleItems(10)
     completer.setCompletionMode(0)
-    completer.setFilterMode(Qt.MatchContains)
+    completer.setFilterMode(Qt.MatchFlag.MatchContains)
     completer.popup().setStyleSheet("color: black;")
     qlineedit.setCompleter(completer)
     model = QStringListModel()
@@ -1171,7 +1171,7 @@ def set_completer_rows(widget, rows, filter_mode: QtMatchFlag = 'starts'):
 
     # Set completer and model: add autocomplete in the widget
     completer = QCompleter()
-    completer.setCaseSensitivity(Qt.CaseInsensitive)
+    completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setFilterMode(match_flags.get(filter_mode))
     widget.setCompleter(completer)
     model = QStringListModel()
@@ -1309,7 +1309,7 @@ def show_details(detail_text, title=None, inf_text=None, text_params=None, title
 
     iface.messageBar().clearWidgets()
     msg_box = QMessageBox()
-    msg_box.setIcon(QMessageBox.Information)
+    msg_box.setIcon(QMessageBox.Icon.Information)
     if detail_text:
         detail_text = tr(detail_text, list_params=text_params)
         msg_box.setText(detail_text)
@@ -1319,10 +1319,10 @@ def show_details(detail_text, title=None, inf_text=None, text_params=None, title
     if inf_text:
         inf_text = tr(inf_text)
         msg_box.setInformativeText(inf_text)
-    msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
-    msg_box.setStandardButtons(QMessageBox.Ok)
-    msg_box.setDefaultButton(QMessageBox.Ok)
-    msg_box.exec_()
+    msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+    msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
+    msg_box.exec()
 
 
 def show_warning_open_file(text, inf_text, file_path, context_name="giswater", text_params=None):
@@ -1346,35 +1346,35 @@ def _manage_messagebox_buttons(buttons):
         tuple: (button_flags, default_button)
     """
     button_map = {
-        "Yes": QMessageBox.Yes,
-        "No": QMessageBox.No,
-        "Ok": QMessageBox.Ok,
-        "Cancel": QMessageBox.Cancel,
-        "Save": QMessageBox.Save,
-        "Discard": QMessageBox.Discard,
-        "Close": QMessageBox.Close,
-        "Apply": QMessageBox.Apply,
+        "Yes": QMessageBox.StandardButton.Yes,
+        "No": QMessageBox.StandardButton.No,
+        "Ok": QMessageBox.StandardButton.Ok,
+        "Cancel": QMessageBox.StandardButton.Cancel,
+        "Save": QMessageBox.StandardButton.Save,
+        "Discard": QMessageBox.StandardButton.Discard,
+        "Close": QMessageBox.StandardButton.Close,
+        "Apply": QMessageBox.StandardButton.Apply,
     }
-    
+
     # Set buttons (default to Ok/Cancel if not specified)
     if buttons is None:
         buttons = ["Ok", "Cancel"]
-    
+
     button_flags = QMessageBox.NoButton
     for btn_name in buttons:
         if btn_name in button_map:
             button_flags |= button_map[btn_name]
-    
+
     # Set default button (first positive action button)
     if "Yes" in buttons:
-        default_button = QMessageBox.Yes
+        default_button = QMessageBox.StandardButton.Yes
     elif "Ok" in buttons:
-        default_button = QMessageBox.Ok
+        default_button = QMessageBox.StandardButton.Ok
     elif "Save" in buttons:
-        default_button = QMessageBox.Save
+        default_button = QMessageBox.StandardButton.Save
     else:
-        default_button = button_map.get(buttons[0], QMessageBox.Ok)
-    
+        default_button = button_map.get(buttons[0], QMessageBox.StandardButton.Ok)
+
     return button_flags, default_button
 
 
@@ -1409,15 +1409,15 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
         if len(inf_text) > 500:
             inf_text = inf_text[:500] + "\n[...]"
         msg_box.setInformativeText(inf_text)
-    
+
     # Get button configuration
     button_flags, default_button = _manage_messagebox_buttons(buttons)
     msg_box.setStandardButtons(button_flags)
     msg_box.setDefaultButton(default_button)
-    msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
+    msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
 
     # Set icon for the type of message
-    msg_box.setIcon(QMessageBox.Question)
+    msg_box.setIcon(QMessageBox.Icon.Question)
 
     # Set window icon
     icon_folder = f"{lib_vars.plugin_dir}{os.sep}icons"
@@ -1427,7 +1427,7 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
 
     ret = msg_box.exec_()
     # Return True for positive actions (Yes, Ok, Save, Apply)
-    if ret in (QMessageBox.Ok, QMessageBox.Yes, QMessageBox.Save, QMessageBox.Apply):
+    if ret in (QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.Save, QMessageBox.StandardButton.Apply):
         return True
     else:
         return False
@@ -1447,7 +1447,7 @@ def show_info_box(text, title=None, inf_text=None, context_name="giswater", para
     if len(msg) > 750:
         msg = msg[:750] + "\n[...]"
     msg_box.setText(msg)
-    msg_box.setWindowFlags(Qt.WindowStaysOnTopHint)
+    msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if title:
         title = tr(title, context_name, list_params=title_params)
         msg_box.setWindowTitle(title)
@@ -1456,22 +1456,22 @@ def show_info_box(text, title=None, inf_text=None, context_name="giswater", para
         if len(inf_text) > 500:
             inf_text = inf_text[:500] + "\n[...]"
         msg_box.setInformativeText(inf_text)
-    msg_box.setIcon(QMessageBox.Information)
-    msg_box.setDefaultButton(QMessageBox.No)
-    msg_box.exec_()
+    msg_box.setIcon(QMessageBox.Icon.Information)
+    msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+    msg_box.exec()
 
 
 def set_text_bold(widget, pattern):
     """ Set bold text when word match with pattern
     :param widget: QTextEdit
-    :param pattern: Text to find used as pattern for QRegExp (String)
+    :param pattern: Text to find used as pattern for QRegularExpression (String)
     :return:
     """
 
     cursor = widget.textCursor()
     format_ = QTextCharFormat()
-    format_.setFontWeight(QFont.Bold)
     regex = QRegExp(pattern)
+    format_.setFontWeight(QFont.Weight.Bold)
     pos = 0
     index = regex.indexIn(widget.toPlainText(), pos)
     while index != -1:
@@ -1607,7 +1607,7 @@ def pause():
     dlg_info.btn_accept.setVisible(True)
     dlg_info.btn_close.setVisible(False)
     dlg_info.btn_accept.clicked.connect(lambda: dlg_info.close())
-    dlg_info.exec_()
+    dlg_info.exec()
 
 
 def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
@@ -1628,7 +1628,7 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     if msg:
         msg = tr(msg, context_name, list_params=msg_params)
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
-    dlg_info.setWindowFlags(Qt.WindowStaysOnTopHint)
+    dlg_info.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if pattern is None:
         pattern = f'''{tr('File name')}:|{tr('Function name')}:|{tr('Line number')}:|{tr('SQL')}:|{tr('SQL File')}:
                     |{tr('Detail')}:|{tr('Context')}:|{tr('Description')}:|{tr('Schema name')}:|{tr('Message error')}:
@@ -1718,7 +1718,7 @@ def set_table_model(dialog, table_object, table_name, expr_filter, columns_to_sh
     # Hide columns that are not in the list of columns to show
     if columns_to_show:
         for i in range(model.columnCount()):
-            if model.headerData(i, Qt.Horizontal) not in columns_to_show:
+            if model.headerData(i, Qt.Orientation.Horizontal) not in columns_to_show:
                 widget.hideColumn(i)
 
     return expr
@@ -1867,7 +1867,7 @@ def _create_table_model(table_name):
 
     model = QSqlTableModel(db=lib_vars.qgis_db_credentials)
     model.setTable(table_name)
-    model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+    model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
     model.select()
 
     if model.lastError().isValid():

@@ -774,31 +774,31 @@ def get_uri(tablename=None, geom=None, schema_name=None):
         geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = "
                                       f"'{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
         geom_type_map = {
-            'POINT': QgsWkbTypes.Point,
-            'LINESTRING': QgsWkbTypes.LineString,
-            'POLYGON': QgsWkbTypes.Polygon,
-            'MULTIPOINT': QgsWkbTypes.MultiPoint,
-            'MULTILINESTRING': QgsWkbTypes.MultiLineString,
-            'MULTIPOLYGON': QgsWkbTypes.MultiPolygon,
-            'POINTZ': QgsWkbTypes.PointZ,
-            'LINESTRINGZ': QgsWkbTypes.LineStringZ,
-            'POLYGONZ': QgsWkbTypes.PolygonZ,
-            'MULTIPOINTZ': QgsWkbTypes.MultiPointZ,
-            'MULTILINESTRINGZ': QgsWkbTypes.MultiLineStringZ,
-            'MULTIPOLYGONZ': QgsWkbTypes.MultiPolygonZ,
-            'POINTM': QgsWkbTypes.PointM,
-            'LINESTRINGM': QgsWkbTypes.LineStringM,
-            'POLYGONM': QgsWkbTypes.PolygonM,
-            'MULTIPOINTM': QgsWkbTypes.MultiPointM,
-            'MULTILINESTRINGM': QgsWkbTypes.MultiLineStringM,
-            'MULTIPOLYGONM': QgsWkbTypes.MultiPolygonM,
-            'POINTZM': QgsWkbTypes.PointZM,
-            'LINESTRINGZM': QgsWkbTypes.LineStringZM,
-            'POLYGONZM': QgsWkbTypes.PolygonZM,
-            'MULTIPOINTZM': QgsWkbTypes.MultiPointZM,
-            'MULTILINESTRINGZM': QgsWkbTypes.MultiLineStringZM,
-            'MULTIPOLYGONZM': QgsWkbTypes.MultiPolygonZM,
-            'MULTICURVE': QgsWkbTypes.MultiCurve,
+            'POINT': QgsWkbTypes.Type.Point,
+            'LINESTRING': QgsWkbTypes.Type.LineString,
+            'POLYGON': QgsWkbTypes.Type.Polygon,
+            'MULTIPOINT': QgsWkbTypes.Type.MultiPoint,
+            'MULTILINESTRING': QgsWkbTypes.Type.MultiLineString,
+            'MULTIPOLYGON': QgsWkbTypes.Type.MultiPolygon,
+            'POINTZ': QgsWkbTypes.Type.PointZ,
+            'LINESTRINGZ': QgsWkbTypes.Type.LineStringZ,
+            'POLYGONZ': QgsWkbTypes.Type.PolygonZ,
+            'MULTIPOINTZ': QgsWkbTypes.Type.MultiPointZ,
+            'MULTILINESTRINGZ': QgsWkbTypes.Type.MultiLineStringZ,
+            'MULTIPOLYGONZ': QgsWkbTypes.Type.MultiPolygonZ,
+            'POINTM': QgsWkbTypes.Type.PointM,
+            'LINESTRINGM': QgsWkbTypes.Type.LineStringM,
+            'POLYGONM': QgsWkbTypes.Type.PolygonM,
+            'MULTIPOINTM': QgsWkbTypes.Type.MultiPointM,
+            'MULTILINESTRINGM': QgsWkbTypes.Type.MultiLineStringM,
+            'MULTIPOLYGONM': QgsWkbTypes.Type.MultiPolygonM,
+            'POINTZM': QgsWkbTypes.Type.PointZM,
+            'LINESTRINGZM': QgsWkbTypes.Type.LineStringZM,
+            'POLYGONZM': QgsWkbTypes.Type.PolygonZM,
+            'MULTIPOINTZM': QgsWkbTypes.Type.MultiPointZM,
+            'MULTILINESTRINGZM': QgsWkbTypes.Type.MultiLineStringZM,
+            'MULTIPOLYGONZM': QgsWkbTypes.Type.MultiPolygonZM,
+            'MULTICURVE': QgsWkbTypes.Type.MultiCurve,
         }
         geom_key = geom_type[0].upper()
         
@@ -806,7 +806,7 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             msg = "Geometry type ({0}) not found in layer: {1}"
             msg_params = (geom_type[0], tablename)
             tools_qgis.show_warning(msg, msg_params=msg_params)
-            wkb_type = QgsWkbTypes.Point
+            wkb_type = QgsWkbTypes.Type.Point
             uri.setWkbType(wkb_type)
             return uri, False
 

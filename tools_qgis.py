@@ -299,17 +299,17 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     layout.addWidget(text_area)
 
     # Add standard close button at the bottom
-    button_box = QDialogButtonBox(QDialogButtonBox.Close)
+    button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
     button_box.rejected.connect(dialog.reject)
     layout.addWidget(button_box)
 
     dialog.setLayout(layout)
 
     # Manage stay on top
-    flags = Qt.WindowStaysOnTopHint
+    flags = Qt.WindowType.WindowStaysOnTopHint
     dialog.setWindowFlags(flags)
 
-    dialog.exec_()
+    dialog.exec()
 
 
 def get_visible_layers(as_str_list=False, as_list=False):
@@ -806,13 +806,13 @@ def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
     if not layer:
         return
     if snapping_type == 0:
-        snapping_type = QgsPointLocator.Vertex
+        snapping_type = QgsPointLocator.Type.Vertex
     elif snapping_type == 1:
-        snapping_type = QgsPointLocator.Edge
+        snapping_type = QgsPointLocator.Type.Edge
     elif snapping_type == 2:
-        snapping_type = QgsPointLocator.All
+        snapping_type = QgsPointLocator.Type.All
 
-    QgsSnappingUtils.LayerConfig(layer, snapping_type, tolerance, QgsTolerance.Pixels)
+    QgsSnappingUtils.LayerConfig(layer, snapping_type, tolerance, QgsTolerance.UnitType.Pixels)
 
 
 def set_project_snapping_settings(enabled=None, mode=None, tolerance=None, units=None, snapping_types=None):
@@ -835,16 +835,16 @@ def set_project_snapping_settings(enabled=None, mode=None, tolerance=None, units
     if is_create_project_mode:
         # Apply a full default configuration for new projects.
         cfg.setEnabled(True)
-        cfg.setMode(QgsSnappingConfig.AllLayers)
+        cfg.setMode(QgsSnappingConfig.SnappingMode.AllLayers)
         cfg.setTolerance(15.0)
-        cfg.setUnits(QgsTolerance.Pixels)
+        cfg.setUnits(QgsTolerance.UnitType.Pixels)
         if is_new_api:
             # For QGIS 3.22 and later
             types = Qgis.SnappingType.Vertex | Qgis.SnappingType.Segment
             cfg.setTypeFlag(Qgis.SnappingTypes(types))
         else:
             # For older QGIS versions
-            cfg.setTypeFlag(QgsSnappingConfig.VertexFlag | QgsSnappingConfig.SegmentFlag)
+            cfg.setTypeFlag(QgsSnappingConfig.SnappingTypes.VertexFlag | QgsSnappingConfig.SnappingTypes.SegmentFlag)
     else:
         # Apply only the settings that were explicitly passed to the function.
         if enabled is not None:
@@ -970,7 +970,7 @@ def set_cursor_wait():
     """ Change cursor to 'WaitCursor' """
     while get_override_cursor() is not None:
         restore_cursor()
-    QApplication.setOverrideCursor(Qt.WaitCursor)
+    QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
 
 def get_override_cursor():
@@ -1342,7 +1342,7 @@ def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, d
     """
 
     if reset_rb:
-        rubber_band.reset(QgsWkbTypes.PointGeometry)
+        rubber_band.reset(QgsWkbTypes.GeometryType.PointGeometry)
     rubber_band.setIconSize(10)
     rubber_band.setColor(color)
     rubber_band.setWidth(width)
@@ -1368,7 +1368,7 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
      """
 
     if reset_rb:
-        rubber_band.reset(QgsWkbTypes.LineGeometry)
+        rubber_band.reset(QgsWkbTypes.GeometryType.LineGeometry)
     rubber_band.setIconSize(20)
     if type(points) is str:
         polyline = QgsGeometry.fromWkt(points)
@@ -1394,7 +1394,7 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
     """
 
     if reset_rb:
-        rubber_band.reset(QgsWkbTypes.PolygonGeometry)
+        rubber_band.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
     rubber_band.setIconSize(20)
     polygon = QgsGeometry.fromPolygonXY([points])
     if rubber_band.size() == 0:
