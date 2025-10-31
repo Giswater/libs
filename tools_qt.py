@@ -1473,7 +1473,11 @@ def set_text_bold(widget, pattern):
     format_.setFontWeight(QFont.Weight.Bold)
     regex = QRegularExpression(pattern)
     pos = 0
-    index = regex.indexIn(widget.toPlainText(), pos)
+    match = regex.match(widget.toPlainText(), pos)
+    if match.hasMatch():
+        index = match.capturedStart()
+    else:
+        index = -1
     while index != -1:
         # Set cursor at begin of match
         cursor.setPosition(index, 0)
