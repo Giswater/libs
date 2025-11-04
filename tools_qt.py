@@ -1149,7 +1149,7 @@ def set_completer_lineedit(qlineedit, list_items):
     completer = QCompleter()
     completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setMaxVisibleItems(10)
-    completer.setCompletionMode(0)
+    completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
     completer.setFilterMode(Qt.MatchFlag.MatchContains)
     completer.popup().setStyleSheet("color: black;")
     qlineedit.setCompleter(completer)
