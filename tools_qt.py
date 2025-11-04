@@ -1360,7 +1360,7 @@ def _manage_messagebox_buttons(buttons):
     if buttons is None:
         buttons = ["Ok", "Cancel"]
 
-    button_flags = QMessageBox.NoButton
+    button_flags = QMessageBox.StandardButton.NoButton
     for btn_name in buttons:
         if btn_name in button_map:
             button_flags |= button_map[btn_name]
