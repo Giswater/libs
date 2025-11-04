@@ -1425,7 +1425,7 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
     giswater_icon = QIcon(icon_path)
     msg_box.setWindowIcon(giswater_icon)
 
-    ret = msg_box.exec_()
+    ret = msg_box.exec()
     # Return True for positive actions (Yes, Ok, Save, Apply)
     if ret in (QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.Save, QMessageBox.StandardButton.Apply):
         return True
