@@ -21,7 +21,7 @@ from pathlib import Path
 from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegularExpression, \
     pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
 from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegularExpressionValidator, \
-    QStandardItem, QStandardItemModel
+    QStandardItem, QStandardItemModel, QTextCursor
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
@@ -1472,22 +1472,24 @@ def set_text_bold(widget, pattern):
     format_ = QTextCharFormat()
     format_.setFontWeight(QFont.Weight.Bold)
     regex = QRegularExpression(pattern)
+    text = widget.toPlainText()
     pos = 0
-    match = regex.match(widget.toPlainText(), pos)
-    if match.hasMatch():
-        index = match.capturedStart()
-    else:
-        index = -1
-    while index != -1:
+    match = regex.match(text, pos)
+
+    while match.hasMatch():
+        start = match.capturedStart()
+        length = match.capturedLength()
+
         # Set cursor at begin of match
-        cursor.setPosition(index, 0)
-        pos = index + regex.matchedLength()
+        cursor.setPosition(start, QTextCursor.MoveMode.MoveAnchor)
         # Set cursor at end of match
-        cursor.setPosition(pos, 1)
-        # Select the matched text and apply the desired format
+        cursor.setPosition(start + length, QTextCursor.MoveMode.KeepAnchor)
+        # Apply format
         cursor.mergeCharFormat(format_)
+
         # Move to the next match
-        index = regex.indexIn(widget.toPlainText(), pos)
+        pos = start + length
+        match = regex.match(text, pos)
 
 
 def set_stylesheet(widget, style="border: 2px solid red"):
