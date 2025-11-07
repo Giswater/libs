@@ -203,8 +203,8 @@ def log_error(text=None, context_name="giswater", parameter=None, logger_file=Tr
         lib_vars.logger.error(msg, stack_level_increase=stack_level_increase)
 
 
-def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message_level=Qgis.MessageLevel.Info, logger_file=True,
-        stack_level_increase=0):
+def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message_level=Qgis.MessageLevel.Info,
+           logger_file=True, stack_level_increase=0):
     """ Write information message into QGIS Log Messages Panel (tab Giswater DB) """
 
     if type(text) is dict:
@@ -226,8 +226,8 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
         lib_vars.logger.info(text, stack_level_increase=stack_level_increase)
 
 
-def _qgis_log_message(text=None, message_level=Qgis.MessageLevel.Info, context_name="giswater", parameter=None, tab_name=None,
-                      msg_params=None):
+def _qgis_log_message(text=None, message_level=Qgis.MessageLevel.Info, context_name="giswater",
+                      parameter=None, tab_name=None, msg_params=None):
     """
     Write message into QGIS Log Messages Panel with selected message level
         :param message_level: {INFO = 0, WARNING = 1, CRITICAL = 2, SUCCESS = 3, NONE = 4}
