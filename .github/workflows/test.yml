@@ -22,15 +22,15 @@ jobs:
       - name: Dry run lint (log only)
         run: pyqt5_to_pyqt6.py --dry_run --logfile pyqt6_checker.log ./ 
 
-      - name: Lint and fix
-        run: pyqt5_to_pyqt6.py ./
-
       - name: Upload log artifact
         uses: actions/upload-artifact@v4
         with:
           name: pyqt6_checker-log
           path: pyqt6_checker.log
           retention-days: 3
+
+      - name: Lint and fix
+        run: pyqt5_to_pyqt6.py ./      
 
   lint-flake8:
     runs-on: ${{ matrix.os }}
