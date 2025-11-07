@@ -24,7 +24,7 @@ from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
     QgsSnappingUtils, QgsSnappingConfig, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
     QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
     QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, \
-    QgsPrintLayout, Qgis
+    QgsPrintLayout, Qgis, NULL
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -493,6 +493,8 @@ def get_project_variable(var_name):
     value = None
     try:
         value = QgsExpressionContextUtils.projectScope(QgsProject.instance()).variable(var_name)
+        if value == NULL:
+            value = None
     except Exception:
         pass
     finally:
