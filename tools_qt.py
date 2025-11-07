@@ -660,8 +660,8 @@ def enable_tab_by_tab_name(tab_widget, tab_name, enable):
             break
 
 
-def double_validator(widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator.Notation.StandardNotation,
-                     locale=None):
+def double_validator(widget, min_=-9999999, max_=9999999, decimals=2,
+                     notation=QDoubleValidator.Notation.StandardNotation, locale=None):
     """
     Create and apply a validator for doubles to ensure the number is within a maximum and minimum values
         :param widget: Widget to apply the validator
@@ -696,8 +696,10 @@ def enable_dialog(dialog, enable, ignore_widgets=['', None]):
                 widget.setEnabled(enable)
 
 
-def set_tableview_config(widget, selection=QAbstractItemView.SelectionBehavior.SelectRows, edit_triggers=QTableView.EditTrigger.NoEditTriggers,
-                         sectionResizeMode=QHeaderView.ResizeMode.ResizeToContents, stretchLastSection=True, sortingEnabled=True,
+def set_tableview_config(widget, selection=QAbstractItemView.SelectionBehavior.SelectRows,
+                         edit_triggers=QTableView.EditTrigger.NoEditTriggers,
+                         sectionResizeMode=QHeaderView.ResizeMode.ResizeToContents,
+                         stretchLastSection=True, sortingEnabled=True,
                          selectionMode=QAbstractItemView.SelectionMode.ExtendedSelection):
     """ Set QTableView configurations """
 
@@ -974,7 +976,7 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
     :param qtable: tableview where set the model (QTableView)
     :param table_name: database table name or view name (String)
     :param expr_filter: expression to filter the model (String)
-    :param edit_strategy: (QSqlTableModel.EditStrategy.OnFieldChange, QSqlTableModel.EditStrategy.OnManualSubmit, QSqlTableModel.EditStrategy.OnRowChange)
+    :param edit_strategy: (QSqlTableModel.EditStrategy.OnFieldChange, QSqlTableModel.EditStrategy.OnManualSubmit, QSqlTableModel.EditStrategy.OnRowChange)  # noqa: E501
     :param sort_order: can be 0 or 1 (Qt.SortOrder.AscendingOrder or Qt.SortOrder.AscendingOrder)
     :return:
     """
@@ -1427,7 +1429,8 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
 
     ret = msg_box.exec()
     # Return True for positive actions (Yes, Ok, Save, Apply)
-    if ret in (QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.Save, QMessageBox.StandardButton.Apply):
+    if ret in (QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Yes,
+               QMessageBox.StandardButton.Save, QMessageBox.StandardButton.Apply):
         return True
     else:
         return False

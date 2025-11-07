@@ -65,8 +65,8 @@ def setup_qgis_mocks():
     sys.modules['qgis.core.QgsMessageLog'] = MagicMock()
     sys.modules['qgis.gui'] = MagicMock()
     sys.modules['qgis.utils'] = MagicMock()
-    sys.modules['sip'] = MagicMock()
-    sys.modules['sip'].isdeleted = MagicMock(return_value=False)
+    sys.modules['qgis.PyQt.sip'] = MagicMock()
+    sys.modules['qgis.PyQt.sip'].isdeleted = MagicMock(return_value=False)
     sys.modules['console'] = MagicMock()
 
     # Set up the mocks
