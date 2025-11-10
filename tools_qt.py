@@ -840,7 +840,10 @@ def set_completer_object(
             item.setData(idkey, Qt.ItemDataRole.UserRole)
             model.appendRow(item)
 
-        completer.textActivated.connect(on_completion)
+        if isinstance(completer, QComboBox):
+            completer.textActivated.connect(on_completion)
+        else:
+            completer.activated.connect(on_completion)
 
     elif isinstance(model, QStringListModel):
         model.setStringList(list_items)  # Not recommended for idval/id cases
