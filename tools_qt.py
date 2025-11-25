@@ -520,6 +520,8 @@ def get_combo_value(dialog, widget, index=0, add_quote=False):
             if index == -1:
                 return elem
             value = elem[index]
+            if add_quote:
+                value = _handle_null_text(value, True, False)
 
     return value
 
