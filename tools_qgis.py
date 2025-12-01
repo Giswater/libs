@@ -1540,8 +1540,19 @@ def zoom_to_layer(layer):
         show_warning(msg)
         return
 
+    extent = layer.extent()
+
+    # Transform extent from layer CRS to canvas CRS if needed
+    if layer.crs() != iface.mapCanvas().mapSettings().destinationCrs():
+        transform = QgsCoordinateTransform(
+            layer.crs(),
+            iface.mapCanvas().mapSettings().destinationCrs(),
+            QgsProject.instance()
+        )
+        extent = transform.transformBoundingBox(extent)
+
     # Set canvas extent
-    iface.mapCanvas().setExtent(layer.extent())
+    iface.mapCanvas().setExtent(extent)
     # Refresh canvas
     iface.mapCanvas().refresh()
 
