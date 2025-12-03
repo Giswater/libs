@@ -1544,12 +1544,17 @@ def zoom_to_layer(layer):
 
     # Transform extent from layer CRS to canvas CRS if needed
     if layer.crs() != iface.mapCanvas().mapSettings().destinationCrs():
-        transform = QgsCoordinateTransform(
-            layer.crs(),
-            iface.mapCanvas().mapSettings().destinationCrs(),
-            QgsProject.instance()
-        )
-        extent = transform.transformBoundingBox(extent)
+        try:
+            transform = QgsCoordinateTransform(
+                layer.crs(),
+                iface.mapCanvas().mapSettings().destinationCrs(),
+                QgsProject.instance()
+            )
+            extent = transform.transformBoundingBox(extent)
+        except Exception as e:
+            msg = f"Failed to transform coordinates for layer '{layer.name()}': {str(e)}"
+            show_warning(msg)
+            return
 
     # Set canvas extent
     iface.mapCanvas().setExtent(extent)
