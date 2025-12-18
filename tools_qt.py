@@ -251,6 +251,7 @@ def set_calendar(dialog, widget, date, default_current_date=True):
             date = QDateTime.currentDateTime()
         widget.setDateTime(date)
 
+
 def get_listwidget_values(dialog, widget, role=Qt.ItemDataRole.UserRole):
     """
     Returns a list of all values in a QListWidget.
