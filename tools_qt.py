@@ -26,7 +26,7 @@ from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
     QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
     QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
-    QToolButton, QDialog, QGridLayout, QTextBrowser, QHeaderView
+    QToolButton, QDialog, QGridLayout, QTextBrowser, QHeaderView, QListWidget
 from qgis.core import QgsExpression
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
@@ -251,6 +251,27 @@ def set_calendar(dialog, widget, date, default_current_date=True):
             date = QDateTime.currentDateTime()
         widget.setDateTime(date)
 
+def get_listwidget_values(dialog, widget, role=Qt.ItemDataRole.UserRole):
+    """
+    Returns a list of all values in a QListWidget.
+    :param dialog: The parent dialog in which to search for the widget.
+    :param widget: The QListWidget or its objectName (str).
+    :param role: The role of the data to get from the items.
+    :return: list of values (strings) or None if widget not found.
+    """
+    values = None
+    if type(widget) is str:
+        widget = dialog.findChild(QWidget, widget)
+    if widget is None:
+        return
+    if isinstance(widget, QListWidget):
+        values = []
+        for i in range(widget.count()):
+            item = widget.item(i)
+            if item is not None:
+                values.append(item.data(role))
+    return values
+
 
 def set_time(dialog, widget, time):
 
@@ -308,6 +329,8 @@ def get_widget_value(dialog, widget):
             value = str(value).lower()
     elif isinstance(widget, QgsDateTimeEdit):
         value = get_calendar_date(dialog, widget)
+    elif isinstance(widget, QListWidget):
+        value = get_listwidget_values(dialog, widget)
 
     return value
 
