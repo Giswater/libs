@@ -154,16 +154,6 @@ def check_pg_extension(extension, form_enabled=True):
             execute_sql(sql)
             sql = f"CREATE EXTENSION IF NOT EXISTS {extension};"
             execute_sql(sql)
-
-            if extension == 'postgis':
-                postgis_version = get_postgis_version()
-                # Check postGis version
-                major_version = postgis_version.split(".")
-                if int(major_version[0]) >= 3:
-                    sql = "set search_path = public;"
-                    execute_sql(sql)
-                    sql = "CREATE EXTENSION IF NOT EXISTS postgis_raster;"
-                    execute_sql(sql)
             return True, None
         elif form_enabled:
             message = (f"Unable to create '{extension}' extension. "
