@@ -1139,14 +1139,21 @@ def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=Non
 
         # configure a symbol layer
         try:
-            color = color_values.get(str(unique_value))
+            if 'color' in color_values.get(str(unique_value)):
+                color = color_values.get(str(unique_value)).get('color')
+            else:
+                color = color_values.get(str(unique_value))
             symbol.setColor(color)
+            legend_id = color_values.get(str(unique_value)).get('legend_id')
         except Exception:
             color = QColor(randrange(0, 256), randrange(0, 256), randrange(0, 256), opacity)
             symbol.setColor(color)
 
         # create renderer object
-        category = QgsRendererCategory(unique_value, symbol, str(unique_value))
+        if legend_id:
+            category = QgsRendererCategory(unique_value, symbol, str(legend_id))
+        else:
+            category = QgsRendererCategory(unique_value, symbol, str(unique_value))
         # entry for the list of category items
         categories.append(category)
 
