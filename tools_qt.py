@@ -1558,8 +1558,11 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
     # Format the value with named or positional parameters
     if list_params:
         try:
+            # Ensure list_params is iterable (tuple or list)
+            if not isinstance(list_params, (list, tuple)):
+                list_params = (list_params,)
             value = value.format(*list_params)
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, TypeError):
             pass
 
     return value
