@@ -1528,6 +1528,33 @@ def set_stylesheet(widget, style="border: 2px solid red"):
     widget.setStyleSheet(style)
 
 
+def _translate_line(line, context_name, aux_context):
+    """Translate a single line with fallback to aux_context."""
+    translated = QCoreApplication.translate(context_name, line)
+    if translated == line:
+        translated = QCoreApplication.translate(aux_context, line)
+    return translated
+
+
+def _translate_multiline(str_message, context_name, aux_context):
+    """Translate a multiline string by translating each line separately."""
+    lines = str_message.split('\n')
+    translated_lines = [_translate_line(line, context_name, aux_context) for line in lines]
+    return '\n'.join(translated_lines)
+
+
+def _format_params(value, list_params):
+    """Format value with parameters if provided."""
+    if not list_params:
+        return value
+    try:
+        if not isinstance(list_params, (list, tuple)):
+            list_params = (list_params,)
+        return value.format(*list_params)
+    except (IndexError, KeyError, TypeError):
+        return value
+
+
 def tr(message, context_name="giswater", aux_context='ui_message', default=None, list_params=None):
     """ Translate @message looking it in @context_name """
 
@@ -1536,36 +1563,14 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
 
     str_message = str(message)
     if '\n' in str_message:
-        # For strings with newlines, translate each line separately
-        lines = str_message.split('\n')
-        translated_lines = []
-        for line in lines:
-            translated_line = QCoreApplication.translate(context_name, line)
-            if translated_line == line:  # if no translation found, try aux_context
-                translated_line = QCoreApplication.translate(aux_context, line)
-            translated_lines.append(translated_line)
-        value = '\n'.join(translated_lines)
+        value = _translate_multiline(str_message, context_name, aux_context)
     else:
-        # Logic for strings without newlines
-        value = QCoreApplication.translate(context_name, str_message)
-        if value == str_message:  # if no translation found, try aux_context
-            value = QCoreApplication.translate(aux_context, str_message)
+        value = _translate_line(str_message, context_name, aux_context)
 
-    # If not translation has been found, use default
     if value == str_message and default is not None:
         value = default
 
-    # Format the value with named or positional parameters
-    if list_params:
-        try:
-            # Ensure list_params is iterable (tuple or list)
-            if not isinstance(list_params, (list, tuple)):
-                list_params = (list_params,)
-            value = value.format(*list_params)
-        except (IndexError, KeyError, TypeError):
-            pass
-
-    return value
+    return _format_params(value, list_params)
 
 
 def translate_am_cm(schema_name):
