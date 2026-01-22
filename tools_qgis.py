@@ -1138,6 +1138,7 @@ def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=Non
             symbol.setSize(size)
 
         # configure a symbol layer
+        legend_id = None
         try:
             if 'color' in color_values.get(str(unique_value)):
                 color = color_values.get(str(unique_value)).get('color')
