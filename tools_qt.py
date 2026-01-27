@@ -705,17 +705,17 @@ def enable_dialog(dialog, enable, ignore_widgets=["", None]):
 
 def set_tableview_config(widget, selection=QAbstractItemView.SelectionBehavior.SelectRows,
                          edit_triggers=QTableView.EditTrigger.NoEditTriggers,
-                         sectionResizeMode=QHeaderView.ResizeMode.ResizeToContents,
-                         stretchLastSection=True, sortingEnabled=True,
-                         selectionMode=QAbstractItemView.SelectionMode.ExtendedSelection):
+                         section_resize_mode=QHeaderView.ResizeMode.ResizeToContents,
+                         stretch_last_section=True, sorting_enabled=True,
+                         selection_mode=QAbstractItemView.SelectionMode.ExtendedSelection):
     """Set QTableView configurations"""
     widget.setSelectionBehavior(selection)
-    widget.setSelectionMode(selectionMode)
-    widget.horizontalHeader().setSectionResizeMode(sectionResizeMode)
-    widget.horizontalHeader().setStretchLastSection(stretchLastSection)
+    widget.setSelectionMode(selection_mode)
+    widget.horizontalHeader().setSectionResizeMode(section_resize_mode)
+    widget.horizontalHeader().setStretchLastSection(stretch_last_section)
     widget.horizontalHeader().setMinimumSectionSize(100)
     widget.setEditTriggers(edit_triggers)
-    widget.setSortingEnabled(sortingEnabled)
+    widget.setSortingEnabled(sorting_enabled)
 
 
 def get_col_index_by_col_name(qtable, column_name):
