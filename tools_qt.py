@@ -1,9 +1,9 @@
-"""
-This file is part of Giswater
+"""This file is part of Giswater
 The program is free software: you can redistribute it and/or modify it under the terms of the GNU
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 """
+
 # -*- coding: utf-8 -*-
 import inspect
 import os
@@ -18,15 +18,65 @@ from encodings.aliases import aliases
 from warnings import warn
 from qgis.PyQt.sip import isdeleted
 from pathlib import Path
-from qgis.PyQt.QtCore import QDate, QDateTime, QSortFilterProxyModel, QStringListModel, QTime, Qt, QRegularExpression, \
-    pyqtSignal, QPersistentModelIndex, QCoreApplication, QTranslator, QLocale
-from qgis.PyQt.QtGui import QPixmap, QDoubleValidator, QTextCharFormat, QFont, QIcon, QRegularExpressionValidator, \
-    QStandardItem, QStandardItemModel, QTextCursor
+from qgis.PyQt.QtCore import (
+    QDate,
+    QDateTime,
+    QSortFilterProxyModel,
+    QStringListModel,
+    QTime,
+    Qt,
+    QRegularExpression,
+    pyqtSignal,
+    QPersistentModelIndex,
+    QCoreApplication,
+    QTranslator,
+    QLocale,
+)
+from qgis.PyQt.QtGui import (
+    QPixmap,
+    QDoubleValidator,
+    QTextCharFormat,
+    QFont,
+    QIcon,
+    QRegularExpressionValidator,
+    QStandardItem,
+    QStandardItemModel,
+    QTextCursor,
+)
 from qgis.PyQt.QtSql import QSqlTableModel
-from qgis.PyQt.QtWidgets import QAction, QLineEdit, QComboBox, QWidget, QDoubleSpinBox, QCheckBox, QLabel, QTextEdit, \
-    QDateEdit, QAbstractItemView, QCompleter, QDateTimeEdit, QTableView, QSpinBox, QTimeEdit, QPushButton, \
-    QPlainTextEdit, QRadioButton, QSizePolicy, QSpacerItem, QFileDialog, QGroupBox, QMessageBox, QTabWidget, QToolBox, \
-    QToolButton, QDialog, QGridLayout, QTextBrowser, QHeaderView, QListWidget
+from qgis.PyQt.QtWidgets import (
+    QAction,
+    QLineEdit,
+    QComboBox,
+    QWidget,
+    QDoubleSpinBox,
+    QCheckBox,
+    QLabel,
+    QTextEdit,
+    QDateEdit,
+    QAbstractItemView,
+    QCompleter,
+    QDateTimeEdit,
+    QTableView,
+    QSpinBox,
+    QTimeEdit,
+    QPushButton,
+    QPlainTextEdit,
+    QRadioButton,
+    QSizePolicy,
+    QSpacerItem,
+    QFileDialog,
+    QGroupBox,
+    QMessageBox,
+    QTabWidget,
+    QToolBox,
+    QToolButton,
+    QDialog,
+    QGridLayout,
+    QTextBrowser,
+    QHeaderView,
+    QListWidget,
+)
 from qgis.core import QgsExpression
 from qgis.gui import QgsDateTimeEdit
 from qgis.utils import iface
@@ -40,59 +90,59 @@ dlg_info = ShowInfoUi()
 
 
 class GwExtendedQLabel(QLabel):
-
     clicked = pyqtSignal()
 
     def __init(self, parent):
         QLabel.__init__(self, parent)
 
-    def mouseReleaseEvent(self, ev):
+    def mouseReleaseEvent(self, ev):  # noqa: N802
         self.clicked.emit()
 
 
 class GwHyperLinkLabel(QLabel):
-
     clicked = pyqtSignal()
 
     def __init__(self):
         QLabel.__init__(self)
         self.setStyleSheet("QLabel{color:blue; text-decoration: underline;}")
 
-    def mouseReleaseEvent(self, ev):
+    def mouseReleaseEvent(self, ev):  # noqa: N802
         self.clicked.emit()
         self.setStyleSheet("QLabel{color:purple; text-decoration: underline;}")
 
 
 class GwHyperLinkLineEdit(QLineEdit):
-
     clicked = pyqtSignal()
 
     def __init__(self):
         QLabel.__init__(self)
         self.setStyleSheet("QLineEdit{color:blue; text-decoration: underline;}")
 
-    def mouseReleaseEvent(self, ev):
+    def mouseReleaseEvent(self, ev):  # noqa: N802
         if self.isReadOnly():
             self.clicked.emit()
-            self.setStyleSheet("QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}")  # noqa: E501
+            self.setStyleSheet(
+                "QLineEdit { background: rgb(242, 242, 242); color:purple; text-decoration: underline; border: none;}"
+            )  # noqa: E501
 
 
 class GwEditDialog(QDialog):
-    """
-    Dialog with just one widget (QLineEdit, QTextEdit, QComboBox, QCheckBox).
+    """Dialog with just one widget (QLineEdit, QTextEdit, QComboBox, QCheckBox).
 
     Use example:
-```
-        edit_dialog = GwEditDialog(dialog, title=f"Edit {header}", 
-                                   label_text=f"Set new '{header}' value for result '{result_id}':", 
+    ```
+        edit_dialog = GwEditDialog(dialog, title=f"Edit {header}",
+                                   label_text=f"Set new '{header}' value for result '{result_id}':",
                                    widget_type="QTextEdit", initial_value=value)
         if edit_dialog.exec_() == QDialog.DialogCode.Accepted:
             new_value = edit_dialog.get_value()
             self._update_data(result_id, columnname, new_value)
-```
+    ```
     """
-    def __init__(self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None,
-                 initial_value=None):
+
+    def __init__(
+        self, parent=None, title="Edit", label_text="", widget_type="QLineEdit", options=None, initial_value=None
+    ):
         super(GwEditDialog, self).__init__(parent)
 
         self.setWindowTitle(title)
@@ -151,19 +201,18 @@ class GwEditDialog(QDialog):
         set_widget_text(self, self.widget, value)
 
 
-QtMatchFlag = Literal['starts', 'contains', 'ends', 'exact', 'regex']
+QtMatchFlag = Literal["starts", "contains", "ends", "exact", "regex"]
 match_flags: Dict[QtMatchFlag, Qt.MatchFlag] = {
-    'starts': Qt.MatchFlag.MatchStartsWith,
-    'contains': Qt.MatchFlag.MatchContains,
-    'ends': Qt.MatchFlag.MatchEndsWith,
-    'exact': Qt.MatchFlag.MatchExactly,
-    'regex': Qt.MatchFlag.MatchRegularExpression,
+    "starts": Qt.MatchFlag.MatchStartsWith,
+    "contains": Qt.MatchFlag.MatchContains,
+    "ends": Qt.MatchFlag.MatchEndsWith,
+    "exact": Qt.MatchFlag.MatchExactly,
+    "regex": Qt.MatchFlag.MatchRegularExpression,
 }
 
 
 def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):  # noqa: C901
-
-    warn('This method is deprecated, use fill_combo_values instead.', DeprecationWarning, stacklevel=2)
+    warn("This method is deprecated, use fill_combo_values instead.", DeprecationWarning, stacklevel=2)
 
     if rows is None:
         return
@@ -172,7 +221,7 @@ def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):  #
     if clear_combo:
         widget.clear()
     if allow_nulls:
-        widget.addItem('')
+        widget.addItem("")
     for row in rows:
         if len(row) > 1:
             elem = row[0]
@@ -191,7 +240,6 @@ def fill_combo_box(dialog, widget, rows, allow_nulls=True, clear_combo=True):  #
 
 
 def fill_combo_box_list(dialog, widget, list_object, allow_nulls=True, clear_combo=True):
-
     if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget is None:
@@ -200,13 +248,12 @@ def fill_combo_box_list(dialog, widget, list_object, allow_nulls=True, clear_com
     if clear_combo:
         widget.clear()
     if allow_nulls:
-        widget.addItem('')
+        widget.addItem("")
     for elem in list_object:
         widget.addItem(str(elem))
 
 
 def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format="yyyy/MM/dd hh:mm:ss"):
-
     date = None
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
@@ -216,18 +263,23 @@ def get_calendar_date(dialog, widget, date_format="yyyy/MM/dd", datetime_format=
         date = widget.date().toString(date_format)
     elif type(widget) is QDateTimeEdit:
         date = widget.dateTime().toString(datetime_format)
-    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
-            ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd'):
+    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in (
+        "dd/MM/yyyy",
+        "yyyy/MM/dd",
+        "dd-MM-yyyy",
+        "yyyy-MM-dd",
+    ):
         date = widget.dateTime().toString(date_format)
-    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in \
-            ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss'):
+    elif isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in (
+        "dd/MM/yyyy hh:mm:ss",
+        "yyyy/MM/dd hh:mm:ss",
+    ):
         date = widget.dateTime().toString(datetime_format)
 
     return date
 
 
 def set_calendar(dialog, widget, date, default_current_date=True):
-
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
@@ -235,26 +287,28 @@ def set_calendar(dialog, widget, date, default_current_date=True):
 
     if lib_vars.date_format in ("dd/MM/yyyy", "dd-MM-yyyy", "yyyy/MM/dd", "yyyy-MM-dd"):
         widget.setDisplayFormat(lib_vars.date_format)
-    if type(widget) is QDateEdit \
-            or (isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in
-                ('dd/MM/yyyy', 'yyyy/MM/dd', 'dd-MM-yyyy', 'yyyy-MM-dd')):
+    if type(widget) is QDateEdit or (
+        isinstance(widget, QgsDateTimeEdit)
+        and widget.displayFormat() in ("dd/MM/yyyy", "yyyy/MM/dd", "dd-MM-yyyy", "yyyy-MM-dd")
+    ):
         if date is None:
             if default_current_date:
                 date = QDate.currentDate()
             else:
-                date = QDate.fromString('01-01-2000', 'dd-MM-yyyy')
+                date = QDate.fromString("01-01-2000", "dd-MM-yyyy")
         widget.setDate(date)
-    elif type(widget) is QDateTimeEdit \
-            or (isinstance(widget, QgsDateTimeEdit) and widget.displayFormat() in
-                ('dd/MM/yyyy hh:mm:ss', 'yyyy/MM/dd hh:mm:ss', 'dd-MM-yyyy hh:mm:ss', 'yyyy-MM-dd hh:mm:ss')):
+    elif type(widget) is QDateTimeEdit or (
+        isinstance(widget, QgsDateTimeEdit)
+        and widget.displayFormat()
+        in ("dd/MM/yyyy hh:mm:ss", "yyyy/MM/dd hh:mm:ss", "dd-MM-yyyy hh:mm:ss", "yyyy-MM-dd hh:mm:ss")
+    ):
         if date is None:
             date = QDateTime.currentDateTime()
         widget.setDateTime(date)
 
 
 def get_listwidget_values(dialog, widget, role=Qt.ItemDataRole.UserRole):
-    """
-    Returns a list of all values in a QListWidget.
+    """Returns a list of all values in a QListWidget.
     :param dialog: The parent dialog in which to search for the widget.
     :param widget: The QListWidget or its objectName (str).
     :param role: The role of the data to get from the items.
@@ -275,7 +329,6 @@ def get_listwidget_values(dialog, widget, role=Qt.ItemDataRole.UserRole):
 
 
 def set_time(dialog, widget, time):
-
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if not widget:
@@ -287,7 +340,6 @@ def set_time(dialog, widget, time):
 
 
 def get_widget(dialog, widget):
-
     if isdeleted(dialog):
         return None
 
@@ -297,7 +349,6 @@ def get_widget(dialog, widget):
 
 
 def get_widget_type(dialog, widget):
-
     if isdeleted(dialog):
         return None
 
@@ -309,7 +360,6 @@ def get_widget_type(dialog, widget):
 
 
 def get_widget_value(dialog, widget):
-
     value = None
 
     if isdeleted(dialog):
@@ -337,8 +387,7 @@ def get_widget_value(dialog, widget):
 
 
 def get_text(dialog, widget, add_quote=False, return_string_null=True):
-    """ Get text from widget """
-
+    """Get text from widget"""
     if isdeleted(dialog):
         return None
 
@@ -366,8 +415,7 @@ def get_text(dialog, widget, add_quote=False, return_string_null=True):
 
 
 def set_widget_text(dialog, widget, text, msg_params=None):
-    """ Set text to widget """
-
+    """Set text to widget"""
     try:
         if type(widget) is str:
             widget = dialog.findChild(QWidget, widget)
@@ -389,7 +437,6 @@ def set_widget_text(dialog, widget, text, msg_params=None):
 
 
 def is_checked(dialog, widget):
-
     if type(widget) is str:
         widget = dialog.findChild(QCheckBox, widget)
         if widget is None:
@@ -407,10 +454,9 @@ def is_checked(dialog, widget):
 
 
 def set_checked(dialog, widget, checked=True):
-
-    if str(checked) in ('true', 't', 'True'):
+    if str(checked) in ("true", "t", "True"):
         checked = True
-    elif str(checked) in ('false', 'f', 'False'):
+    elif str(checked) in ("false", "f", "False"):
         checked = False
 
     if type(widget) is str:
@@ -422,7 +468,6 @@ def set_checked(dialog, widget, checked=True):
 
 
 def get_selected_item(dialog, widget, return_string_null=True):
-
     if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if return_string_null:
@@ -436,7 +481,6 @@ def get_selected_item(dialog, widget, return_string_null=True):
 
 
 def set_selected_item(dialog, widget, text):
-
     if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget:
@@ -447,7 +491,6 @@ def set_selected_item(dialog, widget, text):
 
 
 def set_current_index(dialog, widget, index):
-
     if type(widget) is str:
         widget = dialog.findChild(QComboBox, widget)
     if widget:
@@ -457,7 +500,6 @@ def set_current_index(dialog, widget, index):
 
 
 def set_widget_visible(dialog, widget, visible=True):
-
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
@@ -465,7 +507,6 @@ def set_widget_visible(dialog, widget, visible=True):
 
 
 def set_widget_enabled(dialog, widget, enabled=True):
-
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
@@ -473,14 +514,12 @@ def set_widget_enabled(dialog, widget, enabled=True):
 
 
 def add_image(dialog, widget, path_img):
-    """  Set pictures for UD """
-
+    """Set pictures for UD"""
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget is None:
         return
     if type(widget) is QLabel:
-
         # Check if file exists
         if not os.path.exists(path_img):
             return
@@ -502,10 +541,9 @@ def add_image(dialog, widget, path_img):
 
 
 def set_autocompleter(combobox, list_items=None):
-    """ Iterate over the items in the QCombobox, create a list,
-        create the model, and set the model according to the list
+    """Iterate over the items in the QCombobox, create a list,
+    create the model, and set the model according to the list
     """
-
     if list_items is None:
         list_items = [combobox.itemText(i) for i in range(combobox.count())]
 
@@ -521,8 +559,7 @@ def set_autocompleter(combobox, list_items=None):
 
 
 def filter_by_list(combobox, proxy_model, text):
-    """ Filter the list based on the text input """
-
+    """Filter the list based on the text input"""
     proxy_model.setFilterFixedString(text)
     if combobox.completer():
         combobox.completer().complete()
@@ -530,11 +567,10 @@ def filter_by_list(combobox, proxy_model, text):
 
 
 def get_combo_value(dialog, widget, index=0, add_quote=False):
-    """ Get item data of current index of the @widget """
-
+    """Get item data of current index of the @widget"""
     value = -1
     if add_quote:
-        value = ''
+        value = ""
     if type(widget) is str:
         widget = dialog.findChild(QWidget, widget)
     if widget:
@@ -551,14 +587,12 @@ def get_combo_value(dialog, widget, index=0, add_quote=False):
 
 
 def set_combo_value(combo, value, index, add_new=True):
+    """Set text to combobox populate with more than 1 item for row
+    :param combo: QComboBox widget to manage
+    :param value: element to show
+    :param index: index to compare
+    :param add_new: if True it will add the value even if it's not in the combo
     """
-    Set text to combobox populate with more than 1 item for row
-        :param combo: QComboBox widget to manage
-        :param value: element to show
-        :param index: index to compare
-        :param add_new: if True it will add the value even if it's not in the combo
-    """
-
     if combo is None:
         return False
     for i in range(0, combo.count()):
@@ -568,11 +602,11 @@ def set_combo_value(combo, value, index, add_new=True):
             return True
 
     # Add new value if @value not in combo
-    if add_new and value not in ("", None, 'None', 'none', '-1', -1):
+    if add_new and value not in ("", None, "None", "none", "-1", -1):
         new_elem = []
         # Control if the QComboBox has been previously filled
         if combo.count() > 0:
-            for x in range(len(combo.itemData(0))):
+            for _x in range(len(combo.itemData(0))):
                 new_elem.append("")
         else:
             new_elem.append("")
@@ -585,24 +619,31 @@ def set_combo_value(combo, value, index, add_new=True):
     return False
 
 
-def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo=True, sort_by=1, add_empty=False,
-                      selected_id=None, index_to_compare=None):
+def fill_combo_values(  # noqa: C901
+    combo,
+    rows,
+    index_to_show=1,
+    combo_clear=True,
+    sort_combo=True,
+    sort_by=1,
+    add_empty=False,
+    selected_id=None,
+    index_to_compare=None,
+):
+    """Populate @combo with list @rows and show field @index_to_show
+    :param combo: QComboBox widget to fill (QComboBox)
+    :param rows: the data that'll fill the combo
+    :param index_to_show: the index of the row to show (int)
+    :param combo_clear: whether it should clear the combo or not (bool)
+    :param sort_combo: whether it should sort the items or not (bool)
+    :param sort_by: sort combo by this column (int)
+    :param add_empty: add an empty element as first item (bool)
+    :param selected_id: The value to be set as selected in the ComboBox (str or int)
+    :param index_to_compare: Index to compare `selected_id` with the id or value in this combo widget (int).
     """
-    Populate @combo with list @rows and show field @index_to_show
-        :param combo: QComboBox widget to fill (QComboBox)
-        :param rows: the data that'll fill the combo
-        :param index_to_show: the index of the row to show (int)
-        :param combo_clear: whether it should clear the combo or not (bool)
-        :param sort_combo: whether it should sort the items or not (bool)
-        :param sort_by: sort combo by this column (int)
-        :param add_empty: add an empty element as first item (bool)
-        :param selected_id: The value to be set as selected in the ComboBox (str or int)
-        :param index_to_compare: Index to compare `selected_id` with the id or value in this combo widget (int).
-    """
-
     records = []
     if rows is None:
-        rows = [['', '']]
+        rows = [["", ""]]
 
     if sort_by > len(rows[0]) - 1:
         sort_by = 1
@@ -625,7 +666,7 @@ def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo
         pass
     finally:
         if add_empty:
-            records_sorted.insert(0, ['', ''])
+            records_sorted.insert(0, ["", ""])
 
         for record in records_sorted:
             combo.addItem(str(record[index_to_show]), record)
@@ -635,32 +676,35 @@ def fill_combo_values(combo, rows, index_to_show=1, combo_clear=True, sort_combo
         set_combo_value(combo, selected_id, index_to_compare)
 
 
-def set_combo_item_unselectable_by_id(qcombo, list_id=[]):
-    """ Make items of QComboBox visibles but not selectable"""
+def set_combo_item_unselectable_by_id(qcombo, list_id=None):
+    """Make items of QComboBox visibles but not selectable"""
+    if list_id is None:
+        list_id = []
     for x in range(0, qcombo.count()):
         if x in list_id:
             index = qcombo.model().index(x, 0)
             qcombo.model().setData(index, 0, Qt.ItemDataRole.UserRole - 1)
 
 
-def set_combo_item_selectable_by_id(qcombo, list_id=[]):
-    """ Make items of QComboBox selectable """
-
+def set_combo_item_selectable_by_id(qcombo, list_id=None):
+    """Make items of QComboBox selectable"""
+    if list_id is None:
+        list_id = []
     for x in range(0, qcombo.count()):
         if x in list_id:
             index = qcombo.model().index(x, 0)
             qcombo.model().setData(index, (1 | 32), Qt.ItemDataRole.UserRole - 1)
 
 
-def set_combo_item_select_unselectable(qcombo, list_id=[], column=0, opt=0):
+def set_combo_item_select_unselectable(qcombo, list_id=None, column=0, opt=0):
+    """Make items of QComboBox visibles but not selectable
+    :param qcombo: QComboBox widget to manage (QComboBox)
+    :param list_id: list of strings to manage ex. ['1','3','...'] or ['word1', 'word3','...'] (list)
+    :param column: column where to look up the values in the list (int)
+    :param opt: 0 -> item not selectable // (1 | 32) -> item selectable (int)
     """
-    Make items of QComboBox visibles but not selectable
-        :param qcombo: QComboBox widget to manage (QComboBox)
-        :param list_id: list of strings to manage ex. ['1','3','...'] or ['word1', 'word3','...'] (list)
-        :param column: column where to look up the values in the list (int)
-        :param opt: 0 -> item not selectable // (1 | 32) -> item selectable (int)
-    """
-
+    if list_id is None:
+        list_id = []
     for x in range(0, qcombo.count()):
         elem = qcombo.itemData(x)
         if str(elem[column]) in list_id:
@@ -669,8 +713,7 @@ def set_combo_item_select_unselectable(qcombo, list_id=[], column=0, opt=0):
 
 
 def remove_tab(tab_widget, tab_name):
-    """ Look in @tab_widget for a tab with @tab_name and remove it """
-
+    """Look in @tab_widget for a tab with @tab_name and remove it"""
     for x in range(0, tab_widget.count()):
         if tab_widget.widget(x).objectName() == tab_name:
             tab_widget.removeTab(x)
@@ -678,26 +721,24 @@ def remove_tab(tab_widget, tab_name):
 
 
 def enable_tab_by_tab_name(tab_widget, tab_name, enable):
-    """ Look in @tab_widget for a tab with @tab_name and remove it """
-
+    """Look in @tab_widget for a tab with @tab_name and remove it"""
     for x in range(0, tab_widget.count()):
         if tab_widget.widget(x).objectName() == tab_name:
             tab_widget.setTabEnabled(x, enable)
             break
 
 
-def double_validator(widget, min_=-9999999, max_=9999999, decimals=2,
-                     notation=QDoubleValidator.Notation.StandardNotation, locale=None):
+def double_validator(
+    widget, min_=-9999999, max_=9999999, decimals=2, notation=QDoubleValidator.Notation.StandardNotation, locale=None
+):
+    """Create and apply a validator for doubles to ensure the number is within a maximum and minimum values
+    :param widget: Widget to apply the validator
+    :param min_: Minimum value (int)
+    :param max_: Maximum value (int)
+    :param decimals: Number of decimals (int)
+    :param notation: StandardNotation or ScientificNotation
+    :param locale: Locale to define decimal separator and more (QLocale)
     """
-    Create and apply a validator for doubles to ensure the number is within a maximum and minimum values
-        :param widget: Widget to apply the validator
-        :param min_: Minimum value (int)
-        :param max_: Maximum value (int)
-        :param decimals: Number of decimals (int)
-        :param notation: StandardNotation or ScientificNotation
-        :param locale: Locale to define decimal separator and more (QLocale)
-    """
-
     validator = QDoubleValidator(min_, max_, decimals)
     validator.setNotation(notation)
     if locale is None:
@@ -706,7 +747,9 @@ def double_validator(widget, min_=-9999999, max_=9999999, decimals=2,
     widget.setValidator(validator)
 
 
-def enable_dialog(dialog, enable, ignore_widgets=['', None]):
+def enable_dialog(dialog, enable, ignore_widgets=None):
+    if ignore_widgets is None:
+        ignore_widgets = ["", None]
 
     widget_list = dialog.findChildren(QWidget)
     for widget in widget_list:
@@ -716,36 +759,40 @@ def enable_dialog(dialog, enable, ignore_widgets=['', None]):
                 if enable:
                     widget.setStyleSheet(None)
                 else:
-                    widget.setStyleSheet("QWidget { background: rgb(242, 242, 242);"
-                                         " color: rgb(100, 100, 100)}")
+                    widget.setStyleSheet("QWidget { background: rgb(242, 242, 242); color: rgb(100, 100, 100)}")
             elif isinstance(widget, (QComboBox, QCheckBox, QPushButton, QgsDateTimeEdit, QTableView)):
                 widget.setEnabled(enable)
 
 
-def set_tableview_config(widget, selection=QAbstractItemView.SelectionBehavior.SelectRows,
-                         edit_triggers=QTableView.EditTrigger.NoEditTriggers,
-                         sectionResizeMode=QHeaderView.ResizeMode.ResizeToContents,
-                         stretchLastSection=True, sortingEnabled=True,
-                         selectionMode=QAbstractItemView.SelectionMode.ExtendedSelection):
-    """ Set QTableView configurations """
-
+def set_tableview_config(
+    widget,
+    selection=QAbstractItemView.SelectionBehavior.SelectRows,
+    edit_triggers=QTableView.EditTrigger.NoEditTriggers,
+    section_resize_mode=QHeaderView.ResizeMode.ResizeToContents,
+    stretch_last_section=True,
+    sorting_enabled=True,
+    selection_mode=QAbstractItemView.SelectionMode.ExtendedSelection,
+):
+    """Set QTableView configurations"""
     widget.setSelectionBehavior(selection)
-    widget.setSelectionMode(selectionMode)
-    widget.horizontalHeader().setSectionResizeMode(sectionResizeMode)
-    widget.horizontalHeader().setStretchLastSection(stretchLastSection)
+    widget.setSelectionMode(selection_mode)
+    widget.horizontalHeader().setSectionResizeMode(section_resize_mode)
+    widget.horizontalHeader().setStretchLastSection(stretch_last_section)
     widget.horizontalHeader().setMinimumSectionSize(100)
     widget.setEditTriggers(edit_triggers)
-    widget.setSortingEnabled(sortingEnabled)
+    widget.setSortingEnabled(sorting_enabled)
 
 
 def get_col_index_by_col_name(qtable, column_name):
-    """ Return column index searching by column name """
-
+    """Return column index searching by column name"""
     model = qtable.model()
-    columns_dict = qtable.property('columns')
+    columns_dict = qtable.property("columns")
     if not columns_dict:
-        columns_dict = {model.headerData(i, Qt.Orientation.Horizontal): model.headerData(i, Qt.Orientation.Horizontal) for i in range(model.columnCount())}  # noqa: E501
-        qtable.setProperty('columns', columns_dict)
+        columns_dict = {
+            model.headerData(i, Qt.Orientation.Horizontal): model.headerData(i, Qt.Orientation.Horizontal)
+            for i in range(model.columnCount())
+        }  # noqa: E501
+        qtable.setProperty("columns", columns_dict)
     column_index = -1
     try:
         record = model.record(0)
@@ -763,8 +810,7 @@ def get_col_index_by_col_name(qtable, column_name):
 
 
 def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional[int]:
-    """ Return tab index searching by tab name """
-
+    """Return tab index searching by tab name"""
     tab_index = -1
 
     try:
@@ -783,8 +829,7 @@ def get_tab_index_by_tab_name(qtabwidget: QTabWidget, tab_name: str) -> Optional
 
 
 def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[int]:
-    """ Return page index searching by page name """
-
+    """Return page index searching by page name"""
     page_index = -1
 
     try:
@@ -802,10 +847,10 @@ def get_page_index_by_page_name(qtoolbox: QToolBox, page_name: str) -> Optional[
     return page_index
 
 
-def onCellChanged(table, row, column):
-    """ Function to be connected to a QTableWidget cellChanged signal.
-    Note: row & column parameters are passed by the signal """
-
+def onCellChanged(table, row, column):  # noqa: N802
+    """Function to be connected to a QTableWidget cellChanged signal.
+    Note: row & column parameters are passed by the signal
+    """
     # Add a new row if the edited row is the last one
     if row >= (table.rowCount() - 1):
         headers = [n for n in range(0, table.rowCount() + 1)]
@@ -816,7 +861,7 @@ def onCellChanged(table, row, column):
         for n in range(0, table.columnCount()):
             item = table.item(row, n)
             if item is not None:
-                if item.data(0) not in (None, ''):
+                if item.data(0) not in (None, ""):
                     return
         table.setRowCount(table.rowCount() - 1)
 
@@ -826,7 +871,7 @@ def set_completer_object(
     model: Union[QStandardItemModel, QStringListModel],
     widget: QLineEdit,
     list_items: Union[List[str], List[Dict[str, Any]]],
-    max_visible: int = 10
+    max_visible: int = 10,
 ) -> None:
     """Attach a QCompleter to a QLineEdit using the provided model and list_items.
 
@@ -856,12 +901,12 @@ def set_completer_object(
         model.clear()
 
         for item_dict in list_items:
-            idval = str(item_dict['idval'])
+            idval = str(item_dict["idval"])
             if idval in seen:
                 continue  # skip duplicates
             seen.add(idval)
 
-            idkey = item_dict['id']
+            idkey = item_dict["id"]
             item = QStandardItem(idval)
             item.setData(idkey, Qt.ItemDataRole.UserRole)
             model.appendRow(item)
@@ -881,7 +926,6 @@ def set_completer_object(
 
 
 def set_action_checked(action, enabled, dialog=None):
-
     if type(action) is str and dialog is not None:
         action = dialog.findChild(QAction, action)
     try:
@@ -891,25 +935,22 @@ def set_action_checked(action, enabled, dialog=None):
 
 
 def set_calendar_empty(widget):
-    """ Set calendar empty when click inner button of QgsDateTimeEdit because aesthetically it looks better"""
+    """Set calendar empty when click inner button of QgsDateTimeEdit because aesthetically it looks better"""
     widget.displayNull(True)
 
 
 def add_horizontal_spacer():
-
     widget = QSpacerItem(10, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
     return widget
 
 
 def add_verticalspacer():
-
     widget = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
     return widget
 
 
 def check_expression_filter(expr_filter, log_info=False):
-    """ Check if expression filter @expr is valid """
-
+    """Check if expression filter @expr is valid"""
     if log_info:
         tools_log.log_info(expr_filter)
     expr = QgsExpression(expr_filter)
@@ -922,69 +963,75 @@ def check_expression_filter(expr_filter, log_info=False):
 
 
 def check_date(widget, button=None, regex_type=1):
-    """ Set QRegularExpression in order to validate QLineEdit(widget) field type date.
+    """Set QRegularExpression in order to validate QLineEdit(widget) field type date.
     Also allow to enable or disable a QPushButton(button), like typical accept button
     @Type=1 (yyy-mm-dd), @Type=2 (dd-mm-yyyy)
     """
-
     reg_exp = ""
     placeholder = "yyyy-mm-dd"
     if regex_type == 1:
         widget.setPlaceholderText("yyyy-mm-dd")
         placeholder = "yyyy-mm-dd"
-        reg_exp = QRegularExpression(r"(((\d{4})([-])(0[13578]|10|12)([-])(0[1-9]|[12][0-9]|3[01]))|"
-                          r"((\d{4})([-])(0[469]|11)([-])([0][1-9]|[12][0-9]|30))|"
-                          r"((\d{4})([-])(02)([-])(0[1-9]|1[0-9]|2[0-8]))|"
-                          r"(([02468][048]00)([-])(02)([-])(29))|"
-                          r"(([13579][26]00)([-])(02)([-])(29))|"
-                          r"(([0-9][0-9][0][48])([-])(02)([-])(29))|"
-                          r"(([0-9][0-9][2468][048])([-])(02)([-])(29))|"
-                          r"(([0-9][0-9][13579][26])([-])(02)([-])(29)))")
+        reg_exp = QRegularExpression(
+            r"(((\d{4})([-])(0[13578]|10|12)([-])(0[1-9]|[12][0-9]|3[01]))|"
+            r"((\d{4})([-])(0[469]|11)([-])([0][1-9]|[12][0-9]|30))|"
+            r"((\d{4})([-])(02)([-])(0[1-9]|1[0-9]|2[0-8]))|"
+            r"(([02468][048]00)([-])(02)([-])(29))|"
+            r"(([13579][26]00)([-])(02)([-])(29))|"
+            r"(([0-9][0-9][0][48])([-])(02)([-])(29))|"
+            r"(([0-9][0-9][2468][048])([-])(02)([-])(29))|"
+            r"(([0-9][0-9][13579][26])([-])(02)([-])(29)))"
+        )
     elif regex_type == 2:
         widget.setPlaceholderText("dd-mm-yyyy")
         placeholder = "dd-mm-yyyy"
-        reg_exp = QRegularExpression(r"(((0[1-9]|[12][0-9]|3[01])([-])(0[13578]|10|12)([-])(\d{4}))|"
-                          r"(([0][1-9]|[12][0-9]|30)([-])(0[469]|11)([-])(\d{4}))|"
-                          r"((0[1-9]|1[0-9]|2[0-8])([-])(02)([-])(\d{4}))|"
-                          r"((29)(-)(02)([-])([02468][048]00))|"
-                          r"((29)([-])(02)([-])([13579][26]00))|"
-                          r"((29)([-])(02)([-])([0-9][0-9][0][48]))|"
-                          r"((29)([-])(02)([-])([0-9][0-9][2468][048]))|"
-                          r"((29)([-])(02)([-])([0-9][0-9][13579][26])))")
+        reg_exp = QRegularExpression(
+            r"(((0[1-9]|[12][0-9]|3[01])([-])(0[13578]|10|12)([-])(\d{4}))|"
+            r"(([0][1-9]|[12][0-9]|30)([-])(0[469]|11)([-])(\d{4}))|"
+            r"((0[1-9]|1[0-9]|2[0-8])([-])(02)([-])(\d{4}))|"
+            r"((29)(-)(02)([-])([02468][048]00))|"
+            r"((29)([-])(02)([-])([13579][26]00))|"
+            r"((29)([-])(02)([-])([0-9][0-9][0][48]))|"
+            r"((29)([-])(02)([-])([0-9][0-9][2468][048]))|"
+            r"((29)([-])(02)([-])([0-9][0-9][13579][26])))"
+        )
     elif regex_type == 3:
         widget.setPlaceholderText("yyyy/mm/dd")
         placeholder = "yyyy/mm/dd"
-        reg_exp = QRegularExpression(r"(((\d{4})([/])(0[13578]|10|12)([/])(0[1-9]|[12][0-9]|3[01]))|"
-                          r"((\d{4})([/])(0[469]|11)([/])([0][1-9]|[12][0-9]|30))|"
-                          r"((\d{4})([/])(02)([/])(0[1-9]|1[0-9]|2[0-8]))|"
-                          r"(([02468][048]00)([/])(02)([/])(29))|"
-                          r"(([13579][26]00)([/])(02)([/])(29))|"
-                          r"(([0-9][0-9][0][48])([/])(02)([/])(29))|"
-                          r"(([0-9][0-9][2468][048])([/])(02)([/])(29))|"
-                          r"(([0-9][0-9][13579][26])([/])(02)([/])(29)))")
+        reg_exp = QRegularExpression(
+            r"(((\d{4})([/])(0[13578]|10|12)([/])(0[1-9]|[12][0-9]|3[01]))|"
+            r"((\d{4})([/])(0[469]|11)([/])([0][1-9]|[12][0-9]|30))|"
+            r"((\d{4})([/])(02)([/])(0[1-9]|1[0-9]|2[0-8]))|"
+            r"(([02468][048]00)([/])(02)([/])(29))|"
+            r"(([13579][26]00)([/])(02)([/])(29))|"
+            r"(([0-9][0-9][0][48])([/])(02)([/])(29))|"
+            r"(([0-9][0-9][2468][048])([/])(02)([/])(29))|"
+            r"(([0-9][0-9][13579][26])([/])(02)([/])(29)))"
+        )
     elif regex_type == 4:
         widget.setPlaceholderText("dd/mm/yyyy")
         placeholder = "dd/mm/yyyy"
-        reg_exp = QRegularExpression(r"(((0[1-9]|[12][0-9]|3[01])([/])(0[13578]|10|12)([/])(\d{4}))|"
-                          r"(([0][1-9]|[12][0-9]|30)([/])(0[469]|11)([/])(\d{4}))|"
-                          r"((0[1-9]|1[0-9]|2[0-8])([/])(02)([/])(\d{4}))|"
-                          r"((29)(-)(02)([/])([02468][048]00))|"
-                          r"((29)([/])(02)([/])([13579][26]00))|"
-                          r"((29)([/])(02)([/])([0-9][0-9][0][48]))|"
-                          r"((29)([/])(02)([/])([0-9][0-9][2468][048]))|"
-                          r"((29)([/])(02)([/])([0-9][0-9][13579][26])))")
+        reg_exp = QRegularExpression(
+            r"(((0[1-9]|[12][0-9]|3[01])([/])(0[13578]|10|12)([/])(\d{4}))|"
+            r"(([0][1-9]|[12][0-9]|30)([/])(0[469]|11)([/])(\d{4}))|"
+            r"((0[1-9]|1[0-9]|2[0-8])([/])(02)([/])(\d{4}))|"
+            r"((29)(-)(02)([/])([02468][048]00))|"
+            r"((29)([/])(02)([/])([13579][26]00))|"
+            r"((29)([/])(02)([/])([0-9][0-9][0][48]))|"
+            r"((29)([/])(02)([/])([0-9][0-9][2468][048]))|"
+            r"((29)([/])(02)([/])([0-9][0-9][13579][26])))"
+        )
 
     widget.setValidator(QRegularExpressionValidator(reg_exp))
     widget.textChanged.connect(partial(check_regex, widget, reg_exp, button, placeholder))
 
 
 def check_regex(widget, reg_exp, button, placeholder, text):
-
     is_valid = False
     if reg_exp.exactMatch(text) is True:
         widget.setStyleSheet(None)
         is_valid = True
-    elif str(text) == '':
+    elif str(text) == "":
         widget.setStyleSheet(None)
         widget.setPlaceholderText(placeholder)
         is_valid = True
@@ -999,13 +1046,20 @@ def check_regex(widget, reg_exp, button, placeholder, text):
             button.setEnabled(True)
 
 
-def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableModel.EditStrategy.OnManualSubmit,
-               sort_order=Qt.SortOrder.AscendingOrder, schema_name=None):
-    """ Set a model with selected filter. Attach that model to selected table
+def fill_table(
+    qtable,
+    table_name,
+    expr_filter=None,
+    edit_strategy=QSqlTableModel.EditStrategy.OnManualSubmit,
+    sort_order=Qt.SortOrder.AscendingOrder,
+    schema_name=None,
+):
+    """Set a model with selected filter. Attach that model to selected table
     :param qtable: tableview where set the model (QTableView)
     :param table_name: database table name or view name (String)
     :param expr_filter: expression to filter the model (String)
-    :param edit_strategy: (QSqlTableModel.EditStrategy.OnFieldChange, QSqlTableModel.EditStrategy.OnManualSubmit, QSqlTableModel.EditStrategy.OnRowChange)  # noqa: E501
+    :param edit_strategy: (QSqlTableModel.EditStrategy.OnFieldChange,
+        QSqlTableModel.EditStrategy.OnManualSubmit, QSqlTableModel.EditStrategy.OnRowChange)
     :param sort_order: can be 0 or 1 (Qt.SortOrder.AscendingOrder or Qt.SortOrder.AscendingOrder)
     :return:
     """
@@ -1023,7 +1077,7 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
 
     # Check for errors
     if model.lastError().isValid():
-        if 'Unable to find table' in model.lastError().text():
+        if "Unable to find table" in model.lastError().text():
             tools_db.reset_qsqldatabase_connection()
         else:
             msg = "Fill table"
@@ -1035,8 +1089,8 @@ def fill_table(qtable, table_name, expr_filter=None, edit_strategy=QSqlTableMode
 
 def set_lazy_init(widget, lazy_widget=None, lazy_init_function=None):
     """Apply the init function related to the model. It's necessary
-    a lazy init because model is changed everytime is loaded."""
-
+    a lazy init because model is changed everytime is loaded.
+    """
     if lazy_widget is None:
         return
     if widget != lazy_widget:
@@ -1045,9 +1099,8 @@ def set_lazy_init(widget, lazy_widget=None, lazy_init_function=None):
 
 
 def filter_by_id(dialog, widget_table, widget_txt, table_object, field_object_id="id"):
-
     object_id = get_text(dialog, widget_txt)
-    if object_id != 'null':
+    if object_id != "null":
         expr = f"{field_object_id}::text ILIKE '%{object_id}%'"
         # Refresh model with selected filter
         widget_table.model().setFilter(expr)
@@ -1057,7 +1110,6 @@ def filter_by_id(dialog, widget_table, widget_txt, table_object, field_object_id
 
 
 def set_selection_behavior(dialog):
-
     # Get objects of type: QTableView
     widget_list = dialog.findChildren(QTableView)
     for widget in widget_list:
@@ -1067,11 +1119,10 @@ def set_selection_behavior(dialog):
 
 
 def get_folder_path(dialog, widget):
-    """ Get folder path """
-
+    """Get folder path"""
     # Check if selected folder exists. Set default value if necessary
     folder_path = get_text(dialog, widget)
-    if folder_path is None or folder_path == 'null' or not os.path.exists(folder_path):
+    if folder_path is None or folder_path == "null" or not os.path.exists(folder_path):
         folder_path = os.path.expanduser("~")
 
     # Open dialog to select folder
@@ -1079,14 +1130,13 @@ def get_folder_path(dialog, widget):
     file_dialog = QFileDialog()
     file_dialog.setFileMode(QFileDialog.FileMode.Directory)
     message = "Select folder"
-    folder_path = file_dialog.getExistingDirectory(
-        parent=None, caption=tr(message), directory=folder_path)
+    folder_path = file_dialog.getExistingDirectory(parent=None, caption=tr(message), directory=folder_path)
     if folder_path:
         set_widget_text(dialog, widget, str(folder_path))
 
 
 def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
-    """ Get file path """
+    """Get file path"""
     result = QFileDialog.getOpenFileName(None, title, subtitle, extension)
     file_path_str: str = result[0]
     if file_path_str:
@@ -1094,20 +1144,25 @@ def get_file(title: str, subtitle: str, extension: str) -> Optional[Path]:
     return None
 
 
-def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
-                       default_path: str = "", file_name: str = "") -> str:
-    """ Get file path """
-
+def get_save_file_path(
+    dialog: Any,
+    widget: Union[str, QWidget],
+    extension: str = "",
+    message: str = "",
+    default_path: str = "",
+    file_name: str = "",
+) -> str:
+    """Get file path"""
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in (None, 'null', ''):
+    if file in (None, "null", ""):
         if default_path != "":
             file = default_path
         else:
             file = lib_vars.plugin_dir
 
     if not file:
-        return ''
+        return ""
 
     # Get directory of that file
     folder_path = os.path.dirname(file)
@@ -1120,20 +1175,20 @@ def get_save_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
     return file
 
 
-def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "",
-                       default_path: str = "") -> str:
-    """ Get file path """
-
+def get_open_file_path(
+    dialog: Any, widget: Union[str, QWidget], extension: str = "", message: str = "", default_path: str = ""
+) -> str:
+    """Get file path"""
     file = get_text(dialog, widget)
     # Set default value if necessary
-    if file in (None, 'null', ''):
+    if file in (None, "null", ""):
         if default_path != "":
             file = default_path
         else:
             file = lib_vars.plugin_dir
 
     if not file:
-        return ''
+        return ""
 
     # Get directory of that file
     folder_path = os.path.dirname(file)
@@ -1147,19 +1202,17 @@ def get_open_file_path(dialog: Any, widget: Union[str, QWidget], extension: str 
 
 
 def get_open_files_path(message: str = "", file_types: str = "") -> List[str]:
-    """ Get file path """
-
+    """Get file path"""
     files_path, _ = QFileDialog.getOpenFileNames(None, tr(message), "", file_types)
     return files_path
 
 
 def hide_void_groupbox(dialog):
-    """ Rceives a dialog, searches it all the QGroupBox, looks 1 to 1 if the grb have widgets, if it does not have
+    """Rceives a dialog, searches it all the QGroupBox, looks 1 to 1 if the grb have widgets, if it does not have
      (if it is empty), hides the QGroupBox
     :param dialog: QDialog or QMainWindow
     :return: Dictionario with names of hidden QGroupBox
     """
-
     grb_list = {}
     grbox_list = dialog.findChildren(QGroupBox)
     for grbox in grbox_list:
@@ -1172,11 +1225,10 @@ def hide_void_groupbox(dialog):
 
 
 def set_completer_lineedit(qlineedit, list_items):
-    """ Set a completer into a QLineEdit
+    """Set a completer into a QLineEdit
     :param qlineedit: Object where to set the completer (QLineEdit)
     :param list_items: List of items to set into the completer (List)["item1","item2","..."]
     """
-
     completer = QCompleter()
     completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
     completer.setMaxVisibleItems(10)
@@ -1189,12 +1241,11 @@ def set_completer_lineedit(qlineedit, list_items):
     completer.setModel(model)
 
 
-def set_completer_rows(widget, rows, filter_mode: QtMatchFlag = 'starts'):
-    """ Set a completer into a widget
+def set_completer_rows(widget, rows, filter_mode: QtMatchFlag = "starts"):
+    """Set a completer into a widget
     :param widget: Object where to set the completer (QLineEdit)
     :param rows: rows to set into the completer (List)["item1","item2","..."]
     """
-
     list_values = []
     if rows is not None:
         for row in rows:
@@ -1211,7 +1262,7 @@ def set_completer_rows(widget, rows, filter_mode: QtMatchFlag = 'starts'):
 
 
 def add_combo_on_tableview(qtable, rows, field, widget_pos, combo_values):
-    """ Set one column of a QtableView as QComboBox with values from database.
+    """Set one column of a QtableView as QComboBox with values from database.
     :param qtable: QTableView to fill
     :param rows: List of items to set QComboBox (["..", "..."])
     :param field: Field to set QComboBox (String)
@@ -1219,7 +1270,6 @@ def add_combo_on_tableview(qtable, rows, field, widget_pos, combo_values):
     :param combo_values: List of items to populate QComboBox (["..", "..."])
     :return:
     """
-
     for x in range(0, len(rows)):
         combo = QComboBox()
         row = rows[x]
@@ -1235,7 +1285,7 @@ def add_combo_on_tableview(qtable, rows, field, widget_pos, combo_values):
 
 
 def set_status(qtable, combo, pos_x, combo_pos, col_update):
-    """ Update values from QComboBox to QTableView
+    """Update values from QComboBox to QTableView
     :param qtable: QTableView Where update values
     :param combo: QComboBox from which we will take the value
     :param pos_x: Position of the row where we want to update value (integer)
@@ -1251,8 +1301,7 @@ def set_status(qtable, combo, pos_x, combo_pos, col_update):
 
 
 def document_open(qtable, field_name):
-    """ Open selected document """
-
+    """Open selected document"""
     msg = None
 
     # Get selected rows
@@ -1280,8 +1329,7 @@ def document_open(qtable, field_name):
 
 
 def delete_rows_tableview(qtable: QTableView):
-    """ Delete record from selected rows in a QTableView """
-
+    """Delete record from selected rows in a QTableView"""
     # Get selected rows. 0 is the column of the pk 0 'id'
     selected_list = qtable.selectionModel().selectedRows(0)
     if len(selected_list) == 0:
@@ -1295,7 +1343,7 @@ def delete_rows_tableview(qtable: QTableView):
         selected_id.append(str(doc_id))
     message = "Are you sure you want to delete these records?"
     title = "Delete records"
-    answer = show_question(message, title, ','.join(selected_id))
+    answer = show_question(message, title, ",".join(selected_id))
     if answer:
         for model_index in qtable.selectionModel().selectedRows():
             index = QPersistentModelIndex(model_index)
@@ -1312,8 +1360,7 @@ def delete_rows_tableview(qtable: QTableView):
 
 
 def reset_model(dialog, table_object, feature_type):
-    """ Reset model of the widget """
-
+    """Reset model of the widget"""
     table_relation = f"{table_object}_x_{feature_type}"
     widget_name = f"tbl_{table_relation}"
     widget = get_widget(dialog, widget_name)
@@ -1322,7 +1369,6 @@ def reset_model(dialog, table_object, feature_type):
 
 
 def get_feature_by_id(layer, id, field_id=None):
-
     if field_id is not None:
         expr = f"{field_id} = '{id}'"
         features = layer.getFeatures(expr)
@@ -1336,8 +1382,7 @@ def get_feature_by_id(layer, id, field_id=None):
 
 
 def show_details(detail_text, title=None, inf_text=None, text_params=None, title_params=None):
-    """ Shows a message box with detail information """
-
+    """Shows a message box with detail information"""
     iface.messageBar().clearWidgets()
     msg_box = QMessageBox()
     msg_box.setIcon(QMessageBox.Icon.Information)
@@ -1357,8 +1402,7 @@ def show_details(detail_text, title=None, inf_text=None, text_params=None, title
 
 
 def show_warning_open_file(text, inf_text, file_path, context_name="giswater", text_params=None):
-    """ Show warning message with a button to open @file_path """
-
+    """Show warning message with a button to open @file_path"""
     widget = iface.messageBar().createMessage(tr(text, context_name, list_params=text_params), tr(inf_text))
     button = QPushButton(widget)
     button.setText(tr("Open file"))
@@ -1368,13 +1412,14 @@ def show_warning_open_file(text, inf_text, file_path, context_name="giswater", t
 
 
 def _manage_messagebox_buttons(buttons):
-    """ Convert list of button names to QMessageBox flags and determine default button
-    
+    """Convert list of button names to QMessageBox flags and determine default button
+
     Args:
         buttons: List of button names like ["Yes", "No"] or None for default ["Ok", "Cancel"]
-        
+
     Returns:
         tuple: (button_flags, default_button)
+
     """
     button_map = {
         "Yes": QMessageBox.StandardButton.Yes,
@@ -1409,18 +1454,27 @@ def _manage_messagebox_buttons(buttons):
     return button_flags, default_button
 
 
-def show_question(text, title="Info", inf_text=None, context_name="giswater", parameter=None, force_action=False,
-                  msg_params=None, title_params=None, buttons=None):
-    """ Ask question to the user 
-    
-    Args:
-        buttons: List of button names like ["Yes", "No"] or ["Save", "Discard"]. 
-                 Defaults to ["Ok", "Cancel"] if None.
-    """
+def show_question(
+    text,
+    title="Info",
+    inf_text=None,
+    context_name="giswater",
+    parameter=None,
+    force_action=False,
+    msg_params=None,
+    title_params=None,
+    buttons=None,
+):
+    """Ask question to the user
 
+    Args:
+        buttons: List of button names like ["Yes", "No"] or ["Save", "Discard"].
+                 Defaults to ["Ok", "Cancel"] if None.
+
+    """
     # Expert mode does not ask and accept all actions
-    if lib_vars.user_level['level'] not in (None, 'None') and not force_action:
-        if lib_vars.user_level['level'] not in lib_vars.user_level['showquestion']:
+    if lib_vars.user_level["level"] not in (None, "None") and not force_action:
+        if lib_vars.user_level["level"] not in lib_vars.user_level["showquestion"]:
             return True
 
     msg_box = QMessageBox()
@@ -1458,17 +1512,21 @@ def show_question(text, title="Info", inf_text=None, context_name="giswater", pa
 
     ret = msg_box.exec()
     # Return True for positive actions (Yes, Ok, Save, Apply)
-    if ret in (QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Yes,
-               QMessageBox.StandardButton.Save, QMessageBox.StandardButton.Apply):
+    if ret in (
+        QMessageBox.StandardButton.Ok,
+        QMessageBox.StandardButton.Yes,
+        QMessageBox.StandardButton.Save,
+        QMessageBox.StandardButton.Apply,
+    ):
         return True
     else:
         return False
 
 
-def show_info_box(text, title=None, inf_text=None, context_name="giswater", parameter=None,
-                  msg_params=None, title_params=None):
-    """ Show information box to the user """
-
+def show_info_box(
+    text, title=None, inf_text=None, context_name="giswater", parameter=None, msg_params=None, title_params=None
+):
+    """Show information box to the user"""
     msg = ""
     if text:
         msg = tr(text, context_name, list_params=msg_params)
@@ -1494,12 +1552,11 @@ def show_info_box(text, title=None, inf_text=None, context_name="giswater", para
 
 
 def set_text_bold(widget, pattern):
-    """ Set bold text when word match with pattern
+    """Set bold text when word match with pattern
     :param widget: QTextEdit
     :param pattern: Text to find used as pattern for QRegularExpression (String)
     :return:
     """
-
     cursor = widget.textCursor()
     format_ = QTextCharFormat()
     format_.setFontWeight(QFont.Weight.Bold)
@@ -1538,9 +1595,9 @@ def _translate_line(line, context_name, aux_context):
 
 def _translate_multiline(str_message, context_name, aux_context):
     """Translate a multiline string by translating each line separately."""
-    lines = str_message.split('\n')
+    lines = str_message.split("\n")
     translated_lines = [_translate_line(line, context_name, aux_context) for line in lines]
-    return '\n'.join(translated_lines)
+    return "\n".join(translated_lines)
 
 
 def _format_params(value, list_params):
@@ -1555,14 +1612,13 @@ def _format_params(value, list_params):
         return value
 
 
-def tr(message, context_name="giswater", aux_context='ui_message', default=None, list_params=None):
-    """ Translate @message looking it in @context_name """
-
+def tr(message, context_name="giswater", aux_context="ui_message", default=None, list_params=None):
+    """Translate @message looking it in @context_name"""
     if context_name is None:
         context_name = lib_vars.plugin_name
 
     str_message = str(message)
-    if '\n' in str_message:
+    if "\n" in str_message:
         value = _translate_multiline(str_message, context_name, aux_context)
     else:
         value = _translate_line(str_message, context_name, aux_context)
@@ -1574,15 +1630,14 @@ def tr(message, context_name="giswater", aux_context='ui_message', default=None,
 
 
 def translate_am_cm(schema_name):
-    """ Translate AM and CM toolbars """
-
+    """Translate AM and CM toolbars"""
     # Get locale and schema lang
     locale = tools_qgis.get_locale_schema()
     lang = tools_db.get_rows(f"SELECT language FROM {schema_name}.sys_version")
     lang = lang[0][0]
 
     # Determine if translation is necessary
-    if lang == locale or locale == 'no_TR':
+    if lang == locale or locale == "no_TR":
         return
 
     # Get file path
@@ -1592,9 +1647,9 @@ def translate_am_cm(schema_name):
         return
 
     # Execute SQL statements
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         sql = file.read()
-        statements = sql.split(';')
+        statements = sql.split(";")
         for stmt in statements:
             if stmt.strip():
                 tools_db.execute_sql(stmt.strip(), log_sql=False, commit=True)
@@ -1608,20 +1663,30 @@ def _should_show_exception(description):
     if not description:
         return True
 
-    dont_show_list = ['unknown error', 'server closed the connection unexpectedly',
-                      'message contents do not agree with length in message', 'unexpected field count in']
+    dont_show_list = [
+        "unknown error",
+        "server closed the connection unexpectedly",
+        "message contents do not agree with length in message",
+        "unexpected field count in",
+    ]
     for dont_show in dont_show_list:
         if dont_show in description:
             return False
-    if 'server sent data' in description and 'without prior row description' in description:
+    if "server sent data" in description and "without prior row description" in description:
         return False
     return True
 
 
-def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_increase=0, filepath=None,
-                        schema_name=None, pause_on_exception=False):
-    """ Manage exception in database queries and show information to the user """
-
+def manage_exception_db(
+    exception=None,
+    sql=None,
+    stack_level=2,
+    stack_level_increase=0,
+    filepath=None,
+    schema_name=None,
+    pause_on_exception=False,
+):
+    """Manage exception in database queries and show information to the user"""
     show_exception_msg = _should_show_exception(str(exception) if exception else "")
 
     try:
@@ -1629,7 +1694,7 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
         file_name, function_line, function_name = _get_stack_info(stack_level)
 
         msg = _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name)
-        lib_vars.session_vars['last_error_msg'] = msg
+        lib_vars.session_vars["last_error_msg"] = msg
 
         # Show exception message in dialog and log it
         if show_exception_msg:
@@ -1649,22 +1714,27 @@ def manage_exception_db(exception=None, sql=None, stack_level=2, stack_level_inc
 
 def pause():
     """Pause execution until user clicks accept on dialog"""
-
     dlg_info.btn_accept.setVisible(True)
     dlg_info.btn_close.setVisible(False)
     dlg_info.btn_accept.clicked.connect(lambda: dlg_info.close())
     dlg_info.exec()
 
 
-def show_exception_message(title=None, msg="", window_title="Information about exception", pattern=None,
-                           context_name='giswater', title_params=None, msg_params=None):
-    """ Show exception message in dialog """
-
+def show_exception_message(
+    title=None,
+    msg="",
+    window_title="Information about exception",
+    pattern=None,
+    context_name="giswater",
+    title_params=None,
+    msg_params=None,
+):
+    """Show exception message in dialog"""
     # Show dialog only if we are not in a task process
-    if len(lib_vars.session_vars['threads']) > 0:
+    if len(lib_vars.session_vars["threads"]) > 0:
         return
 
-    lib_vars.session_vars['last_error_msg'] = None
+    lib_vars.session_vars["last_error_msg"] = None
     dlg_info.btn_accept.setVisible(False)
     dlg_info.btn_close.clicked.connect(lambda: dlg_info.close())
     dlg_info.setWindowTitle(tr(window_title))
@@ -1676,17 +1746,16 @@ def show_exception_message(title=None, msg="", window_title="Information about e
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
     dlg_info.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if pattern is None:
-        pattern = f'''{tr('File name')}:|{tr('Function name')}:|{tr('Line number')}:|{tr('SQL')}:|{tr('SQL File')}:
-                    |{tr('Detail')}:|{tr('Context')}:|{tr('Description')}:|{tr('Schema name')}:|{tr('Message error')}:
-                    |{tr('Error type')}:'''
+        pattern = f"""{tr("File name")}:|{tr("Function name")}:|{tr("Line number")}:|{tr("SQL")}:|{tr("SQL File")}:
+                    |{tr("Detail")}:|{tr("Context")}:|{tr("Description")}:|{tr("Schema name")}:|{tr("Message error")}:
+                    |{tr("Error type")}:"""
     set_text_bold(dlg_info.tab_log_txt_infolog, pattern)
 
     dlg_info.show()
 
 
 def manage_exception(title=None, description=None, sql=None, schema_name=None):
-    """ Manage exception and show information to the user """
-
+    """Manage exception and show information to the user"""
     # Get traceback
     trace = traceback.format_exc()
     exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -1695,15 +1764,15 @@ def manage_exception(title=None, description=None, sql=None, schema_name=None):
 
     # Set exception message details
     msg = ""
-    msg += f'''{tr("Error type")}: {exc_type}\n'''
-    msg += f'''{tr("File name")}: {file_name}\n'''
-    msg += f'''{tr("Line number")}: {exc_tb.tb_lineno}\n'''
+    msg += f"""{tr("Error type")}: {exc_type}\n"""
+    msg += f"""{tr("File name")}: {file_name}\n"""
+    msg += f"""{tr("Line number")}: {exc_tb.tb_lineno}\n"""
     msg += f"{trace}\n"
     if description:
-        msg += f'''{tr("Description")}: {description}\n'''
+        msg += f"""{tr("Description")}: {description}\n"""
     if sql:
-        msg += f'''{tr("SQL")}:\n {sql}\n\n'''
-    msg += f'''{tr("Schema name")}: {schema_name}'''
+        msg += f"""{tr("SQL")}:\n {sql}\n\n"""
+    msg += f"""{tr("Schema name")}: {schema_name}"""
 
     # Translate title if exist
     if title:
@@ -1717,13 +1786,12 @@ def manage_exception(title=None, description=None, sql=None, schema_name=None):
     tools_log.log_warning(msg)
 
     # Show exception message only if we are not in a task process
-    if len(lib_vars.session_vars['threads']) == 0:
+    if len(lib_vars.session_vars["threads"]) == 0:
         show_exception_message(title, msg)
 
 
 def fill_combo_unicodes(combo):
-    """ Populate combo with full list of codes """
-
+    """Populate combo with full list of codes"""
     unicode_list = []
     matches = ["utf8", "windows", "latin"]
 
@@ -1734,10 +1802,12 @@ def fill_combo_unicodes(combo):
     fill_combo_values(combo, unicode_list)
 
 
-def set_table_model(dialog, table_object, table_name, expr_filter, columns_to_show: List[str] = list()):
-    """ Sets a TableModel to @widget_name attached to
-        @table_name and filter @expr_filter
+def set_table_model(dialog, table_object, table_name, expr_filter, columns_to_show: List[str] = None):
+    """Sets a TableModel to @widget_name attached to
+    @table_name and filter @expr_filter
     """
+    if columns_to_show is None:
+        columns_to_show = []
     # Validate expression
     is_valid, expr = _validate_expression(expr_filter)
     if not is_valid:
@@ -1770,9 +1840,8 @@ def set_table_model(dialog, table_object, table_name, expr_filter, columns_to_sh
     return expr
 
 
-def create_datetime(object_name, allow_null=True, set_cal_popup=True, display_format='dd/MM/yyyy'):
-    """ Create a QgsDateTimeEdit widget """
-
+def create_datetime(object_name, allow_null=True, set_cal_popup=True, display_format="dd/MM/yyyy"):
+    """Create a QgsDateTimeEdit widget"""
     widget = QgsDateTimeEdit()
     widget.setObjectName(object_name)
     widget.setAllowNull(allow_null)
@@ -1782,21 +1851,21 @@ def create_datetime(object_name, allow_null=True, set_cal_popup=True, display_fo
     btn_calendar.clicked.connect(partial(set_calendar_empty, widget))
     return widget
 
+
 # region private functions
 
 
 def _add_translator(log_info=False):
-    """ Add translation file to the list of translation files to be used for translations """
-
-     # Get locale of QGIS application
+    """Add translation file to the list of translation files to be used for translations"""
+    # Get locale of QGIS application
     locale = tools_qgis.get_locale_schema()
 
-    locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name.lower()}_{locale}.qm')
+    locale_path = os.path.join(lib_vars.plugin_dir, "i18n", f"{lib_vars.plugin_name.lower()}_{locale}.qm")
     if not os.path.exists(locale_path):
         if log_info:
             msg = "Locale not found"
             tools_log.log_info(msg, parameter=locale_path)
-        locale_path = os.path.join(lib_vars.plugin_dir, 'i18n', f'{lib_vars.plugin_name}_en_US.qm')
+        locale_path = os.path.join(lib_vars.plugin_dir, "i18n", f"{lib_vars.plugin_name}_en_US.qm")
         # If English locale file not found, exit function
         if not os.path.exists(locale_path):
             if log_info:
@@ -1818,11 +1887,18 @@ def _add_translator(log_info=False):
             tools_log.log_info(msg, parameter=locale_path, msg_params=msg_params)
 
 
-def _translate_form(context_name, dialog, aux_context='ui_message'):
-    """ Translate widgets of the form to current language """
-
+def _translate_form(context_name, dialog, aux_context="ui_message"):
+    """Translate widgets of the form to current language"""
     type_widget_list = [
-        QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QLineEdit, QTextEdit, QTabWidget, QToolBox
+        QCheckBox,
+        QGroupBox,
+        QLabel,
+        QPushButton,
+        QRadioButton,
+        QLineEdit,
+        QTextEdit,
+        QTabWidget,
+        QToolBox,
     ]
     for widget_type in type_widget_list:
         widget_list = dialog.findChildren(widget_type)
@@ -1830,14 +1906,13 @@ def _translate_form(context_name, dialog, aux_context='ui_message'):
             _translate_widget(context_name, widget, aux_context)
 
     # Translate title of the form
-    text = tr('title', context_name, aux_context)
-    if text != 'title':
+    text = tr("title", context_name, aux_context)
+    if text != "title":
         dialog.setWindowTitle(text)
 
 
-def _translate_widget(context_name, widget, aux_context='ui_message'):
-    """ Translate widget text """
-
+def _translate_widget(context_name, widget, aux_context="ui_message"):
+    """Translate widget text"""
     if widget is None:
         return
 
@@ -1860,36 +1935,34 @@ def _translate_widget(context_name, widget, aux_context='ui_message'):
         tools_log.log_info(msg, msg_params=msg_params)
 
 
-def _translate_tooltip(context_name, widget, idx=None, aux_context='ui_message'):
-    """ Translate tooltips widgets of the form to current language
-        If we find a translation, it will be put
-        If the object does not have a tooltip we will put the object text itself as a tooltip
+def _translate_tooltip(context_name, widget, idx=None, aux_context="ui_message"):
+    """Translate tooltips widgets of the form to current language
+    If we find a translation, it will be put
+    If the object does not have a tooltip we will put the object text itself as a tooltip
     """
-
     if type(widget) is QTabWidget:
         widget_name = widget.widget(idx).objectName()
-        tooltip = tr(f'tooltip_{widget_name}', context_name, aux_context)
-        if tooltip not in (f'tooltip_{widget_name}', None, 'None'):
+        tooltip = tr(f"tooltip_{widget_name}", context_name, aux_context)
+        if tooltip not in (f"tooltip_{widget_name}", None, "None"):
             widget.setTabToolTip(idx, tooltip)
         elif widget.toolTip() in ("", None):
             widget.setTabToolTip(idx, widget.tabText(idx))
     else:
         widget_name = widget.objectName()
-        tooltip = tr(f'tooltip_{widget_name}', context_name, aux_context)
-        if tooltip not in (f'tooltip_{widget_name}', None, 'None'):
+        tooltip = tr(f"tooltip_{widget_name}", context_name, aux_context)
+        if tooltip not in (f"tooltip_{widget_name}", None, "None"):
             widget.setToolTip(tooltip)
         elif widget.toolTip() in ("", None):
             if type(widget) is QGroupBox:
                 widget.setToolTip(widget.title())
             elif type(widget) is QWidget:
-                 widget.setToolTip("")
+                widget.setToolTip("")
             else:
                 widget.setToolTip(widget.text())
 
 
 def _set_model_by_list(string_list, proxy_model):
-    """ Set the model according to the list """
-
+    """Set the model according to the list"""
     model = QStringListModel()
     model.setStringList(string_list)
     proxy_model.setSourceModel(model)
@@ -1917,7 +1990,7 @@ def _create_table_model(table_name):
     model.select()
 
     if model.lastError().isValid():
-        if 'Unable to find table' in model.lastError().text():
+        if "Unable to find table" in model.lastError().text():
             tools_db.reset_qsqldatabase_connection()
         else:
             tools_qgis.show_warning(model.lastError().text())
@@ -1954,7 +2027,7 @@ def _translate_tab_widget(widget, context_name, aux_context):
     for i in range(0, num_tabs):
         widget_name = widget.widget(i).objectName()
         text = tr(widget_name, context_name, aux_context)
-        if text not in (widget_name, None, 'None'):
+        if text not in (widget_name, None, "None"):
             widget.setTabText(i, text)
         else:
             widget_text = widget.tabText(i)
@@ -1970,7 +2043,7 @@ def _translate_tool_box(widget, context_name, aux_context):
     for i in range(0, num_tabs):
         widget_name = widget.widget(i).objectName()
         text = tr(widget_name, context_name, aux_context)
-        if text not in (widget_name, None, 'None'):
+        if text not in (widget_name, None, "None"):
             widget.setItemText(i, text)
         else:
             widget_text = widget.itemText(i)
@@ -1984,7 +2057,7 @@ def _translate_group_box(widget, context_name, aux_context):
     """Helper function to translate QGroupBox"""
     widget_name = widget.objectName()
     text = tr(widget_name, context_name, aux_context)
-    if text not in (widget_name, None, 'None'):
+    if text not in (widget_name, None, "None"):
         widget.setTitle(text)
     else:
         widget_title = widget.title()
@@ -1998,7 +2071,7 @@ def _translate_standard_widget(widget, context_name, aux_context):
     """Helper function to translate standard widgets"""
     widget_name = widget.objectName()
     text = tr(widget_name, context_name, aux_context)
-    if text not in (widget_name, None, 'None'):
+    if text not in (widget_name, None, "None"):
         widget.setText(text)
     else:
         widget_text = widget.text()
@@ -2041,9 +2114,9 @@ def _get_text_from_checkbox(dialog, widget):
 
 def _handle_null_text(text, add_quote, return_string_null):
     """Helper function to handle null/empty text cases"""
-    if text in (None, '') and return_string_null:
+    if text in (None, "") and return_string_null:
         text = "null"
-    elif text in (None, ''):
+    elif text in (None, ""):
         text = ""
     if add_quote and text != "null":
         text = "'" + text + "'"
@@ -2052,7 +2125,7 @@ def _handle_null_text(text, add_quote, return_string_null):
 
 def _set_text_for_text_widgets(widget, text, msg_params=None):
     """Helper function to set text for text-based widgets"""
-    if str(text) == 'None':
+    if str(text) == "None":
         text = ""
     else:
         text = tr(f"{text}", list_params=msg_params)
@@ -2064,7 +2137,7 @@ def _set_text_for_text_widgets(widget, text, msg_params=None):
 
 def _set_text_for_spinbox(widget, text):
     """Helper function to set text for spinbox widgets"""
-    if text == 'None' or text == 'null':
+    if text == "None" or text == "null":
         text = 0
     widget.setValue(float(text))
 
@@ -2082,18 +2155,18 @@ def _get_stack_info(stack_level):
 
 def _build_exception_message(file_name, function_line, function_name, exception, filepath, sql, schema_name):
     """Helper function to build exception message"""
-        # Set exception message details
+    # Set exception message details
     msg = ""
-    msg += f'''{tr("File name")}: {file_name}\n'''
-    msg += f'''{tr("Function name")}: {function_name}\n'''
-    msg += f'''{tr("Line number")}: {function_line}\n'''
+    msg += f"""{tr("File name")}: {file_name}\n"""
+    msg += f"""{tr("Function name")}: {function_name}\n"""
+    msg += f"""{tr("Line number")}: {function_line}\n"""
     if exception:
-        msg += f'''{tr("Description")}:\n{str(exception)}\n'''
+        msg += f"""{tr("Description")}:\n{str(exception)}\n"""
     if filepath:
-        msg += f'''{tr("SQL File")}:\n{filepath}\n\n'''
+        msg += f"""{tr("SQL File")}:\n{filepath}\n\n"""
     if sql:
-        msg += f'''{tr("SQL")}:\n {sql}\n\n'''
-    msg += f'''{tr("Schema name")}: {schema_name}'''
+        msg += f"""{tr("SQL")}:\n {sql}\n\n"""
+    msg += f"""{tr("Schema name")}: {schema_name}"""
 
     return msg
 

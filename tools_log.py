@@ -1,5 +1,4 @@
-"""
-This file is part of Giswater
+"""This file is part of Giswater
 The program is free software: you can redistribute it and/or modify it under the terms of the GNU
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
@@ -60,8 +59,7 @@ class GwLogger(object):
         self.add_file_handler()
 
     def set_logger_parameters(self, min_log_level, log_limit_characters, log_db_limit_characters):
-        """ Set logger parameters min_log_level, log_limit_characters, log_db_limit_characters """
-
+        """Set logger parameters min_log_level, log_limit_characters, log_db_limit_characters"""
         try:
             min_log_level = int(min_log_level)
         except (ValueError, TypeError):
@@ -82,18 +80,16 @@ class GwLogger(object):
             self.log_db_limit_characters = log_db_limit_characters
 
     def add_file_handler(self):
-        """ Add file handler """
-
-        log_format = '%(asctime)s [%(levelname)s] - %(message)s\n'
-        log_date = '%d/%m/%Y %H:%M:%S'
+        """Add file handler"""
+        log_format = "%(asctime)s [%(levelname)s] - %(message)s\n"
+        log_date = "%d/%m/%Y %H:%M:%S"
         formatter = logging.Formatter(log_format, log_date)
         self.fh = logging.FileHandler(self.filepath)
         self.fh.setFormatter(formatter)
         self.logger_file.addHandler(self.fh)
 
     def close_logger(self):
-        """ Remove file handler """
-
+        """Remove file handler"""
         try:
             self.logger_file.removeHandler(self.fh)
             self.fh.flush()
@@ -103,34 +99,33 @@ class GwLogger(object):
             pass
 
     def debug(self, msg=None, stack_level=2, stack_level_increase=0):
-        """ Logger message into logger file with level DEBUG (10) """
+        """Logger message into logger file with level DEBUG (10)"""
         self._log(msg, logging.DEBUG, stack_level + stack_level_increase + 1)
 
     def info(self, msg=None, stack_level=2, stack_level_increase=0):
-        """ Logger message into logger file with level INFO (20) """
+        """Logger message into logger file with level INFO (20)"""
         self._log(msg, logging.INFO, stack_level + stack_level_increase + 1)
 
     def warning(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
-        """ Logger message into logger file with level WARNING (30) """
+        """Logger message into logger file with level WARNING (30)"""
         self._log(msg, logging.WARNING, stack_level + stack_level_increase + 1)
         if sum_error:
             self.num_errors += 1
 
     def error(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
-        """ Logger message into logger file with level ERROR (40) """
+        """Logger message into logger file with level ERROR (40)"""
         self._log(msg, logging.ERROR, stack_level + stack_level_increase + 1)
         if sum_error:
             self.num_errors += 1
 
     def critical(self, msg=None, stack_level=2, stack_level_increase=0, sum_error=True):
-        """ Logger message into logger file with level CRITICAL (50) """
+        """Logger message into logger file with level CRITICAL (50)"""
         self._log(msg, logging.CRITICAL, stack_level + stack_level_increase + 1)
         if sum_error:
             self.num_errors += 1
 
     def _log(self, msg=None, log_level=logging.INFO, stack_level=2):
-        """ Logger message into logger file with selected level """
-
+        """Logger message into logger file with selected level"""
         try:
 
             # Check session parameter 'min_log_level' to know if we need to log message in logger file
@@ -158,10 +153,9 @@ class GwLogger(object):
 
 
 def set_logger(logger_name, min_log_level=20):
-    """ Set logger class. This class will generate new logger file """
-
+    """Set logger class. This class will generate new logger file"""
     if lib_vars.logger is None:
-        log_suffix = '%Y%m%d'
+        log_suffix = "%Y%m%d"
         lib_vars.logger = GwLogger(logger_name, min_log_level, str(log_suffix))
         values = {10: 0, 20: 0, 30: 1, 40: 2}
         lib_vars.logger.min_message_level = values.get(int(min_log_level), 0)
@@ -169,8 +163,7 @@ def set_logger(logger_name, min_log_level=20):
 
 def log_debug(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
               tab_name=None, msg_params=None):
-    """ Write debug message into QGIS Log Messages Panel """
-
+    """Write debug message into QGIS Log Messages Panel"""
     msg = _qgis_log_message(text, Qgis.MessageLevel.Info, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.debug(msg, stack_level_increase=stack_level_increase)
@@ -178,8 +171,7 @@ def log_debug(text=None, context_name="giswater", parameter=None, logger_file=Tr
 
 def log_info(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
              tab_name=None, msg_params=None):
-    """ Write information message into QGIS Log Messages Panel """
-
+    """Write information message into QGIS Log Messages Panel"""
     msg = _qgis_log_message(text, Qgis.MessageLevel.Info, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.info(msg, stack_level_increase=stack_level_increase)
@@ -187,8 +179,7 @@ def log_info(text=None, context_name="giswater", parameter=None, logger_file=Tru
 
 def log_warning(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
                 tab_name=None, msg_params=None):
-    """ Write warning message into QGIS Log Messages Panel """
-
+    """Write warning message into QGIS Log Messages Panel"""
     msg = _qgis_log_message(text, Qgis.MessageLevel.Warning, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.warning(msg, stack_level_increase=stack_level_increase)
@@ -196,17 +187,15 @@ def log_warning(text=None, context_name="giswater", parameter=None, logger_file=
 
 def log_error(text=None, context_name="giswater", parameter=None, logger_file=True, stack_level_increase=0,
               tab_name=None, msg_params=None):
-    """ Write error message into QGIS Log Messages Panel """
-
+    """Write error message into QGIS Log Messages Panel"""
     msg = _qgis_log_message(text, Qgis.MessageLevel.Critical, context_name, parameter, tab_name, msg_params)
     if lib_vars.logger and logger_file:
         lib_vars.logger.error(msg, stack_level_increase=stack_level_increase)
 
 
-def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message_level=Qgis.MessageLevel.Info,
+def log_db(text=None, color="black", bold="", header="SERVER EXECUTION", message_level=Qgis.MessageLevel.Info,
            logger_file=True, stack_level_increase=0):
-    """ Write information message into QGIS Log Messages Panel (tab Giswater DB) """
-
+    """Write information message into QGIS Log Messages Panel (tab Giswater DB)"""
     if type(text) is dict:
         text = json.dumps(text)
 
@@ -215,7 +204,7 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
     limit = 200
     if lib_vars.logger and lib_vars.logger.log_db_limit_characters:
         limit = lib_vars.logger.log_db_limit_characters
-    msg = (msg_[:limit] + '...') if len(msg_) > limit and bold == '' else msg_
+    msg = (msg_[:limit] + "...") if len(msg_) > limit and bold == "" else msg_
 
     # Check session parameter 'min_message_level' to know if we need to log message in QGIS Log Messages Panel
     if lib_vars.logger and message_level >= lib_vars.logger.min_message_level:
@@ -228,11 +217,9 @@ def log_db(text=None, color="black", bold='', header="SERVER EXECUTION", message
 
 def _qgis_log_message(text=None, message_level=Qgis.MessageLevel.Info, context_name="giswater",
                       parameter=None, tab_name=None, msg_params=None):
+    """Write message into QGIS Log Messages Panel with selected message level
+    :param message_level: {INFO = 0, WARNING = 1, CRITICAL = 2, SUCCESS = 3, NONE = 4}
     """
-    Write message into QGIS Log Messages Panel with selected message level
-        :param message_level: {INFO = 0, WARNING = 1, CRITICAL = 2, SUCCESS = 3, NONE = 4}
-    """
-
     msg = None
     if text:
         msg = tools_qt.tr(text, context_name, list_params=msg_params)
