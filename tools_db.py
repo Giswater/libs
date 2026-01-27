@@ -3,6 +3,7 @@ The program is free software: you can redistribute it and/or modify it under the
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 """
+
 # -*- coding: utf-8 -*-
 from qgis.PyQt.QtSql import QSqlDatabase, QSqlQueryModel
 from qgis.core import QgsCredentials, QgsDataSourceUri, QgsWkbTypes
@@ -67,8 +68,7 @@ def check_view(viewname, schemaname=None):
         schemaname = lib_vars.schema_name
 
     schemaname = schemaname.replace('"', "")
-    sql = ("SELECT * FROM pg_views "
-           "WHERE schemaname = %s AND viewname = %s ")
+    sql = "SELECT * FROM pg_views WHERE schemaname = %s AND viewname = %s "
     params = [schemaname, viewname]
     row = get_row(sql, log_info=False, params=params)
     return row
@@ -80,8 +80,7 @@ def check_column(tablename, columname, schemaname=None):
         schemaname = lib_vars.schema_name
 
     schemaname = schemaname.replace('"', "")
-    sql = ("SELECT * FROM information_schema.columns "
-           "WHERE table_schema = %s AND table_name = %s AND column_name = %s")
+    sql = "SELECT * FROM information_schema.columns WHERE table_schema = %s AND table_name = %s AND column_name = %s"
     params = [schemaname, tablename, columname]
     row = get_row(sql, log_info=False, params=params)
     return row
@@ -96,7 +95,7 @@ def check_role(role_name, is_admin=None):
 
 def check_role_user(role_name, username=None):
     """Check if current user belongs to @role_name"""
-    global current_user  # noqa: F824
+    global current_user
     # Check both @role_name and @username exists
     if not check_role(role_name):
         return False
@@ -107,7 +106,7 @@ def check_role_user(role_name, username=None):
     if not check_role(username):
         return False
 
-    sql = ("SELECT pg_has_role('" + username + "', '" + role_name + "', 'MEMBER');")
+    sql = "SELECT pg_has_role('" + username + "', '" + role_name + "', 'MEMBER');"
     row = get_row(sql)
     if row:
         return row[0]
@@ -117,7 +116,7 @@ def check_role_user(role_name, username=None):
 
 def check_super_user(username=None):
     """Returns True if @username is a superuser"""
-    global current_user  # noqa: F824
+    global current_user
     if username is None:
         username = current_user
 
@@ -146,8 +145,9 @@ def check_pg_extension(extension, form_enabled=True):
             execute_sql(sql)
             return True, None
         elif form_enabled:
-            message = (f"Unable to create '{extension}' extension. "
-                      f"Packages must be installed, consult your administrator.")
+            message = (
+                f"Unable to create '{extension}' extension. Packages must be installed, consult your administrator."
+            )
             return False, message
 
     return True, None
@@ -155,7 +155,7 @@ def check_pg_extension(extension, form_enabled=True):
 
 def get_current_user():
     """Get current user connected to database"""
-    global current_user  # noqa: F824
+    global current_user
     if current_user:
         return current_user
 
@@ -174,9 +174,11 @@ def get_columns_list(tablename, schemaname=None):
         schemaname = lib_vars.schema_name
 
     schemaname = schemaname.replace('"', "")
-    sql = ("SELECT column_name FROM information_schema.columns "
-           "WHERE table_schema = %s AND table_name = %s "
-           "ORDER BY ordinal_position")
+    sql = (
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema = %s AND table_name = %s "
+        "ORDER BY ordinal_position"
+    )
     params = [schemaname, tablename]
     column_names = get_rows(sql, params=params)
     return column_names
@@ -200,8 +202,8 @@ def get_srid(tablename, schemaname=None):
 
 def set_database_connection():
     """Set database connection"""
-    global dao  # noqa: F824
-    global current_user  # noqa: F824
+    global dao
+    global current_user
     dao = None
     lib_vars.session_vars["last_error"] = None
     lib_vars.session_vars["logged_status"] = False
@@ -209,9 +211,13 @@ def set_database_connection():
 
     layer_source, not_version = get_layer_source_from_credentials("prefer")
     if layer_source:
-        if layer_source["service"] is None and \
-                (layer_source["db"] is None or layer_source["host"] is None or layer_source["user"] is None
-                 or layer_source["password"] is None or layer_source["port"] is None):
+        if layer_source["service"] is None and (
+            layer_source["db"] is None
+            or layer_source["host"] is None
+            or layer_source["user"] is None
+            or layer_source["password"] is None
+            or layer_source["port"] is None
+        ):
             return False, not_version, layer_source
     else:
         return False, not_version, layer_source
@@ -223,7 +229,7 @@ def set_database_connection():
 
 def check_db_connection():
     """Check database connection. Reconnect if needed"""
-    global dao  # noqa: F824
+    global dao
     opened = True
     try:
         was_closed = dao.check_connection()
@@ -234,14 +240,19 @@ def check_db_connection():
             if not opened:
                 msg = lib_vars.qgis_db_credentials.lastError().databaseText()
                 msg = "Database connection error ({0    }): {1}"
-                msg_params = ("QSqlDatabase", msg,)
+                msg_params = (
+                    "QSqlDatabase",
+                    msg,
+                )
                 tools_log.log_warning(msg, msg_params=msg_params)
     except Exception as e:
         msg = "{0} Exception: {1}"
-        msg_params = ("check_db_connection", e,)
+        msg_params = (
+            "check_db_connection",
+            e,
+        )
         tools_log.log_warning(msg, msg_params=msg_params)
-    finally:
-        return opened
+    return opened
 
 
 def get_pg_version():
@@ -257,8 +268,8 @@ def get_pg_version():
 
 def connect_to_database(host, port, db, user, pwd, sslmode):
     """Connect to database with selected parameters"""
-    global dao  # noqa: F824
-    global current_user  # noqa: F824
+    global dao
+    global current_user
     # Check if selected parameters is correct
     if None in (host, port, db, user, pwd):
         message = "Database connection error. Please check your connection parameters."
@@ -291,7 +302,6 @@ def connect_to_database(host, port, db, user, pwd, sslmode):
 
 
 def create_qsqldatabase_connection(host, port, db, user, pwd):
-
     # QSqlDatabase connection for Table Views
     lib_vars.qgis_db_credentials = QSqlDatabase.addDatabase("QPSQL", lib_vars.plugin_name)
     lib_vars.qgis_db_credentials.setHostName(host)
@@ -346,31 +356,38 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
     """Connect to database trough selected service
     This service must exist in file pg_service.conf
     """
-    global dao  # noqa: F824
+    global dao
     conn_string = f"service='{service}'"
     if sslmode:
         conn_string += f" sslmode={sslmode}"
 
     # Get credentials from .pg_service.conf
     credentials = tools_os.manage_pg_service(service)
-    if all([credentials["host"], credentials["port"], credentials["dbname"]]) and \
-            None in [credentials["user"], credentials["password"]]:
+    if all([credentials["host"], credentials["port"], credentials["dbname"]]) and None in [
+        credentials["user"],
+        credentials["password"],
+    ]:
         if conn_info is None:
             conn_info = f"service='{service}'"
-        (success, credentials["user"], credentials["password"]) = \
-                QgsCredentials.instance().get(
-                    conn_info,
-                    credentials["user"],
-                    credentials["password"],
-                    f"Please enter the credentials for connection '{service}'"
-                )
+        (success, credentials["user"], credentials["password"]) = QgsCredentials.instance().get(
+            conn_info,
+            credentials["user"],
+            credentials["password"],
+            f"Please enter the credentials for connection '{service}'",
+        )
 
         # Put the credentials back (for yourself and the provider), as QGIS removes it when you "get" it
         QgsCredentials.instance().put(conn_info, credentials["user"], credentials["password"])
 
     if credentials:
-        status = connect_to_database(credentials["host"], credentials["port"], credentials["dbname"],
-                                     credentials["user"], credentials["password"], credentials["sslmode"])
+        status = connect_to_database(
+            credentials["host"],
+            credentials["port"],
+            credentials["dbname"],
+            credentials["user"],
+            credentials["password"],
+            credentials["sslmode"],
+        )
     else:
         # Try to connect using name defined in service file
         # QSqlDatabase connection
@@ -430,7 +447,7 @@ def get_pgrouting_version():
 
 def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_conn=None, is_admin=None, is_thread=False):
     """Execute SQL. Check its result in log tables, and show it to the user"""
-    global dao  # noqa: F824
+    global dao
     if dao is None:
         msg = "The connection to the database is broken."
         tools_log.log_warning(msg, parameter=sql)
@@ -450,10 +467,11 @@ def get_row(sql, log_info=True, log_sql=False, commit=True, params=None, aux_con
     return row
 
 
-def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False,
-             aux_conn=None):
+def get_rows(
+    sql, log_info=True, log_sql=False, commit=True, params=None, add_empty_row=False, is_thread=False, aux_conn=None
+):
     """Execute SQL. Check its result in log tables, and show it to the user"""
-    global dao  # noqa: F824
+    global dao
     if dao is None:
         msg = "The connection to the database is broken."
         tools_log.log_warning(msg, parameter=sql)
@@ -480,19 +498,16 @@ def get_rows(sql, log_info=True, log_sql=False, commit=True, params=None, add_em
 
 
 def get_values_from_catalog(table_name, typevalue, order_by="id"):
-
-    sql = (f"SELECT id, idval"
-           f" FROM {table_name}"
-           f" WHERE typevalue = '{typevalue}'"
-           f" ORDER BY {order_by}")
+    sql = f"SELECT id, idval FROM {table_name} WHERE typevalue = '{typevalue}' ORDER BY {order_by}"
     rows = get_rows(sql)
     return rows
 
 
-def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True,
-                aux_conn=None):
+def execute_sql(
+    sql, log_sql=False, log_error=False, commit=True, filepath=None, is_thread=False, show_exception=True, aux_conn=None
+):
     """Execute SQL. Check its result in log tables, and show it to the user"""
-    global dao  # noqa: F824
+    global dao
     if log_sql:
         tools_log.log_db(sql, stack_level_increase=1)
     result = dao.execute_sql(sql, commit, aux_conn=aux_conn)
@@ -509,13 +524,13 @@ def execute_sql(sql, log_sql=False, log_error=False, commit=True, filepath=None,
 
 def cancel_pid(pid):
     """Cancel one process by pid"""
-    global dao  # noqa: F824
+    global dao
     return dao.cancel_pid(pid)
 
 
 def execute_returning(sql, log_sql=False, log_error=False, commit=True, is_thread=False, show_exception=True):
     """Execute SQL. Check its result in log tables, and show it to the user"""
-    global dao  # noqa: F824
+    global dao
     if log_sql:
         tools_log.log_db(sql, stack_level_increase=1)
     value = dao.execute_returning(sql, commit)
@@ -532,7 +547,7 @@ def execute_returning(sql, log_sql=False, log_error=False, commit=True, is_threa
 
 def set_search_path(schema_name):
     """Set parameter search_path for current QGIS project"""
-    global dao  # noqa: F824
+    global dao
     sql = f"SET search_path = {schema_name}, public;"
     execute_sql(sql)
     dao.set_search_path = sql
@@ -544,10 +559,12 @@ def check_function(function_name, schema_name=None, commit=True, aux_conn=None, 
         schema_name = lib_vars.schema_name
 
     schema_name = schema_name.replace('"', "")
-    sql = (f"SELECT routine_name "
-           f"FROM information_schema.routines "
-           f"WHERE lower(routine_schema) = '{schema_name}' "
-           f"AND lower(routine_name) = '{function_name}'")
+    sql = (
+        f"SELECT routine_name "
+        f"FROM information_schema.routines "
+        f"WHERE lower(routine_schema) = '{schema_name}' "
+        f"AND lower(routine_name) = '{function_name}'"
+    )
     row = get_row(sql, commit=commit, aux_conn=aux_conn, is_thread=is_thread)
     return row
 
@@ -568,10 +585,17 @@ def connect_to_database_credentials(credentials, conn_info=None, max_attempts=2)
     while not logged and attempt <= max_attempts:
         attempt += 1
         if conn_info and attempt > 1:
-            (success, credentials["user"], credentials["password"]) = \
-                QgsCredentials.instance().get(conn_info, credentials["user"], credentials["password"])
-        logged = connect_to_database(credentials["host"], credentials["port"], credentials["db"],
-                                     credentials["user"], credentials["password"], credentials["sslmode"])
+            (success, credentials["user"], credentials["password"]) = QgsCredentials.instance().get(
+                conn_info, credentials["user"], credentials["password"]
+            )
+        logged = connect_to_database(
+            credentials["host"],
+            credentials["port"],
+            credentials["db"],
+            credentials["user"],
+            credentials["password"],
+            credentials["sslmode"],
+        )
 
     return logged, credentials
 
@@ -581,8 +605,13 @@ def _get_sslmode_from_settings(settings, sslmode_default):
     sslmode_settings = settings.value("sslmode")
     try:
         sslmode_dict = {
-            0: "prefer", 1: "disable", 3: "require",
-            "SslPrefer": "prefer", "SslDisable": "disable", "SslRequire": "require", "SslAllow": "allow"
+            0: "prefer",
+            1: "disable",
+            3: "require",
+            "SslPrefer": "prefer",
+            "SslDisable": "disable",
+            "SslRequire": "require",
+            "SslAllow": "allow",
         }
         return sslmode_dict.get(sslmode_settings, sslmode_default)
     except ValueError:
@@ -598,10 +627,15 @@ def _get_credentials_from_layer(layer, sslmode_default):
     if not credentials["sslmode"]:
         if credentials["service"]:
             msg = "Getting {0} from .{1} file"
-            msg_params = ("sslmode", "pg_service",)
+            msg_params = (
+                "sslmode",
+                "pg_service",
+            )
             tools_log.log_info(msg, msg_params=msg_params)
             credentials_service = tools_os.manage_pg_service(credentials["service"])
-            credentials["sslmode"] = credentials_service["sslmode"] if credentials_service["sslmode"] else sslmode_default  # noqa: E501
+            credentials["sslmode"] = (
+                credentials_service["sslmode"] if credentials_service["sslmode"] else sslmode_default
+            )  # noqa: E501
         else:
             settings = QSettings()
             settings.beginGroup("PostgreSQL/connections")
@@ -631,8 +665,15 @@ def _get_credentials_from_settings(sslmode_default):
 
     settings.beginGroup(f"PostgreSQL/connections/{default_connection}")
     credentials = {
-        "db": None, "schema": None, "table": None, "service": None,
-        "host": None, "port": None, "user": None, "password": None, "sslmode": None
+        "db": None,
+        "schema": None,
+        "table": None,
+        "service": None,
+        "host": None,
+        "port": None,
+        "user": None,
+        "password": None,
+        "sslmode": None,
     }
 
     credentials["host"] = settings.value("host") or "localhost"
@@ -644,7 +685,10 @@ def _get_credentials_from_settings(sslmode_default):
 
     if credentials["service"]:
         msg = "Getting {0} from .{1} file"
-        msg_params = ("sslmode", "pg_service",)
+        msg_params = (
+            "sslmode",
+            "pg_service",
+        )
         tools_log.log_info(msg, msg_params=msg_params)
         credentials_service = tools_os.manage_pg_service(credentials["service"])
         credentials["sslmode"] = credentials_service["sslmode"] if credentials_service["sslmode"] else sslmode_default
@@ -659,7 +703,7 @@ def get_layer_source_from_credentials(sslmode_default, layer_name="ve_node"):
     """Get database parameters from layer @layer_name or database connection settings
     sslmode_default should be (disable, allow, prefer, require, verify-ca, verify-full)
     """
-    global dao_db_credentials  # noqa: F824
+    global dao_db_credentials
 
     # Get layer and settings
     layer = tools_qgis.get_layer_by_tablename(layer_name)
@@ -708,7 +752,7 @@ def get_uri(tablename=None, geom=None, schema_name=None):
     """Set the component parts of a RDBMS data source URI
     :return: QgsDataSourceUri() with the connection established according to the parameters of the credentials.
     """
-    global dao_db_credentials  # noqa: F824
+    global dao_db_credentials
     uri = QgsDataSourceUri()
     sslmode_default = QgsDataSourceUri.SslMode.SslPrefer
     sslmode_creds: str = dao_db_credentials["sslmode"]
@@ -717,7 +761,7 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             "prefer": QgsDataSourceUri.SslMode.SslPrefer,
             "disable": QgsDataSourceUri.SslMode.SslDisable,
             "require": QgsDataSourceUri.SslMode.SslRequire,
-            "allow": QgsDataSourceUri.SslMode.SslAllow
+            "allow": QgsDataSourceUri.SslMode.SslAllow,
         }
         sslmode = sslmode_dict.get(sslmode_creds, sslmode_default)
     except ValueError:
@@ -726,15 +770,23 @@ def get_uri(tablename=None, geom=None, schema_name=None):
         uri.setConnection(dao_db_credentials["service"], None, None, "", sslmode)
     else:
         if tools_os.set_boolean(lib_vars.project_vars["store_credentials"], default=True):
-            uri.setConnection(dao_db_credentials["host"], dao_db_credentials["port"],
-                dao_db_credentials["db"], dao_db_credentials["user"], dao_db_credentials["password"],
-                sslmode)
+            uri.setConnection(
+                dao_db_credentials["host"],
+                dao_db_credentials["port"],
+                dao_db_credentials["db"],
+                dao_db_credentials["user"],
+                dao_db_credentials["password"],
+                sslmode,
+            )
         else:
-            uri.setConnection(dao_db_credentials["host"], dao_db_credentials["port"],
-                              dao_db_credentials["db"], None, "", sslmode)
+            uri.setConnection(
+                dao_db_credentials["host"], dao_db_credentials["port"], dao_db_credentials["db"], None, "", sslmode
+            )
     if geom is not None and geom != "None" and tablename is not None:
-        geom_type = execute_returning(f"SELECT type FROM geometry_columns WHERE f_table_name = "
-                                      f"'{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;")
+        geom_type = execute_returning(
+            f"SELECT type FROM geometry_columns WHERE f_table_name = "
+            f"'{tablename}' AND f_table_schema = '{schema_name}' LIMIT 1;"
+        )
         geom_type_map = {
             "POINT": QgsWkbTypes.Type.Point,
             "LINESTRING": QgsWkbTypes.Type.LineString,
@@ -763,7 +815,7 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             "MULTICURVE": QgsWkbTypes.Type.MultiCurve,
         }
         geom_key = geom_type[0].upper()
-        
+
         if geom_key not in geom_type_map:
             msg = "Geometry type ({0}) not found in layer: {1}"
             msg_params = (geom_type[0], tablename)
@@ -772,22 +824,24 @@ def get_uri(tablename=None, geom=None, schema_name=None):
             uri.setWkbType(wkb_type)
             return uri, False
 
-        wkb_type = geom_type_map.get(geom_key)  
+        wkb_type = geom_type_map.get(geom_key)
         uri.setWkbType(wkb_type)
         return uri, True
     return uri, False
+
 
 # region private functions
 
 
 def _get_sql(sql, log_sql=False, params=None):
     """Generate SQL with params. Useful for debugging"""
-    global dao  # noqa: F824
+    global dao
     if params:
         sql = dao.mogrify(sql, params)
     if log_sql:
         tools_log.log_db(sql, bold="b", stack_level_increase=2)
 
     return sql
+
 
 # endregion

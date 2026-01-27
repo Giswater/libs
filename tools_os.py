@@ -4,6 +4,7 @@ The program is free software: you can redistribute it and/or modify it under the
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 """
+
 import configparser
 import os
 import pathlib
@@ -74,16 +75,16 @@ def get_relative_path(filepath, levels=1):
         return filepath
 
     common = filepath
-    for i in range(levels + 1):
+    for _i in range(levels + 1):
         common = os.path.dirname(common)
 
     return os.path.relpath(filepath, common)
 
 
 def get_values_from_dictionary(dictionary: dict) -> Iterator[Any]:
-    """ 
-    Return values from @dictionary 
-    
+    """
+    Return values from @dictionary
+
     :param dictionary: The dictionary to get the values from.
 
     :return Iterator[Any]: An iterator of the values of the dictionary.
@@ -100,8 +101,18 @@ def set_boolean(param: Union[str, bool], default: bool = True) -> bool:
 
     :return: default if param not in bool_dict (bool)
     """
-    bool_dict = {True: True, "TRUE": True, "True": True, "true": True, "1": True,
-                 False: False, "FALSE": False, "False": False, "false": False, "0": False}
+    bool_dict = {
+        True: True,
+        "TRUE": True,
+        "True": True,
+        "true": True,
+        "1": True,
+        False: False,
+        "FALSE": False,
+        "False": False,
+        "false": False,
+        "0": False,
+    }
 
     return bool_dict.get(param, default)
 
@@ -145,7 +156,6 @@ def ireplace(old, new, text):
 
 
 def manage_pg_service(section):
-
     credentials = {"host": None, "port": None, "dbname": None, "user": None, "password": None, "sslmode": None}
 
     pgservice_file = os.environ.get("PGSERVICEFILE")
@@ -154,24 +164,36 @@ def manage_pg_service(section):
     if not any([pgservice_file, sysconf_dir]):
         return credentials
 
-    invalid_service_files = {path: not (bool(value) and os.path.exists(value))
-                             for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()}
+    invalid_service_files = {
+        path: not (bool(value) and os.path.exists(value))
+        for path, value in {"PGSERVICEFILE": pgservice_file, "PGSYSCONFDIR": sysconf_dir}.items()
+    }
 
     if all(invalid_service_files.values()):
         msg = "Files defined in environment variables '{0}' and '{1}' not found."
-        msg_params = ("PGSERVICEFILE", "PGSYSCONFDIR",)
+        msg_params = (
+            "PGSERVICEFILE",
+            "PGSYSCONFDIR",
+        )
         tools_log.log_warning(msg, msg_params=msg_params)
         return credentials
 
     credentials = get_credentials_from_config(section, pgservice_file)
     if not any([credentials["host"], credentials["port"], credentials["dbname"]]):
         msg = "Connection '{0}' not found in the file '{1}'. Trying in '{2}'..."
-        msg_params = (section, pgservice_file, sysconf_dir,)
+        msg_params = (
+            section,
+            pgservice_file,
+            sysconf_dir,
+        )
         tools_log.log_info(msg, msg_params=msg_params)
         credentials = get_credentials_from_config(section, sysconf_dir)
         if not any([credentials["host"], credentials["port"], credentials["dbname"]]):
             msg = "Connection '{0}' not found in the file '{1}'"
-            msg_params = (section, sysconf_dir,)
+            msg_params = (
+                section,
+                sysconf_dir,
+            )
             tools_log.log_warning(msg, msg_params=msg_params)
             return credentials
 

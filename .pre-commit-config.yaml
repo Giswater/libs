@@ -4,5 +4,5 @@ repos:
     rev: v0.14.14
     hooks:
       - id: ruff-check
-        args: [--fix]
+        args: [--fix, --preview]
       - id: ruff-format

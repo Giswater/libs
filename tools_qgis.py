@@ -3,6 +3,7 @@ The program is free software: you can redistribute it and/or modify it under the
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 """
+
 # -*- coding: utf-8 -*-
 import configparser
 import re
@@ -17,13 +18,41 @@ from random import randrange
 
 from qgis.PyQt.QtCore import Qt, QTimer, QSettings
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QDockWidget, QApplication, QPushButton, QDialog, QVBoxLayout, QTextEdit, \
-    QDialogButtonBox
-from qgis.core import QgsExpressionContextUtils, QgsProject, QgsPointLocator, \
-    QgsSnappingUtils, QgsSnappingConfig, QgsTolerance, QgsPointXY, QgsFeatureRequest, QgsRectangle, QgsSymbol, \
-    QgsLineSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsGeometry, QgsCoordinateReferenceSystem, \
-    QgsCoordinateTransform, QgsVectorLayer, QgsExpression, QgsFillSymbol, QgsMapToPixel, QgsWkbTypes, \
-    QgsPrintLayout, Qgis, NULL
+from qgis.PyQt.QtWidgets import (
+    QDockWidget,
+    QApplication,
+    QPushButton,
+    QDialog,
+    QVBoxLayout,
+    QTextEdit,
+    QDialogButtonBox,
+)
+from qgis.core import (
+    QgsExpressionContextUtils,
+    QgsProject,
+    QgsPointLocator,
+    QgsSnappingUtils,
+    QgsSnappingConfig,
+    QgsTolerance,
+    QgsPointXY,
+    QgsFeatureRequest,
+    QgsRectangle,
+    QgsSymbol,
+    QgsLineSymbol,
+    QgsRendererCategory,
+    QgsCategorizedSymbolRenderer,
+    QgsGeometry,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsVectorLayer,
+    QgsExpression,
+    QgsFillSymbol,
+    QgsMapToPixel,
+    QgsWkbTypes,
+    QgsPrintLayout,
+    Qgis,
+    NULL,
+)
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
 from . import tools_log, tools_qt, tools_os, tools_db
@@ -44,7 +73,6 @@ MINIMUM_WARNING_DURATION = 10
 
 
 def get_feature_by_expr(layer, expr_filter):
-
     # Check filter and existence of fields
     expr = QgsExpression(expr_filter)
     if expr.hasParserError():
@@ -60,9 +88,19 @@ def get_feature_by_expr(layer, expr_filter):
     return False
 
 
-def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
-                 parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None,
-                 title_params=None):
+def show_message(
+    text,
+    message_level=MESSAGE_LEVEL_WARNING,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    parameter=None,
+    title="",
+    logger_file=True,
+    dialog=iface,
+    sqlcontext=None,
+    msg_params=None,
+    title_params=None,
+):
     """Show message to the user with selected message level
     :param text: The text to be shown (String)
     :param message_level: Message level constant
@@ -72,13 +110,16 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
     :param title: The title of the message (String)
     :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    global user_parameters  # noqa: F824
+    global user_parameters
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get("show_message_durations")
     # If is set, use this value
     if dev_duration not in (None, "None"):
-        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
+        if (
+            message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL)
+            and int(dev_duration) < MINIMUM_WARNING_DURATION
+        ):  # noqa: E501
             duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
@@ -94,8 +135,16 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
     try:
         if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and sqlcontext is not None:
             # show message with button with the sqlcontext
-            show_message_function(msg, lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300),
-                                  "Show more", message_level, duration, context_name, logger_file, dialog)
+            show_message_function(
+                msg,
+                lambda: show_sqlcontext_dialog(sqlcontext, msg, title, 500, 300),
+                "Show more",
+                message_level,
+                duration,
+                context_name,
+                logger_file,
+                dialog,
+            )
         else:
             dialog.messageBar().pushMessage(tlt, msg, message_level, duration)
     except Exception as e:  # This is because "messageBar().pushMessage" is only available for QMainWindow, not QDialog.
@@ -107,8 +156,16 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
         lib_vars.logger.info(text)
 
 
-def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION,
-                      context_name="giswater", logger_file=True, dialog=iface):
+def show_message_link(
+    text,
+    url,
+    btn_text="Open",
+    message_level=MESSAGE_LEVEL_INFO,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    logger_file=True,
+    dialog=iface,
+):
     """Show message to the user with selected message level and a button to open the url
     :param text: The text to be shown (String)
     :param url: The url that will be opened by the button. It will also show after the message (String)
@@ -118,7 +175,7 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
     :param context_name: Where to look for translating the message
     :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    global user_parameters  # noqa: F824
+    global user_parameters
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get("show_message_durations")
@@ -147,9 +204,17 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
         lib_vars.logger.info(text)
 
 
-def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO,
-                          duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True, dialog=iface,
-                          text_params=None):
+def show_message_function(
+    text,
+    function,
+    btn_text="Open",
+    message_level=MESSAGE_LEVEL_INFO,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    logger_file=True,
+    dialog=iface,
+    text_params=None,
+):
     """Show message to the user with selected message level and a button to open the url
     :param text: The text to be shown (String)
     :param function: The function (can be a ``partial()`` object) to execute.
@@ -159,13 +224,16 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
     :param context_name: Where to look for translating the message
     :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    global user_parameters  # noqa: F824
+    global user_parameters
 
     # Get optional parameter 'show_message_durations'
     dev_duration = user_parameters.get("show_message_durations")
     # If is set, use this value
     if dev_duration not in (None, "None") and duration > 0:
-        if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
+        if (
+            message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL)
+            and int(dev_duration) < MINIMUM_WARNING_DURATION
+        ):  # noqa: E501
             duration = DEFAULT_MESSAGE_DURATION
         else:
             duration = int(dev_duration)
@@ -188,8 +256,17 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
         lib_vars.logger.info(text)
 
 
-def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-              title="", dialog=iface, msg_params=None, title_params=None):
+def show_info(
+    text,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    parameter=None,
+    logger_file=True,
+    title="",
+    dialog=iface,
+    msg_params=None,
+    title_params=None,
+):
     """Show information message to the user
     :param text: The text to be shown (String)
     :param duration: The duration of the message (int)
@@ -198,12 +275,31 @@ def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", 
     :param logger_file: Whether it should log the message in a file or not (bool)
     :param title: The title of the message (String)
     """
-    show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog,
-                 msg_params=msg_params, title_params=title_params)
+    show_message(
+        text,
+        MESSAGE_LEVEL_INFO,
+        duration,
+        context_name,
+        parameter,
+        title,
+        logger_file,
+        dialog=dialog,
+        msg_params=msg_params,
+        title_params=title_params,
+    )
 
 
-def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                 title="", dialog=iface, msg_params=None, title_params=None):
+def show_warning(
+    text,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    parameter=None,
+    logger_file=True,
+    title="",
+    dialog=iface,
+    msg_params=None,
+    title_params=None,
+):
     """Show warning message to the user
     :param text: The text to be shown (String)
     :param duration: The duration of the message (int)
@@ -212,12 +308,31 @@ def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
     :param logger_file: Whether it should log the message in a file or not (bool)
     :param title: The title of the message (String)
     """
-    show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog,
-                 msg_params=msg_params, title_params=title_params)
+    show_message(
+        text,
+        MESSAGE_LEVEL_WARNING,
+        duration,
+        context_name,
+        parameter,
+        title,
+        logger_file,
+        dialog=dialog,
+        msg_params=msg_params,
+        title_params=title_params,
+    )
 
 
-def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                  title="", dialog=iface, msg_params=None, title_params=None):
+def show_critical(
+    text,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    parameter=None,
+    logger_file=True,
+    title="",
+    dialog=iface,
+    msg_params=None,
+    title_params=None,
+):
     """Show critical message to the user
     :param text: The text to be shown (String)
     :param duration: The duration of the message (int)
@@ -226,12 +341,31 @@ def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswate
     :param logger_file: Whether it should log the message in a file or not (bool)
     :param title: The title of the message (String)
     """
-    show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog,
-                 msg_params=msg_params, title_params=title_params)
+    show_message(
+        text,
+        MESSAGE_LEVEL_CRITICAL,
+        duration,
+        context_name,
+        parameter,
+        title,
+        logger_file,
+        dialog=dialog,
+        msg_params=msg_params,
+        title_params=title_params,
+    )
 
 
-def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
-                 title="", dialog=iface, msg_params=None, title_params=None):
+def show_success(
+    text,
+    duration=DEFAULT_MESSAGE_DURATION,
+    context_name="giswater",
+    parameter=None,
+    logger_file=True,
+    title="",
+    dialog=iface,
+    msg_params=None,
+    title_params=None,
+):
     """Show success message to the user
     :param text: The text to be shown (String)
     :param duration: The duration of the message (int)
@@ -240,12 +374,23 @@ def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater
     :param logger_file: Whether it should log the message in a file or not (bool)
     :param title: The title of the message (String)
     """
-    show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog,
-                 msg_params=msg_params, title_params=title_params)
+    show_message(
+        text,
+        MESSAGE_LEVEL_SUCCESS,
+        duration,
+        context_name,
+        parameter,
+        title,
+        logger_file,
+        dialog=dialog,
+        msg_params=msg_params,
+        title_params=title_params,
+    )
 
 
-def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200,
-                           context_name="giswater"):
+def show_sqlcontext_dialog(
+    sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200, context_name="giswater"
+):
     """Displays a dialog with the SQL context in a more detailed, error-specific format,
     allowing the user to copy the error message.
 
@@ -355,8 +500,7 @@ def get_plugin_metadata(parameter, default_value, plugin_dir=None):
         message = f"Parameter not found: {parameter}"
         iface.messageBar().pushMessage("", message, 1, 20)
         value = default_value
-    finally:
-        return value
+    return value
 
 
 def get_plugin_version():
@@ -472,8 +616,7 @@ def get_project_variable(var_name):
             value = None
     except Exception:
         pass
-    finally:
-        return value
+    return value
 
 
 def set_project_variable(var_name, value):
@@ -484,8 +627,7 @@ def set_project_variable(var_name, value):
         QgsProject.instance().setCustomVariables(custom_vars)
     except Exception:
         pass
-    finally:
-        return
+    return
 
 
 def get_project_layers():
@@ -513,8 +655,17 @@ def find_toc_group(root, group, case_sensitive=False):
 def get_layer_source(layer):
     """Get database connection paramaters of @layer"""
     # Initialize variables
-    layer_source = {"db": None, "schema": None, "table": None, "service": None, "host": None, "port": None,
-                    "user": None, "password": None, "sslmode": None}
+    layer_source = {
+        "db": None,
+        "schema": None,
+        "table": None,
+        "service": None,
+        "host": None,
+        "port": None,
+        "user": None,
+        "password": None,
+        "sslmode": None,
+    }
 
     if layer is None:
         return layer_source
@@ -562,11 +713,11 @@ def get_layer_source_table_name(layer):
         pos_end_schema = uri.rfind(".")
         pos_fi = uri.find('" ')
         if uri.find("pg:") != -1:
-            uri_table = uri[pos_ini + 6:total]
+            uri_table = uri[pos_ini + 6 : total]
         elif pos_ini != -1 and pos_fi != -1:
-            uri_table = uri[pos_end_schema + 2:pos_fi]
+            uri_table = uri[pos_end_schema + 2 : pos_fi]
         else:
-            uri_table = uri[pos_end_schema + 2:total - 1]
+            uri_table = uri[pos_end_schema + 2 : total - 1]
     elif provider == "ogr" and layer.source().split("|")[0].endswith(".gpkg"):
         uri_table = ""
         parts = layer.source().split("|")  # Split by the pipe character '|'
@@ -594,7 +745,7 @@ def get_layer_schema(layer):
     pos_end_schema = uri.rfind(".")
     pos_fi = uri.find('" ')
     if pos_ini != -1 and pos_fi != -1:
-        table_schema = uri[pos_ini + 7:pos_end_schema - 1]
+        table_schema = uri[pos_ini + 7 : pos_end_schema - 1]
 
     return table_schema
 
@@ -662,11 +813,7 @@ def find_matching_layer(layers, tablename, schema_name):
     for cur_layer in layers:
         uri_table = get_layer_source_table_name(cur_layer)
         table_schema = get_layer_schema(cur_layer)
-        if (
-            uri_table is not None and
-            uri_table == tablename and
-            schema_name in ("", None, table_schema)
-        ):
+        if uri_table is not None and uri_table == tablename and schema_name in ("", None, table_schema):
             return cur_layer
     return None
 
@@ -722,9 +869,13 @@ def restore_hidden_nodes():
             hide_node_from_treeview(node, root, ltv)
 
 
-def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
-                         key_column: Optional[str] = None, geom_column: Optional[str] = "the_geom",
-                         group: Optional[str] = None):
+def add_layer_from_query(
+    query: str,
+    layer_name: str = "QueryLayer",
+    key_column: Optional[str] = None,
+    geom_column: Optional[str] = "the_geom",
+    group: Optional[str] = None,
+):
     """Creates a QVectorLayer and adds it to the project"""
     # Define your PostgreSQL connection parameters
     uri, _ = tools_db.get_uri()
@@ -888,7 +1039,10 @@ def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
         iface.mapCanvas().xyCoordinates.disconnect()
     except TypeError as e:
         msg = "{0} --> {1}"
-        msg_params = (type(e).__name__, e,)
+        msg_params = (
+            type(e).__name__,
+            e,
+        )
         tools_log.log_info(msg, msg_params=msg_params)
 
     if emit_point is not None:
@@ -896,7 +1050,10 @@ def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
             emit_point.canvasClicked.disconnect()
         except TypeError as e:
             msg = "{0} --> {1}"
-            msg_params = (type(e).__name__, e,)
+            msg_params = (
+                type(e).__name__,
+                e,
+            )
             tools_log.log_info(msg, msg_params=msg_params)
 
     if vertex_marker is not None:
@@ -904,7 +1061,10 @@ def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
             vertex_marker.hide()
         except AttributeError as e:
             msg = "{0} --> {1}"
-            msg_params = (type(e).__name__, e,)
+            msg_params = (
+                type(e).__name__,
+                e,
+            )
             tools_log.log_info(msg, msg_params=msg_params)
 
     if action_pan:
@@ -995,11 +1155,12 @@ def zoom_to_rectangle(x1, y1, x2, y2, margin=5, change_crs=True):
     """Generate an extension on the canvas according to the received coordinates"""
     rect = QgsRectangle(float(x1) + margin, float(y1) + margin, float(x2) - margin, float(y2) - margin)
     if str(lib_vars.data_epsg) == "2052" and str(lib_vars.project_epsg) == "102566" and change_crs:
-
-        rect = QgsRectangle(float(float(x1) + margin) * -1,
-                            (float(y1) + margin) * -1,
-                            (float(x2) - margin) * -1,
-                            (float(y2) - margin) * -1)
+        rect = QgsRectangle(
+            float(float(x1) + margin) * -1,
+            (float(y1) + margin) * -1,
+            (float(x2) - margin) * -1,
+            (float(y2) - margin) * -1,
+        )
     elif str(lib_vars.data_epsg) != str(lib_vars.project_epsg) and change_crs:
         data_epsg = QgsCoordinateReferenceSystem(str(lib_vars.data_epsg))
         project_epsg = QgsCoordinateReferenceSystem(str(lib_vars.project_epsg))
@@ -1077,9 +1238,9 @@ def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=Non
     for unique_value in unique_values:
         # initialize the default symbol for this geometry type
         symbol = QgsSymbol.defaultSymbol(layer.geometryType())
-        if type(symbol) in (QgsLineSymbol, ):
+        if type(symbol) in (QgsLineSymbol,):
             symbol.setWidth(size)
-        elif type(symbol) in (QgsFillSymbol, ):
+        elif type(symbol) in (QgsFillSymbol,):
             pass
         else:
             symbol.setSize(size)
@@ -1204,7 +1365,9 @@ def set_layer_visible(layer, recursive=True, visible=True):
     try:
         if layer:
             if recursive:
-                QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityCheckedParentRecursive(visible)  # noqa: E501
+                QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityCheckedParentRecursive(
+                    visible
+                )  # noqa: E501
             else:
                 QgsProject.instance().layerTreeRoot().findLayer(layer.id()).setItemVisibilityChecked(visible)
     except RuntimeError:
@@ -1274,7 +1437,7 @@ def create_qml(layer, style):
     load_qml(layer, path_temp_file)
 
 
-def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, duration_time=None, reset_rb=True):
+def draw_point(point, rubber_band=None, color=None, width=3, duration_time=None, reset_rb=True):
     """Draw a point on the canvas
     :param point: (QgsPointXY)
     :param rubber_band: (QgsRubberBand)
@@ -1282,6 +1445,8 @@ def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, d
     :param width: width of the point (int)
     :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
     """
+    if color is None:
+        color = QColor(255, 0, 0, 100)
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.PointGeometry)
     rubber_band.setIconSize(10)
@@ -1298,7 +1463,7 @@ def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, d
         QTimer.singleShot(duration_time, rubber_band.reset)
 
 
-def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, duration_time=None, reset_rb=True):
+def draw_polyline(points, rubber_band, color=None, width=5, duration_time=None, reset_rb=True):
     """Draw 'line' over canvas following list of points
     :param points: list of QgsPointXY (points[QgsPointXY_1, QgsPointXY_2, ..., QgsPointXY_x])
     :param rubber_band: (QgsRubberBand)
@@ -1306,6 +1471,8 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
     :param width: width of the point (int)
     :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
     """
+    if color is None:
+        color = QColor(255, 0, 0, 100)
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.LineGeometry)
     rubber_band.setIconSize(20)
@@ -1326,10 +1493,12 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
         QTimer.singleShot(duration_time, rubber_band.reset)
 
 
-def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, duration_time=None, reset_rb=True):
+def draw_polygon(points, rubber_band, border=None, width=3, duration_time=None, reset_rb=True):
     """Draw 'polygon' over canvas following list of points
     :param duration_time: integer milliseconds ex: 3000 for 3 seconds
     """
+    if border is None:
+        border = QColor(255, 0, 0, 100)
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
     rubber_band.setIconSize(20)
@@ -1371,13 +1540,15 @@ def get_geometry_from_json(feature):
         return QgsGeometry.fromWkt(geometry)
     except (AttributeError, TypeError, IndexError) as e:
         msg = "{0} --> {1}"
-        msg_params = (type(e).__name__, e,)
+        msg_params = (
+            type(e).__name__,
+            e,
+        )
         tools_log.log_info(msg, msg_params=msg_params)
         return None
 
 
 def get_locale():
-
     locale = "en_US"
     try:
         # Get locale of QGIS application
@@ -1389,12 +1560,14 @@ def get_locale():
     except AttributeError as e:
         locale = "en_US"
         msg = "{0} --> {1}"
-        msg_params = (type(e).__name__, e,)
+        msg_params = (
+            type(e).__name__,
+            e,
+        )
         tools_log.log_info(msg, msg_params=msg_params)
-    finally:
-        if locale in (None, ""):
-            locale = "en_US"
-        return locale
+    if locale in (None, ""):
+        locale = "en_US"
+    return locale
 
 
 def get_locale_schema():
@@ -1426,7 +1599,6 @@ def get_locale_schema():
 
 
 def highlight_features_by_id(qtable, layer_name, field_id, rubber_band, width, selected, deselected):
-
     rubber_band.reset()
     for idx, index in enumerate(qtable.selectionModel().selectedRows()):
         highlight_feature_by_id(qtable, layer_name, field_id, rubber_band, width, index, add=(idx > 0))
@@ -1477,9 +1649,7 @@ def zoom_to_layer(layer):
     if layer.crs() != iface.mapCanvas().mapSettings().destinationCrs():
         try:
             transform = QgsCoordinateTransform(
-                layer.crs(),
-                iface.mapCanvas().mapSettings().destinationCrs(),
-                QgsProject.instance()
+                layer.crs(), iface.mapCanvas().mapSettings().destinationCrs(), QgsProject.instance()
             )
             extent = transform.transformBoundingBox(extent)
         except Exception as e:
@@ -1501,10 +1671,12 @@ def check_query_layer(layer):
     try:
         # TODO:: Find differences between PostgreSQL and query layers, and replace this if condition.
         table_uri = layer.dataProvider().dataSourceUri()
-        if layer is None \
-                or type(layer) is not QgsVectorLayer \
-                or "SELECT row_number() over ()" in str(table_uri) \
-                or layer.isSqlQuery():
+        if (
+            layer is None
+            or type(layer) is not QgsVectorLayer
+            or "SELECT row_number() over ()" in str(table_uri)
+            or layer.isSqlQuery()
+        ):
             return False
         return True
     except Exception:
@@ -1512,7 +1684,6 @@ def check_query_layer(layer):
 
 
 def get_epsg():
-
     epsg = iface.mapCanvas().mapSettings().destinationCrs().authid()
     epsg = epsg.split(":")
     if len(epsg) > 1:
@@ -1540,6 +1711,7 @@ def get_composer(removed=None):
 
 
 # region private functions
+
 
 def _get_vertex_from_point(feature):
     """Manage feature geometry when is Point
@@ -1640,7 +1812,6 @@ def _get_multi_coordinates(feature):
 
 
 def create_point(canvas, iface, event):
-
     x = event.pos().x()
     y = event.pos().y()
     try:
@@ -1696,5 +1867,6 @@ def _add_layer_to_group(layer, first_group, second_group, third_group):
             my_group = root.insertGroup(0, "GW Layers")
         my_group.insertLayer(0, layer)
     iface.setActiveLayer(layer)
+
 
 # endregion
