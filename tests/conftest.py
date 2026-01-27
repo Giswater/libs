@@ -55,33 +55,33 @@ class ShowInfoUi(Dialog, FormClass):
 def setup_qgis_mocks():
     """Setup all QGIS-related mocks"""
     # Mock QGIS imports
-    sys.modules['qgis'] = MagicMock()
-    sys.modules['qgis.PyQt'] = MagicMock()
-    sys.modules['qgis.PyQt.QtCore'] = MagicMock()
-    sys.modules['qgis.PyQt.QtWidgets'] = MagicMock()
-    sys.modules['qgis.PyQt.QtGui'] = MagicMock()
-    sys.modules['qgis.PyQt.QtSql'] = MagicMock()
-    sys.modules['qgis.core'] = MagicMock()
-    sys.modules['qgis.core.QgsMessageLog'] = MagicMock()
-    sys.modules['qgis.gui'] = MagicMock()
-    sys.modules['qgis.utils'] = MagicMock()
-    sys.modules['qgis.PyQt.sip'] = MagicMock()
-    sys.modules['qgis.PyQt.sip'].isdeleted = MagicMock(return_value=False)
-    sys.modules['console'] = MagicMock()
+    sys.modules["qgis"] = MagicMock()
+    sys.modules["qgis.PyQt"] = MagicMock()
+    sys.modules["qgis.PyQt.QtCore"] = MagicMock()
+    sys.modules["qgis.PyQt.QtWidgets"] = MagicMock()
+    sys.modules["qgis.PyQt.QtGui"] = MagicMock()
+    sys.modules["qgis.PyQt.QtSql"] = MagicMock()
+    sys.modules["qgis.core"] = MagicMock()
+    sys.modules["qgis.core.QgsMessageLog"] = MagicMock()
+    sys.modules["qgis.gui"] = MagicMock()
+    sys.modules["qgis.utils"] = MagicMock()
+    sys.modules["qgis.PyQt.sip"] = MagicMock()
+    sys.modules["qgis.PyQt.sip"].isdeleted = MagicMock(return_value=False)
+    sys.modules["console"] = MagicMock()
 
     # Set up the mocks
-    sys.modules['qgis.PyQt.QtWidgets'].QDialog = MockQDialog
-    sys.modules['qgis.PyQt.QtWidgets'].QWidget = MockQWidget
-    sys.modules['qgis.PyQt.QtWidgets'].QMainWindow = MockQMainWindow
-    sys.modules['qgis.PyQt.QtWidgets'].QMessageBox = MockQMessageBox
-    sys.modules['qgis.PyQt.QtWidgets'].QFileDialog = MockQFileDialog
+    sys.modules["qgis.PyQt.QtWidgets"].QDialog = MockQDialog
+    sys.modules["qgis.PyQt.QtWidgets"].QWidget = MockQWidget
+    sys.modules["qgis.PyQt.QtWidgets"].QMainWindow = MockQMainWindow
+    sys.modules["qgis.PyQt.QtWidgets"].QMessageBox = MockQMessageBox
+    sys.modules["qgis.PyQt.QtWidgets"].QFileDialog = MockQFileDialog
 
     # Create and mock the UI manager module
-    ui_manager_module = type('Module', (), {})()
+    ui_manager_module = type("Module", (), {})()
     ui_manager_module.Dialog = Dialog
     ui_manager_module.FORM_CLASS = FormClass
     ui_manager_module.ShowInfoUi = ShowInfoUi
-    sys.modules['libs.ui.ui_manager'] = ui_manager_module
+    sys.modules["libs.ui.ui_manager"] = ui_manager_module
 
 
 # Call setup_qgis_mocks immediately

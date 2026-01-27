@@ -1,5 +1,4 @@
-"""
-This file is part of Giswater
+"""This file is part of Giswater
 The program is free software: you can redistribute it and/or modify it under the terms of the GNU
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
@@ -31,7 +30,7 @@ from . import tools_log, tools_qt, tools_os, tools_db
 from . import lib_vars
 
 # List of user parameters (optionals)
-user_parameters = {'log_sql': None, 'show_message_durations': None, 'aux_context': 'ui_message'}
+user_parameters = {"log_sql": None, "show_message_durations": None, "aux_context": "ui_message"}
 
 # Define message level constants
 MESSAGE_LEVEL_INFO = Qgis.MessageLevel.Info  # Blue
@@ -64,21 +63,19 @@ def get_feature_by_expr(layer, expr_filter):
 def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater",
                  parameter=None, title="", logger_file=True, dialog=iface, sqlcontext=None, msg_params=None,
                  title_params=None):
+    """Show message to the user with selected message level
+    :param text: The text to be shown (String)
+    :param message_level: Message level constant
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param parameter: A text to show after the message (String)
+    :param title: The title of the message (String)
+    :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    Show message to the user with selected message level
-        :param text: The text to be shown (String)
-        :param message_level: Message level constant
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param parameter: A text to show after the message (String)
-        :param title: The title of the message (String)
-        :param logger_file: Whether it should log the message in a file or not (bool)
-    """
-
     global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
-    dev_duration = user_parameters.get('show_message_durations')
+    dev_duration = user_parameters.get("show_message_durations")
     # If is set, use this value
     if dev_duration not in (None, "None"):
         if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
@@ -87,11 +84,11 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
             duration = int(dev_duration)
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'], list_params=msg_params)
+        msg = tools_qt.tr(text, context_name, user_parameters["aux_context"], list_params=msg_params)
         if parameter:
             msg += f": {parameter}"
 
-    tlt = tools_qt.tr(title, context_name, user_parameters['aux_context'], list_params=title_params) if title else ""
+    tlt = tools_qt.tr(title, context_name, user_parameters["aux_context"], list_params=title_params) if title else ""
 
     # Show message
     try:
@@ -112,21 +109,19 @@ def show_message(text, message_level=MESSAGE_LEVEL_WARNING, duration=DEFAULT_MES
 
 def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_INFO, duration=DEFAULT_MESSAGE_DURATION,
                       context_name="giswater", logger_file=True, dialog=iface):
+    """Show message to the user with selected message level and a button to open the url
+    :param text: The text to be shown (String)
+    :param url: The url that will be opened by the button. It will also show after the message (String)
+    :param btn_text: The text of the button (String)
+    :param message_level: {INFO = 0(blue), WARNING = 1(yellow), CRITICAL = 2(red), SUCCESS = 3(green)}
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    Show message to the user with selected message level and a button to open the url
-        :param text: The text to be shown (String)
-        :param url: The url that will be opened by the button. It will also show after the message (String)
-        :param btn_text: The text of the button (String)
-        :param message_level: {INFO = 0(blue), WARNING = 1(yellow), CRITICAL = 2(red), SUCCESS = 3(green)}
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param logger_file: Whether it should log the message in a file or not (bool)
-    """
-
     global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
-    dev_duration = user_parameters.get('show_message_durations')
+    dev_duration = user_parameters.get("show_message_durations")
     # If is set, use this value
     if dev_duration not in (None, "None"):
         if message_level in (1, 2) and int(dev_duration) < 10:
@@ -135,7 +130,7 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
             duration = int(dev_duration)
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'])
+        msg = tools_qt.tr(text, context_name, user_parameters["aux_context"])
 
     # Create the message with the button
     widget = iface.messageBar().createMessage(f"{msg}", f"{url}")
@@ -155,21 +150,19 @@ def show_message_link(text, url, btn_text="Open", message_level=MESSAGE_LEVEL_IN
 def show_message_function(text, function, btn_text="Open", message_level=MESSAGE_LEVEL_INFO,
                           duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", logger_file=True, dialog=iface,
                           text_params=None):
+    """Show message to the user with selected message level and a button to open the url
+    :param text: The text to be shown (String)
+    :param function: The function (can be a ``partial()`` object) to execute.
+    :param btn_text: The text of the button (String)
+    :param message_level: Message level constant
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param logger_file: Whether it should log the message in a file or not (bool)
     """
-    Show message to the user with selected message level and a button to open the url
-        :param text: The text to be shown (String)
-        :param function: The function (can be a ``partial()`` object) to execute.
-        :param btn_text: The text of the button (String)
-        :param message_level: Message level constant
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param logger_file: Whether it should log the message in a file or not (bool)
-    """
-
     global user_parameters  # noqa: F824
 
     # Get optional parameter 'show_message_durations'
-    dev_duration = user_parameters.get('show_message_durations')
+    dev_duration = user_parameters.get("show_message_durations")
     # If is set, use this value
     if dev_duration not in (None, "None") and duration > 0:
         if message_level in (MESSAGE_LEVEL_WARNING, MESSAGE_LEVEL_CRITICAL) and int(dev_duration) < MINIMUM_WARNING_DURATION:  # noqa: E501
@@ -178,7 +171,7 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
             duration = int(dev_duration)
     msg = None
     if text:
-        msg = tools_qt.tr(text, context_name, user_parameters['aux_context'], list_params=text_params)
+        msg = tools_qt.tr(text, context_name, user_parameters["aux_context"], list_params=text_params)
 
     # Create the message with the button
     widget = iface.messageBar().createMessage(f"{msg}")
@@ -197,68 +190,63 @@ def show_message_function(text, function, btn_text="Open", message_level=MESSAGE
 
 def show_info(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
               title="", dialog=iface, msg_params=None, title_params=None):
+    """Show information message to the user
+    :param text: The text to be shown (String)
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param parameter: A text to show after the message (String)
+    :param logger_file: Whether it should log the message in a file or not (bool)
+    :param title: The title of the message (String)
     """
-    Show information message to the user
-        :param text: The text to be shown (String)
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param parameter: A text to show after the message (String)
-        :param logger_file: Whether it should log the message in a file or not (bool)
-        :param title: The title of the message (String) """
-
     show_message(text, MESSAGE_LEVEL_INFO, duration, context_name, parameter, title, logger_file, dialog=dialog,
                  msg_params=msg_params, title_params=title_params)
 
 
 def show_warning(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
                  title="", dialog=iface, msg_params=None, title_params=None):
+    """Show warning message to the user
+    :param text: The text to be shown (String)
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param parameter: A text to show after the message (String)
+    :param logger_file: Whether it should log the message in a file or not (bool)
+    :param title: The title of the message (String)
     """
-    Show warning message to the user
-        :param text: The text to be shown (String)
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param parameter: A text to show after the message (String)
-        :param logger_file: Whether it should log the message in a file or not (bool)
-        :param title: The title of the message (String) """
-
     show_message(text, MESSAGE_LEVEL_WARNING, duration, context_name, parameter, title, logger_file, dialog=dialog,
                  msg_params=msg_params, title_params=title_params)
 
 
 def show_critical(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
                   title="", dialog=iface, msg_params=None, title_params=None):
+    """Show critical message to the user
+    :param text: The text to be shown (String)
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param parameter: A text to show after the message (String)
+    :param logger_file: Whether it should log the message in a file or not (bool)
+    :param title: The title of the message (String)
     """
-    Show critical message to the user
-        :param text: The text to be shown (String)
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param parameter: A text to show after the message (String)
-        :param logger_file: Whether it should log the message in a file or not (bool)
-        :param title: The title of the message (String) """
-
     show_message(text, MESSAGE_LEVEL_CRITICAL, duration, context_name, parameter, title, logger_file, dialog=dialog,
                  msg_params=msg_params, title_params=title_params)
 
 
 def show_success(text, duration=DEFAULT_MESSAGE_DURATION, context_name="giswater", parameter=None, logger_file=True,
                  title="", dialog=iface, msg_params=None, title_params=None):
+    """Show success message to the user
+    :param text: The text to be shown (String)
+    :param duration: The duration of the message (int)
+    :param context_name: Where to look for translating the message
+    :param parameter: A text to show after the message (String)
+    :param logger_file: Whether it should log the message in a file or not (bool)
+    :param title: The title of the message (String)
     """
-    Show success message to the user
-        :param text: The text to be shown (String)
-        :param duration: The duration of the message (int)
-        :param context_name: Where to look for translating the message
-        :param parameter: A text to show after the message (String)
-        :param logger_file: Whether it should log the message in a file or not (bool)
-        :param title: The title of the message (String) """
-
     show_message(text, MESSAGE_LEVEL_SUCCESS, duration, context_name, parameter, title, logger_file, dialog=dialog,
                  msg_params=msg_params, title_params=title_params)
 
 
 def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int = 400, min_height: int = 200,
-                           context_name='giswater'):
-    """
-    Displays a dialog with the SQL context in a more detailed, error-specific format,
+                           context_name="giswater"):
+    """Displays a dialog with the SQL context in a more detailed, error-specific format,
     allowing the user to copy the error message.
 
     :param sqlcontext: The SQL context to display (String)
@@ -267,11 +255,10 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
     :param min_width: The minimum width of the dialog (int)
     :param min_height: The minimum height of the dialog (int)
     """
-
     dialog = QDialog()
 
     # Title translation
-    translated_title = tools_qt.tr(title or "SQL Context", context_name, user_parameters['aux_context'])
+    translated_title = tools_qt.tr(title or "SQL Context", context_name, user_parameters["aux_context"])
     dialog.setWindowTitle(translated_title)
 
     dialog.setMinimumWidth(min_width)
@@ -281,7 +268,7 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
 
     # Full message construction
     message = "SQL Context"
-    sqlcontext_label = tools_qt.tr(message, context_name, user_parameters['aux_context'])
+    sqlcontext_label = tools_qt.tr(message, context_name, user_parameters["aux_context"])
     if msg and sqlcontext:
         full_message = f"{msg}\n\n{sqlcontext_label}:\n{sqlcontext}"
     elif msg:
@@ -290,7 +277,7 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
         full_message = f"{sqlcontext_label}:\n{sqlcontext}"
     else:
         message = "No SQL context available."
-        full_message = tools_qt.tr(message, context_name, user_parameters['aux_context'])
+        full_message = tools_qt.tr(message, context_name, user_parameters["aux_context"])
 
     # Add the message text area to allow copying
     text_area = QTextEdit()
@@ -313,19 +300,17 @@ def show_sqlcontext_dialog(sqlcontext: str, msg: str, title: str, min_width: int
 
 
 def get_visible_layers(as_str_list=False, as_list=False):
+    """Return string as {...} or [...] or list with name of table in DB of all visible layer in TOC
+    False, False --> return str like {"name1", "name2", "..."}
+
+    True, False --> return str like ["name1", "name2", "..."]
+
+    xxxx, True --> return list like ['name1', 'name2', '...']
     """
-    Return string as {...} or [...] or list with name of table in DB of all visible layer in TOC
-        False, False --> return str like {"name1", "name2", "..."}
-
-        True, False --> return str like ["name1", "name2", "..."]
-
-        xxxx, True --> return list like ['name1', 'name2', '...']
-    """
-
     layers_name = []
-    visible_layer = '{'
+    visible_layer = "{"
     if as_str_list:
-        visible_layer = '['
+        visible_layer = "["
     layers = get_project_layers()
     for layer in layers:
         if not check_query_layer(layer):
@@ -342,21 +327,20 @@ def get_visible_layers(as_str_list=False, as_list=False):
         return layers_name
 
     if as_str_list:
-        visible_layer += ']'
+        visible_layer += "]"
     else:
-        visible_layer += '}'
+        visible_layer += "}"
 
     return visible_layer
 
 
 def get_plugin_metadata(parameter, default_value, plugin_dir=None):
-    """ Get @parameter from metadata.txt file """
-
+    """Get @parameter from metadata.txt file"""
     if not plugin_dir:
         plugin_dir = os.path.dirname(__file__)
-        plugin_dir = plugin_dir.rstrip(f'{os.sep}lib')
+        plugin_dir = plugin_dir.rstrip(f"{os.sep}lib")
     # Check if metadata file exists
-    metadata_file = os.path.join(plugin_dir, 'metadata.txt')
+    metadata_file = os.path.join(plugin_dir, "metadata.txt")
     if not os.path.exists(metadata_file):
         message = f"Metadata file not found: {metadata_file}"
         iface.messageBar().pushMessage("", message, 1, 20)
@@ -366,7 +350,7 @@ def get_plugin_metadata(parameter, default_value, plugin_dir=None):
     try:
         metadata = configparser.ConfigParser(comment_prefixes=["#", ";"], allow_no_value=True, strict=False)
         metadata.read(metadata_file)
-        value = metadata.get('general', parameter)
+        value = metadata.get("general", parameter)
     except configparser.NoOptionError:
         message = f"Parameter not found: {parameter}"
         iface.messageBar().pushMessage("", message, 1, 20)
@@ -376,42 +360,38 @@ def get_plugin_metadata(parameter, default_value, plugin_dir=None):
 
 
 def get_plugin_version():
-    """ Get plugin version from metadata.txt file """
-
+    """Get plugin version from metadata.txt file"""
     # Check if metadata file exists
     plugin_version = None
     message = None
-    metadata_file = os.path.join(lib_vars.plugin_dir, 'metadata.txt')
+    metadata_file = os.path.join(lib_vars.plugin_dir, "metadata.txt")
     if not os.path.exists(metadata_file):
         message = f"Metadata file not found: {metadata_file}"
         return plugin_version, message
 
     metadata = configparser.ConfigParser(comment_prefixes=";", allow_no_value=True, strict=False)
     metadata.read(metadata_file)
-    plugin_version = metadata.get('general', 'version')
+    plugin_version = metadata.get("general", "version")
     if plugin_version is None:
         message = "Plugin version not found"
 
     return plugin_version, message
 
 
-def get_major_version(plugin_dir=None, default_version='3.5'):
-    """ Get plugin higher version from metadata.txt file """
-
-    major_version = get_plugin_metadata('version', default_version, plugin_dir)[0:3]
+def get_major_version(plugin_dir=None, default_version="3.5"):
+    """Get plugin higher version from metadata.txt file"""
+    major_version = get_plugin_metadata("version", default_version, plugin_dir)[0:3]
     return major_version
 
 
-def get_build_version(plugin_dir, default_version='35001'):
-    """ Get plugin build version from metadata.txt file """
-
-    build_version = get_plugin_metadata('version', default_version, plugin_dir).replace(".", "")
+def get_build_version(plugin_dir, default_version="35001"):
+    """Get plugin build version from metadata.txt file"""
+    build_version = get_plugin_metadata("version", default_version, plugin_dir).replace(".", "")
     return build_version
 
 
 def find_plugin_path(folder_name: str) -> Optional[str]:
-    """
-    Find the full path of a plugin folder by checking possible paths.
+    """Find the full path of a plugin folder by checking possible paths.
 
     :param folder_name: The folder name of the plugin.
     :return: The full path to the plugin folder if found, None otherwise.
@@ -424,8 +404,7 @@ def find_plugin_path(folder_name: str) -> Optional[str]:
 
 
 def is_plugin_available(plugin_name: str) -> bool:
-    """
-    Check if a QGIS plugin is available by matching its metadata name.
+    """Check if a QGIS plugin is available by matching its metadata name.
 
     :param plugin_name: The 'name' parameter from the plugin's metadata.
     :return: True if the plugin is available, False otherwise.
@@ -433,15 +412,14 @@ def is_plugin_available(plugin_name: str) -> bool:
     for folder_name in available_plugins:
         plugin_dir = find_plugin_path(folder_name)
         if plugin_dir:
-            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            metadata_name = get_plugin_metadata("name", default_value=None, plugin_dir=plugin_dir)
             if metadata_name == plugin_name:
                 return True
     return False
 
 
 def is_plugin_active(plugin_name: str) -> bool:
-    """
-    Check if a QGIS plugin is active by matching its metadata name.
+    """Check if a QGIS plugin is active by matching its metadata name.
 
     :param plugin_name: The 'name' parameter from the plugin's metadata.
     :return: True if the plugin is active, False otherwise.
@@ -449,15 +427,14 @@ def is_plugin_active(plugin_name: str) -> bool:
     for folder_name in active_plugins:
         plugin_dir = find_plugin_path(folder_name)
         if plugin_dir:
-            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            metadata_name = get_plugin_metadata("name", default_value=None, plugin_dir=plugin_dir)
             if metadata_name == plugin_name:
                 return True
     return False
 
 
 def get_plugin_folder(plugin_name: str) -> Optional[str]:
-    """
-    Get the full path of a plugin folder by matching its metadata name.
+    """Get the full path of a plugin folder by matching its metadata name.
 
     :param plugin_name: The 'name' parameter from the plugin's metadata.
     :return: The folder name of the plugin if found, None otherwise.
@@ -465,31 +442,29 @@ def get_plugin_folder(plugin_name: str) -> Optional[str]:
     for folder_name in available_plugins:
         plugin_dir = find_plugin_path(folder_name)
         if plugin_dir:
-            metadata_name = get_plugin_metadata('name', default_value=None, plugin_dir=plugin_dir)
+            metadata_name = get_plugin_metadata("name", default_value=None, plugin_dir=plugin_dir)
             if metadata_name == plugin_name:
                 return folder_name
     return None
 
 
 def enable_python_console():
-    """ Enable Python console and Log Messages panel """
-
+    """Enable Python console and Log Messages panel"""
     # Manage Python console
-    python_console = iface.mainWindow().findChild(QDockWidget, 'PythonConsole')
+    python_console = iface.mainWindow().findChild(QDockWidget, "PythonConsole")
     if python_console:
         python_console.setVisible(True)
     else:
         console.show_console()
 
     # Manage Log Messages panel
-    message_log = iface.mainWindow().findChild(QDockWidget, 'MessageLog')
+    message_log = iface.mainWindow().findChild(QDockWidget, "MessageLog")
     if message_log:
         message_log.setVisible(True)
 
 
 def get_project_variable(var_name):
-    """ Get project variable """
-
+    """Get project variable"""
     value = None
     try:
         value = QgsExpressionContextUtils.projectScope(QgsProject.instance()).variable(var_name)
@@ -502,8 +477,7 @@ def get_project_variable(var_name):
 
 
 def set_project_variable(var_name, value):
-    """ Set project variable """
-
+    """Set project variable"""
     try:
         custom_vars = QgsProject.instance().customVariables()
         custom_vars[var_name] = value
@@ -515,16 +489,14 @@ def set_project_variable(var_name, value):
 
 
 def get_project_layers():
-    """ Return layers in the same order as listed in TOC """
-
+    """Return layers in the same order as listed in TOC"""
     layers = [layer.layer() for layer in QgsProject.instance().layerTreeRoot().findLayers()]
 
     return layers
 
 
 def find_toc_group(root, group, case_sensitive=False):
-    """ Find a group of layers in the ToC """
-
+    """Find a group of layers in the ToC"""
     for grp in root.findGroups():
         group1 = grp.name()
         group2 = group
@@ -539,16 +511,15 @@ def find_toc_group(root, group, case_sensitive=False):
 
 
 def get_layer_source(layer):
-    """ Get database connection paramaters of @layer """
-
+    """Get database connection paramaters of @layer"""
     # Initialize variables
-    layer_source = {'db': None, 'schema': None, 'table': None, 'service': None, 'host': None, 'port': None,
-                    'user': None, 'password': None, 'sslmode': None}
+    layer_source = {"db": None, "schema": None, "table": None, "service": None, "host": None, "port": None,
+                    "user": None, "password": None, "sslmode": None}
 
     if layer is None:
         return layer_source
 
-    if layer.providerType() != 'postgres':
+    if layer.providerType() != "postgres":
         return layer_source
 
     # Get dbname, host, port, user and password
@@ -559,18 +530,18 @@ def get_layer_source(layer):
 
     list_uri = []
     for v in splt:
-        if '=' in v:
-            elem_uri = tuple(v.split('='))
+        if "=" in v:
+            elem_uri = tuple(v.split("="))
             if len(elem_uri) == 2:
                 list_uri.append(elem_uri)
 
     splt_dct = dict(list_uri)
-    if 'service' in splt_dct:
-        splt_dct['service'] = splt_dct['service']
-    if 'dbname' in splt_dct:
-        splt_dct['db'] = splt_dct['dbname']
-    if 'table' in splt_dct:
-        splt_dct['schema'], splt_dct['table'] = splt_dct['table'].split('.')
+    if "service" in splt_dct:
+        splt_dct["service"] = splt_dct["service"]
+    if "dbname" in splt_dct:
+        splt_dct["db"] = splt_dct["dbname"]
+    if "table" in splt_dct:
+        splt_dct["schema"], splt_dct["table"] = splt_dct["table"].split(".")
 
     for key in layer_source.keys():
         layer_source[key] = splt_dct.get(key)
@@ -579,30 +550,29 @@ def get_layer_source(layer):
 
 
 def get_layer_source_table_name(layer):
-    """ Get table or view name of selected layer """
-
+    """Get table or view name of selected layer"""
     if layer is None:
         return None
 
     provider = layer.providerType()
-    if provider in ['postgres', 'gdal']:
+    if provider in ["postgres", "gdal"]:
         uri = layer.dataProvider().dataSourceUri().lower()
-        pos_ini = uri.find('table=')
+        pos_ini = uri.find("table=")
         total = len(uri)
-        pos_end_schema = uri.rfind('.')
+        pos_end_schema = uri.rfind(".")
         pos_fi = uri.find('" ')
-        if uri.find('pg:') != -1:
+        if uri.find("pg:") != -1:
             uri_table = uri[pos_ini + 6:total]
         elif pos_ini != -1 and pos_fi != -1:
             uri_table = uri[pos_end_schema + 2:pos_fi]
         else:
             uri_table = uri[pos_end_schema + 2:total - 1]
-    elif provider == 'ogr' and layer.source().split('|')[0].endswith('.gpkg'):
+    elif provider == "ogr" and layer.source().split("|")[0].endswith(".gpkg"):
         uri_table = ""
-        parts = layer.source().split('|')  # Split by the pipe character '|'
+        parts = layer.source().split("|")  # Split by the pipe character '|'
         for part in parts:
-            if part.startswith('layername='):
-                uri_table = part.split('=')[1]
+            if part.startswith("layername="):
+                uri_table = part.split("=")[1]
                 break
     else:
         uri_table = None
@@ -611,18 +581,17 @@ def get_layer_source_table_name(layer):
 
 
 def get_layer_schema(layer):
-    """ Get table or view schema_name of selected layer """
-
+    """Get table or view schema_name of selected layer"""
     if layer is None:
         return None
-    if layer.providerType() != 'postgres':
+    if layer.providerType() != "postgres":
         return None
 
     table_schema = None
     uri = layer.dataProvider().dataSourceUri().lower()
 
-    pos_ini = uri.find('table=')
-    pos_end_schema = uri.rfind('.')
+    pos_ini = uri.find("table=")
+    pos_end_schema = uri.rfind(".")
     pos_fi = uri.find('" ')
     if pos_ini != -1 and pos_fi != -1:
         table_schema = uri[pos_ini + 7:pos_end_schema - 1]
@@ -631,15 +600,14 @@ def get_layer_schema(layer):
 
 
 def get_primary_key(layer=None):
-    """ Get primary key of selected layer """
-
+    """Get primary key of selected layer"""
     if layer is None:
         layer = iface.activeLayer()
     if layer is None:
         return None
 
     # Check if it's a PostgreSQL layer
-    if layer.providerType() != 'postgres':
+    if layer.providerType() != "postgres":
         return None
 
     try:
@@ -647,8 +615,8 @@ def get_primary_key(layer=None):
 
         # Parse URI and find key parameter
         for part in shlex.split(uri):
-            if part.startswith('key='):
-                return part.split('=', 1)[1]
+            if part.startswith("key="):
+                return part.split("=", 1)[1]
 
         return None
 
@@ -657,8 +625,7 @@ def get_primary_key(layer=None):
 
 
 def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schema_name=None):
-    """ Iterate over all layers and get the one with selected @tablename """
-
+    """Iterate over all layers and get the one with selected @tablename"""
     # Check if we have any layer loaded
     layers = get_project_layers()
     if len(layers) == 0:
@@ -666,11 +633,11 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
 
     # Iterate over all layers
     if schema_name is None:
-        if 'main_schema' in lib_vars.project_vars:
-            schema_name = lib_vars.project_vars['main_schema']
+        if "main_schema" in lib_vars.project_vars:
+            schema_name = lib_vars.project_vars["main_schema"]
         else:
             msg = "Key not found"
-            tools_log.log_warning(msg, parameter='main_schema')
+            tools_log.log_warning(msg, parameter="main_schema")
 
     layer = find_matching_layer(layers, tablename, schema_name)
 
@@ -698,14 +665,14 @@ def find_matching_layer(layers, tablename, schema_name):
         if (
             uri_table is not None and
             uri_table == tablename and
-            schema_name in ('', None, table_schema)
+            schema_name in ("", None, table_schema)
         ):
             return cur_layer
     return None
 
 
 def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None):
-    """ If the function receives a group name, check if it exists or not and put the layer in this group
+    """If the function receives a group name, check if it exists or not and put the layer in this group
     :param layer: (QgsVectorLayer)
     :param group: Name of the group that will be created in the toc (string)
     """
@@ -734,7 +701,7 @@ def hide_node_from_treeview(node, root, ltv):
     # Hide the node from the tree view
     index = get_node_index(node, ltv)
     ltv.setRowHidden(index.row(), index.parent(), True)
-    node.setCustomProperty('nodeHidden', 'true')
+    node.setCustomProperty("nodeHidden", "true")
     ltv.setCurrentIndex(get_node_index(root, ltv))
 
 
@@ -751,15 +718,14 @@ def restore_hidden_nodes():
     ltv = iface.layerTreeView()
 
     for node in root.children():
-        if node.customProperty('nodeHidden', '') == 'true':
+        if node.customProperty("nodeHidden", "") == "true":
             hide_node_from_treeview(node, root, ltv)
 
 
 def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
                          key_column: Optional[str] = None, geom_column: Optional[str] = "the_geom",
                          group: Optional[str] = None):
-    """ Creates a QVectorLayer and adds it to the project """
-
+    """Creates a QVectorLayer and adds it to the project"""
     # Define your PostgreSQL connection parameters
     uri, _ = tools_db.get_uri()
 
@@ -802,8 +768,7 @@ def add_layer_from_query(query: str, layer_name: str = "QueryLayer",
 
 
 def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
-    """ Manage snapping of @layername """
-
+    """Manage snapping of @layername"""
     layer = get_layer_by_tablename(layername)
     if not layer:
         return
@@ -818,8 +783,7 @@ def manage_snapping_layer(layername, snapping_type=0, tolerance=15.0):
 
 
 def set_project_snapping_settings(enabled=None, mode=None, tolerance=None, units=None, snapping_types=None):
-    """
-    Configures project-wide snapping settings.
+    """Configures project-wide snapping settings.
 
     This function operates in two modes:
     1.  **Creation Mode (no arguments):** When called with no arguments, it applies a
@@ -873,8 +837,7 @@ def set_project_snapping_settings(enabled=None, mode=None, tolerance=None, units
 
 
 def select_features_by_ids(feature_type, expr, layers=None):
-    """ Select features of layers of group @feature_type applying @expr """
-
+    """Select features of layers of group @feature_type applying @expr"""
     if layers is None:
         return
 
@@ -895,8 +858,7 @@ def select_features_by_ids(feature_type, expr, layers=None):
 
 
 def get_points_from_geometry(layer, feature):
-    """ Get the start point and end point of the feature """
-
+    """Get the start point and end point of the feature"""
     list_points = None
 
     geom = feature.geometry()
@@ -921,8 +883,7 @@ def get_points_from_geometry(layer, feature):
 
 
 def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
-    """ Select 'Pan' as current map tool and disconnect snapping """
-
+    """Select 'Pan' as current map tool and disconnect snapping"""
     try:
         iface.mapCanvas().xyCoordinates.disconnect()
     except TypeError as e:
@@ -951,8 +912,7 @@ def disconnect_snapping(action_pan=True, emit_point=None, vertex_marker=None):
 
 
 def refresh_map_canvas(_restore_cursor=False):
-    """ Refresh all layers present in map canvas """
-
+    """Refresh all layers present in map canvas"""
     iface.mapCanvas().refreshAllLayers()
     for layer_refresh in iface.mapCanvas().layers():
         layer_refresh.triggerRepaint()
@@ -962,14 +922,13 @@ def refresh_map_canvas(_restore_cursor=False):
 
 
 def force_refresh_map_canvas():
-    """ Refresh all layers & map canvas """
-
+    """Refresh all layers & map canvas"""
     refresh_map_canvas()  # First refresh all the layers
     iface.mapCanvas().refresh()  # Then refresh the map view itself
 
 
 def set_cursor_wait():
-    """ Change cursor to 'WaitCursor' """
+    """Change cursor to 'WaitCursor'"""
     while get_override_cursor() is not None:
         restore_cursor()
     QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
@@ -980,14 +939,13 @@ def get_override_cursor():
 
 
 def restore_cursor():
-    """ Restore to previous cursors """
+    """Restore to previous cursors"""
     while get_override_cursor() is not None:
         QApplication.restoreOverrideCursor()
 
 
 def disconnect_signal_selection_changed():
-    """ Disconnect signal selectionChanged """
-
+    """Disconnect signal selectionChanged"""
     try:
         iface.mapCanvas().selectionChanged.disconnect()
     except Exception:
@@ -997,8 +955,7 @@ def disconnect_signal_selection_changed():
 
 
 def select_features_by_expr(layer, expr):
-    """ Select features of @layer applying @expr """
-
+    """Select features of @layer applying @expr"""
     if not layer:
         return
 
@@ -1015,17 +972,15 @@ def select_features_by_expr(layer, expr):
 
 
 def get_max_rectangle_from_coords(list_coord):
+    """Returns the minimum rectangle(x1, y1, x2, y2) of a series of coordinates
+    :param list_coord: list of coords in format ['x1 y1', 'x2 y2',....,'x99 y99']
     """
-    Returns the minimum rectangle(x1, y1, x2, y2) of a series of coordinates
-        :param list_coord: list of coords in format ['x1 y1', 'x2 y2',....,'x99 y99']
-    """
-
     coords = list_coord.group(1)
-    polygon = coords.split(',')
+    polygon = coords.split(",")
     x_vals = []
     y_vals = []
     for p in polygon:
-        x, y = re.findall(r'-?\d+(?:\.\d+)?', p)
+        x, y = re.findall(r"-?\d+(?:\.\d+)?", p)
         x_vals.append(float(x))
         y_vals.append(float(y))
     min_x = min(x_vals)
@@ -1037,10 +992,9 @@ def get_max_rectangle_from_coords(list_coord):
 
 
 def zoom_to_rectangle(x1, y1, x2, y2, margin=5, change_crs=True):
-    """ Generate an extension on the canvas according to the received coordinates """
-
+    """Generate an extension on the canvas according to the received coordinates"""
     rect = QgsRectangle(float(x1) + margin, float(y1) + margin, float(x2) - margin, float(y2) - margin)
-    if str(lib_vars.data_epsg) == '2052' and str(lib_vars.project_epsg) == '102566' and change_crs:
+    if str(lib_vars.data_epsg) == "2052" and str(lib_vars.project_epsg) == "102566" and change_crs:
 
         rect = QgsRectangle(float(float(x1) + margin) * -1,
                             (float(y1) + margin) * -1,
@@ -1058,16 +1012,14 @@ def zoom_to_rectangle(x1, y1, x2, y2, margin=5, change_crs=True):
 
 
 def get_composers_list():
-    """ Returns the list of project composer """
-
+    """Returns the list of project composer"""
     layour_manager = QgsProject.instance().layoutManager().layouts()
     active_composers = [layout for layout in layour_manager]
     return active_composers
 
 
 def get_composer_index(name):
-    """ Returns the index of the selected composer name"""
-
+    """Returns the index of the selected composer name"""
     index = 0
     composers = get_composers_list()
     for comp_view in composers:
@@ -1080,17 +1032,15 @@ def get_composer_index(name):
 
 
 def get_geometry_vertex(list_coord=None):
+    """Return list of QgsPoints taken from geometry
+    :param list_coord: list of coors in format ['x1 y1', 'x2 y2',....,'x99 y99']
     """
-    Return list of QgsPoints taken from geometry
-        :param list_coord: list of coors in format ['x1 y1', 'x2 y2',....,'x99 y99']
-    """
-
     coords = list_coord.group(1)
-    polygon = coords.split(',')
+    polygon = coords.split(",")
     points = []
 
     for i in range(0, len(polygon)):
-        x, y = polygon[i].split(' ')
+        x, y = polygon[i].split(" ")
         point = QgsPointXY(float(x), float(y))
         points.append(point)
 
@@ -1098,13 +1048,12 @@ def get_geometry_vertex(list_coord=None):
 
 
 def reset_rubber_band(rubber_band):
-    """ Reset QgsRubberBand """
+    """Reset QgsRubberBand"""
     rubber_band.reset()
 
 
 def restore_user_layer(layer_name, user_current_layer=None):
-    """ Set active layer, preferably @user_current_layer else @layer_name """
-
+    """Set active layer, preferably @user_current_layer else @layer_name"""
     if user_current_layer:
         iface.setActiveLayer(user_current_layer)
     else:
@@ -1114,12 +1063,10 @@ def restore_user_layer(layer_name, user_current_layer=None):
 
 
 def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=None, opacity=255):
-    """
-    :param layer: QgsVectorLayer to be categorized (QgsVectorLayer)
+    """:param layer: QgsVectorLayer to be categorized (QgsVectorLayer)
     :param cat_field: Field to categorize (String)
     :param size: Size of feature (int)
     """
-
     # get unique values
     fields = layer.fields()
     fni = fields.indexOf(cat_field)
@@ -1140,12 +1087,12 @@ def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=Non
         # configure a symbol layer
         legend_id = None
         try:
-            if 'color' in color_values.get(str(unique_value)):
-                color = color_values.get(str(unique_value)).get('color')
+            if "color" in color_values.get(str(unique_value)):
+                color = color_values.get(str(unique_value)).get("color")
             else:
                 color = color_values.get(str(unique_value))
             symbol.setColor(color)
-            legend_id = color_values.get(str(unique_value)).get('legend_id')
+            legend_id = color_values.get(str(unique_value)).get("legend_id")
         except Exception:
             color = QColor(randrange(0, 256), randrange(0, 256), randrange(0, 256), opacity)
             symbol.setColor(color)
@@ -1170,12 +1117,10 @@ def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=Non
 
 
 def remove_layer_from_toc(layer_name, group_name, sub_group=None):
+    """Remove layer from toc if exist
+    :param layer_name: Name's layer (String)
+    :param group_name: Name's group (String)
     """
-    Remove layer from toc if exist
-        :param layer_name: Name's layer (String)
-        :param group_name: Name's group (String)
-    """
-
     layer = None
     for lyr in list(QgsProject.instance().mapLayers().values()):
         if lyr.name() == layer_name:
@@ -1205,11 +1150,9 @@ def remove_layer_from_toc(layer_name, group_name, sub_group=None):
 
 
 def clean_layer_group_from_toc(group_name):
+    """Remove all "broken" layers from a group
+    :param group_name: Group's name (String)
     """
-    Remove all "broken" layers from a group
-        :param group_name: Group's name (String)
-    """
-
     root = QgsProject.instance().layerTreeRoot()
     group = root.findGroup(group_name)
     if group:
@@ -1224,16 +1167,14 @@ def clean_layer_group_from_toc(group_name):
 
 
 def get_plugin_settings_value(section, key, default_value=""):
-    """ Get @value of QSettings located in @key """
-
+    """Get @value of QSettings located in @key"""
     key = section + "/" + key
     value = QSettings().value(key, default_value)
     return value
 
 
 def get_layer_by_layername(layername, log_info=False):
-    """ Get layer with selected @layername (the one specified in the TOC) """
-
+    """Get layer with selected @layername (the one specified in the TOC)"""
     layer = QgsProject.instance().mapLayersByName(layername)
     if layer:
         layer = layer[0]
@@ -1246,8 +1187,7 @@ def get_layer_by_layername(layername, log_info=False):
 
 
 def is_layer_visible(layer):
-    """ Return is @layer is visible or not """
-
+    """Return is @layer is visible or not"""
     visible = False
     if layer:
         visible = QgsProject.instance().layerTreeRoot().findLayer(layer.id()).itemVisibilityChecked()
@@ -1256,13 +1196,11 @@ def is_layer_visible(layer):
 
 
 def set_layer_visible(layer, recursive=True, visible=True):
+    """Set layer visible
+    :param layer: layer to set visible (QgsVectorLayer)
+    :param recursive: Whether it affects just the layer or all of its parents (bool)
+    :param visible: Whether the layer will be visible or not (bool)
     """
-    Set layer visible
-        :param layer: layer to set visible (QgsVectorLayer)
-        :param recursive: Whether it affects just the layer or all of its parents (bool)
-        :param visible: Whether the layer will be visible or not (bool)
-    """
-
     try:
         if layer:
             if recursive:
@@ -1274,8 +1212,7 @@ def set_layer_visible(layer, recursive=True, visible=True):
 
 
 def set_layer_index(layer_name):
-    """ Force reload dataProvider of layer """
-
+    """Force reload dataProvider of layer"""
     layer = get_layer_by_tablename(layer_name)
     if layer:
         layer.dataProvider().reloadData()
@@ -1283,13 +1220,11 @@ def set_layer_index(layer_name):
 
 
 def load_qml(layer, qml_path):
+    """Apply QML style located in @qml_path in @layer
+    :param layer: layer to set qml (QgsVectorLayer)
+    :param qml_path: desired path (String)
+    :return: True or False (bool)
     """
-    Apply QML style located in @qml_path in @layer
-        :param layer: layer to set qml (QgsVectorLayer)
-        :param qml_path: desired path (String)
-        :return: True or False (bool)
-    """
-
     if layer is None:
         return False
 
@@ -1310,8 +1245,7 @@ def load_qml(layer, qml_path):
 
 
 def set_margin(layer, margin):
-    """ Generates a margin around the layer so that it is fully visible on the canvas """
-
+    """Generates a margin around the layer so that it is fully visible on the canvas"""
     if layer.extent().isNull():
         return
 
@@ -1328,13 +1262,12 @@ def set_margin(layer, margin):
 
 
 def create_qml(layer, style):
-    """ Generates a qml file through a json of styles (@style) and puts it in the received @layer """
-
-    config_folder = f'{lib_vars.user_folder_dir}{os.sep}core{os.sep}temp'
+    """Generates a qml file through a json of styles (@style) and puts it in the received @layer"""
+    config_folder = f"{lib_vars.user_folder_dir}{os.sep}core{os.sep}temp"
     if not os.path.exists(config_folder):
         os.makedirs(config_folder)
     path_temp_file = f"{config_folder}{os.sep}temporal_layer.qml"
-    file = open(path_temp_file, 'w')
+    file = open(path_temp_file, "w")
     file.write(style)
     file.close()
     del file
@@ -1342,15 +1275,13 @@ def create_qml(layer, style):
 
 
 def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, duration_time=None, reset_rb=True):
+    """Draw a point on the canvas
+    :param point: (QgsPointXY)
+    :param rubber_band: (QgsRubberBand)
+    :param color: Color of the point (QColor)
+    :param width: width of the point (int)
+    :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
     """
-    Draw a point on the canvas
-        :param point: (QgsPointXY)
-        :param rubber_band: (QgsRubberBand)
-        :param color: Color of the point (QColor)
-        :param width: width of the point (int)
-        :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
-    """
-
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.PointGeometry)
     rubber_band.setIconSize(10)
@@ -1368,15 +1299,13 @@ def draw_point(point, rubber_band=None, color=QColor(255, 0, 0, 100), width=3, d
 
 
 def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, duration_time=None, reset_rb=True):
+    """Draw 'line' over canvas following list of points
+    :param points: list of QgsPointXY (points[QgsPointXY_1, QgsPointXY_2, ..., QgsPointXY_x])
+    :param rubber_band: (QgsRubberBand)
+    :param color: Color of the point (QColor)
+    :param width: width of the point (int)
+    :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
     """
-    Draw 'line' over canvas following list of points
-        :param points: list of QgsPointXY (points[QgsPointXY_1, QgsPointXY_2, ..., QgsPointXY_x])
-        :param rubber_band: (QgsRubberBand)
-        :param color: Color of the point (QColor)
-        :param width: width of the point (int)
-        :param duration_time: Time in milliseconds that the point will be visible. Ex: 3000 for 3 seconds (int)
-     """
-
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.LineGeometry)
     rubber_band.setIconSize(20)
@@ -1398,11 +1327,9 @@ def draw_polyline(points, rubber_band, color=QColor(255, 0, 0, 100), width=5, du
 
 
 def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, duration_time=None, reset_rb=True):
+    """Draw 'polygon' over canvas following list of points
+    :param duration_time: integer milliseconds ex: 3000 for 3 seconds
     """
-    Draw 'polygon' over canvas following list of points
-        :param duration_time: integer milliseconds ex: 3000 for 3 seconds
-    """
-
     if reset_rb:
         rubber_band.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
     rubber_band.setIconSize(20)
@@ -1423,8 +1350,7 @@ def draw_polygon(points, rubber_band, border=QColor(255, 0, 0, 100), width=3, du
 
 
 def get_geometry_from_json(feature):
-    """
-    Get coordinates from GeoJson and return QGsGeometry
+    """Get coordinates from GeoJson and return QGsGeometry
 
     functions called in:
         getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1438,10 +1364,9 @@ def get_geometry_from_json(feature):
         :return: Geometry of the feature (QgsGeometry)
 
     """
-
     try:
         coordinates = getattr(sys.modules[__name__], f"_get_vertex_from_{feature['geometry']['type'].lower()}")(feature)
-        type_ = feature['geometry']['type']
+        type_ = feature["geometry"]["type"]
         geometry = f"{type_}{coordinates}"
         return QgsGeometry.fromWkt(geometry)
     except (AttributeError, TypeError, IndexError) as e:
@@ -1456,30 +1381,30 @@ def get_locale():
     locale = "en_US"
     try:
         # Get locale of QGIS application
-        override = QSettings().value('locale/overrideFlag')
+        override = QSettings().value("locale/overrideFlag")
         if tools_os.set_boolean(override):
-            locale = QSettings().value('locale/globalLocale')
+            locale = QSettings().value("locale/globalLocale")
         else:
-            locale = QSettings().value('locale/userLocale')
+            locale = QSettings().value("locale/userLocale")
     except AttributeError as e:
         locale = "en_US"
         msg = "{0} --> {1}"
         msg_params = (type(e).__name__, e,)
         tools_log.log_info(msg, msg_params=msg_params)
     finally:
-        if locale in (None, ''):
+        if locale in (None, ""):
             locale = "en_US"
         return locale
 
 
 def get_locale_schema():
-    """ Get locale of the schema """
+    """Get locale of the schema"""
     locale = "en_US"
     try:
         current_schema = lib_vars.schema_name
         if current_schema:
             # Remove schema quotes for check_table function
-            current_schema_no_quotes = current_schema.replace('"', '')
+            current_schema_no_quotes = current_schema.replace('"', "")
             if tools_db.check_table(tablename="sys_version", schemaname=current_schema_no_quotes):
                 table = f"{current_schema}.sys_version"
                 sql = f"SELECT language FROM {table};"
@@ -1508,9 +1433,9 @@ def highlight_features_by_id(qtable, layer_name, field_id, rubber_band, width, s
 
 
 def highlight_feature_by_id(qtable, layer_name, field_id, rubber_band, width, index, table_field=None, add=False):
-    """ Based on the received index and field_id, the id of the received field_id is searched within the table
-     and is painted in red on the canvas """
-
+    """Based on the received index and field_id, the id of the received field_id is searched within the table
+    and is painted in red on the canvas
+    """
     layer = get_layer_by_tablename(layer_name)
     if not layer:
         rubber_band.reset()
@@ -1537,12 +1462,10 @@ def highlight_feature_by_id(qtable, layer_name, field_id, rubber_band, width, in
 
 
 def zoom_to_layer(layer):
+    """Zooms to a given layer
+    :param layer:
+    :return:
     """
-    Zooms to a given layer
-        :param layer:
-        :return:
-    """
-
     if not layer:
         msg = "Couldn't find layer to zoom to"
         show_warning(msg)
@@ -1571,18 +1494,16 @@ def zoom_to_layer(layer):
 
 
 def check_query_layer(layer):
+    """Check for query layer and/or bad layer, if layer is a simple table, or an added layer from query, return False
+    :param layer: Layer to be checked (QgsVectorLayer)
+    :return: True/False (Boolean)
     """
-    Check for query layer and/or bad layer, if layer is a simple table, or an added layer from query, return False
-        :param layer: Layer to be checked (QgsVectorLayer)
-        :return: True/False (Boolean)
-    """
-
     try:
         # TODO:: Find differences between PostgreSQL and query layers, and replace this if condition.
         table_uri = layer.dataProvider().dataSourceUri()
         if layer is None \
                 or type(layer) is not QgsVectorLayer \
-                or 'SELECT row_number() over ()' in str(table_uri) \
+                or "SELECT row_number() over ()" in str(table_uri) \
                 or layer.isSqlQuery():
             return False
         return True
@@ -1593,7 +1514,7 @@ def check_query_layer(layer):
 def get_epsg():
 
     epsg = iface.mapCanvas().mapSettings().destinationCrs().authid()
-    epsg = epsg.split(':')
+    epsg = epsg.split(":")
     if len(epsg) > 1:
         epsg = epsg[1]
     else:
@@ -1602,8 +1523,7 @@ def get_epsg():
 
 
 def get_composer(removed=None):
-    """ Get all composers from current QGis project """
-
+    """Get all composers from current QGis project"""
     composers = '"{'
     active_composers = get_composers_list()
 
@@ -1611,7 +1531,7 @@ def get_composer(removed=None):
         if type(composer) is QgsPrintLayout:  # TODO: use isinstance(composer, QgsPrintLayout)
             if composer != removed and composer.name():
                 cur = composer.name()
-                composers += cur + ', '
+                composers += cur + ", "
     if len(composers) > 2:
         composers = composers[:-2] + '}"'
     else:
@@ -1622,8 +1542,7 @@ def get_composer(removed=None):
 # region private functions
 
 def _get_vertex_from_point(feature):
-    """
-    Manage feature geometry when is Point
+    """Manage feature geometry when is Point
 
     This function is called in def get_geometry_from_json(feature)
             geometry = getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1636,8 +1555,7 @@ def _get_vertex_from_point(feature):
 
 
 def _get_vertex_from_linestring(feature):
-    """
-    Manage feature geometry when is LineString
+    """Manage feature geometry when is LineString
 
     This function is called in def get_geometry_from_json(feature)
           geometry = getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1649,8 +1567,7 @@ def _get_vertex_from_linestring(feature):
 
 
 def _get_vertex_from_multilinestring(feature):
-    """
-    Manage feature geometry when is MultiLineString
+    """Manage feature geometry when is MultiLineString
 
     This function is called in def get_geometry_from_json(feature)
           geometry = getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1662,8 +1579,7 @@ def _get_vertex_from_multilinestring(feature):
 
 
 def _get_vertex_from_polygon(feature):
-    """
-    Manage feature geometry when is Polygon
+    """Manage feature geometry when is Polygon
 
     This function is called in def get_geometry_from_json(feature)
           geometry = getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1675,8 +1591,7 @@ def _get_vertex_from_polygon(feature):
 
 
 def _get_vertex_from_multipolygon(feature):
-    """
-    Manage feature geometry when is MultiPolygon
+    """Manage feature geometry when is MultiPolygon
 
     This function is called in def get_geometry_from_json(feature)
           geometry = getattr(f"get_{feature['geometry']['type'].lower()}")(feature)
@@ -1684,9 +1599,8 @@ def _get_vertex_from_multipolygon(feature):
         :param feature: feature to get geometry type and coordinates (GeoJson)
         :return: Coordinates of the feature (String)
     """
-
     coordinates = "("
-    for coords in feature['geometry']['coordinates']:
+    for coords in feature["geometry"]["coordinates"]:
         coordinates += "("
         for cc in coords:
             coordinates += "("
@@ -1699,28 +1613,24 @@ def _get_vertex_from_multipolygon(feature):
 
 
 def _get_vertex_from_points(feature):
+    """Get coordinates of the received feature, to be a point
+    :param feature: Json with the information of the received feature (GeoJson)
+    :return: Coordinates of the feature received (String)
     """
-    Get coordinates of the received feature, to be a point
-        :param feature: Json with the information of the received feature (GeoJson)
-        :return: Coordinates of the feature received (String)
-    """
-
     coordinates = "("
-    for coords in feature['geometry']['coordinates']:
+    for coords in feature["geometry"]["coordinates"]:
         coordinates += f"{coords[0]} {coords[1]}, "
     coordinates = coordinates[:-2] + ")"
     return coordinates
 
 
 def _get_multi_coordinates(feature):
+    """Get coordinates of the received feature, can be a line
+    :param feature: Json with the information of the received feature (GeoJson)
+    :return: Coordinates of the feature received (String)
     """
-    Get coordinates of the received feature, can be a line
-        :param feature: Json with the information of the received feature (GeoJson)
-        :return: Coordinates of the feature received (String)
-    """
-
     coordinates = "("
-    for coords in feature['geometry']['coordinates']:
+    for coords in feature["geometry"]["coordinates"]:
         coordinates += "("
         for c in coords:
             coordinates += f"{c[0]} {c[1]}, "

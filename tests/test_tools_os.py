@@ -13,31 +13,31 @@ from libs import tools_os  # noqa: E402
 def test_get_datadir():
     """Test get_datadir function"""
     # Test Windows
-    with patch('sys.platform', 'win32'):
+    with patch("sys.platform", "win32"):
         result = tools_os.get_datadir()
         assert isinstance(result, Path)
         # Normalize path separators for comparison
-        assert str(result).replace('\\', '/').endswith("AppData/Roaming")
+        assert str(result).replace("\\", "/").endswith("AppData/Roaming")
         # Test that it's a subdirectory of home
         assert str(result).startswith(str(Path.home()))
 
     # Test Linux
-    with patch('sys.platform', 'linux'):
+    with patch("sys.platform", "linux"):
         result = tools_os.get_datadir()
         assert isinstance(result, Path)
         # Normalize path separators for comparison
-        assert str(result).replace('\\', '/').endswith(".local/share")
+        assert str(result).replace("\\", "/").endswith(".local/share")
         assert str(result).startswith(str(Path.home()))
 
     # Test macOS
-    with patch('sys.platform', 'darwin'):
+    with patch("sys.platform", "darwin"):
         result = tools_os.get_datadir()
         assert isinstance(result, Path)
-        assert str(result).replace('\\', '/').endswith("Library/Application Support")
+        assert str(result).replace("\\", "/").endswith("Library/Application Support")
         assert str(result).startswith(str(Path.home()))
 
     # Test invalid platform
-    with patch('sys.platform', 'invalid'):
+    with patch("sys.platform", "invalid"):
         with pytest.raises(NotImplementedError):
             tools_os.get_datadir()
 
@@ -81,7 +81,7 @@ def test_set_boolean():
 def test_get_values_from_dictionary():
     """Test get_values_from_dictionary function"""
     # Test basic dictionary
-    test_dict = {'a': 1, 'b': 2, 'c': 3}
+    test_dict = {"a": 1, "b": 2, "c": 3}
     result = tools_os.get_values_from_dictionary(test_dict)
     assert list(result) == [1, 2, 3]
 
@@ -91,17 +91,17 @@ def test_get_values_from_dictionary():
     assert list(result) == []
 
     # Test dictionary with None values
-    none_dict = {'a': None, 'b': None}
+    none_dict = {"a": None, "b": None}
     result = tools_os.get_values_from_dictionary(none_dict)
     assert list(result) == [None, None]
 
     # Test dictionary with mixed types
-    mixed_dict = {'a': 1, 'b': 'two', 'c': [3, 4]}
+    mixed_dict = {"a": 1, "b": "two", "c": [3, 4]}
     result = tools_os.get_values_from_dictionary(mixed_dict)
-    assert list(result) == [1, 'two', [3, 4]]
+    assert list(result) == [1, "two", [3, 4]]
 
     # Test dictionary with duplicate values
-    dup_dict = {'a': 1, 'b': 1, 'c': 2}
+    dup_dict = {"a": 1, "b": 1, "c": 2}
     result = tools_os.get_values_from_dictionary(dup_dict)
     assert list(result) == [1, 1, 2]
 
@@ -113,19 +113,19 @@ def test_get_relative_path():
 
     # Level 0 (should return full path)
     result = tools_os.get_relative_path(test_path, 0)
-    assert result.replace('\\', '/') == "f.txt"
+    assert result.replace("\\", "/") == "f.txt"
 
     # Level 1
     result = tools_os.get_relative_path(test_path, 1)
-    assert result.replace('\\', '/') == "e/f.txt"
+    assert result.replace("\\", "/") == "e/f.txt"
 
     # Level 2
     result = tools_os.get_relative_path(test_path, 2)
-    assert result.replace('\\', '/') == "d/e/f.txt"
+    assert result.replace("\\", "/") == "d/e/f.txt"
 
     # Level 3
     result = tools_os.get_relative_path(test_path, 3)
-    assert result.replace('\\', '/') == "c/d/e/f.txt"
+    assert result.replace("\\", "/") == "c/d/e/f.txt"
 
     # Test with empty path
     result = tools_os.get_relative_path("", 1)
@@ -133,11 +133,11 @@ def test_get_relative_path():
 
     # Test with relative path
     result = tools_os.get_relative_path("a/b/c.txt", 1)
-    assert result.replace('\\', '/') == "b/c.txt"
+    assert result.replace("\\", "/") == "b/c.txt"
 
     # Test with level greater than path depth
     result = tools_os.get_relative_path("a/b.txt", 5)
-    assert result.replace('\\', '/') == "a/b.txt"
+    assert result.replace("\\", "/") == "a/b.txt"
 
 
 def test_ireplace():

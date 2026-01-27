@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This file is part of Giswater
+"""This file is part of Giswater
 The program is free software: you can redistribute it and/or modify it under the terms of the GNU
 General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
@@ -18,15 +17,13 @@ from . import tools_log
 
 
 def get_datadir() -> pathlib.Path:
-    """
-    Returns a parent directory path
+    """Returns a parent directory path
     where persistent application data can be stored.
 
     # linux: ~/.local/share
     # macOS: ~/Library/Application Support
     # windows: C:/Users/<USER>/AppData/Roaming
     """
-
     home = pathlib.Path.home()
 
     if sys.platform == "win32":
@@ -40,11 +37,9 @@ def get_datadir() -> pathlib.Path:
 
 
 def open_file(file_path):
+    """Opens a file (as if you double-click it)
+    :param file_path: Path of the file
     """
-    Opens a file (as if you double-click it)
-        :param file_path: Path of the file
-    """
-
     try:
         # Open selected document
         # Check if path is URL
@@ -68,14 +63,13 @@ def open_file(file_path):
 
 
 def get_encoding_type(file_path):
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         rawdata = f.read()
-    return detect(rawdata)['encoding']
+    return detect(rawdata)["encoding"]
 
 
 def get_relative_path(filepath, levels=1):
-    """ Return relative path from @filepath with @levels """
-
+    """Return relative path from @filepath with @levels"""
     if not filepath:
         return filepath
 
@@ -94,21 +88,18 @@ def get_values_from_dictionary(dictionary: dict) -> Iterator[Any]:
 
     :return Iterator[Any]: An iterator of the values of the dictionary.
     """
-
     list_values = iter(dictionary.values())
     return list_values
 
 
 def set_boolean(param: Union[str, bool], default: bool = True) -> bool:
-    """
-    Receives a string and returns a bool
+    """Receives a string and returns a bool
 
     :param param: String to cast (String)
     :param default: Value to return if the parameter is not one of the keys of the dictionary of values (Boolean)
 
     :return: default if param not in bool_dict (bool)
     """
-
     bool_dict = {True: True, "TRUE": True, "True": True, "true": True, "1": True,
                  False: False, "FALSE": False, "False": False, "false": False, "0": False}
 
@@ -116,15 +107,13 @@ def set_boolean(param: Union[str, bool], default: bool = True) -> bool:
 
 
 def check_python_function(module, function_name):
-    """ Check if function exist in @module """
-
+    """Check if function exist in @module"""
     object_functions = [method_name for method_name in dir(module) if callable(getattr(module, method_name))]
     return function_name in object_functions
 
 
 def get_folder_size(folder):
-    """ Get folder size """
-
+    """Get folder size"""
     if not os.path.exists(folder):
         return 0
 
@@ -138,8 +127,7 @@ def get_folder_size(folder):
 
 
 def get_number_of_files(folder):
-    """ Get number of files of @folder and its subfolders """
-
+    """Get number of files of @folder and its subfolders"""
     if not os.path.exists(folder):
         return 0
 
@@ -148,20 +136,19 @@ def get_number_of_files(folder):
 
 
 def ireplace(old, new, text):
-    """ Replaces @old by @new in @text (case-insensitive) """
-
+    """Replaces @old by @new in @text (case-insensitive)"""
     # Return original text if old string is empty
     if not old:
         return text
 
-    return re.sub('(?i)' + re.escape(old), lambda m: new, text)
+    return re.sub("(?i)" + re.escape(old), lambda m: new, text)
 
 
 def manage_pg_service(section):
 
-    credentials = {'host': None, 'port': None, 'dbname': None, 'user': None, 'password': None, 'sslmode': None}
+    credentials = {"host": None, "port": None, "dbname": None, "user": None, "password": None, "sslmode": None}
 
-    pgservice_file = os.environ.get('PGSERVICEFILE')
+    pgservice_file = os.environ.get("PGSERVICEFILE")
     sysconf_dir = f"{os.environ.get('PGSYSCONFDIR')}{os.sep}pg_service.conf"
 
     if not any([pgservice_file, sysconf_dir]):
@@ -177,12 +164,12 @@ def manage_pg_service(section):
         return credentials
 
     credentials = get_credentials_from_config(section, pgservice_file)
-    if not any([credentials['host'], credentials['port'], credentials['dbname']]):
+    if not any([credentials["host"], credentials["port"], credentials["dbname"]]):
         msg = "Connection '{0}' not found in the file '{1}'. Trying in '{2}'..."
         msg_params = (section, pgservice_file, sysconf_dir,)
         tools_log.log_info(msg, msg_params=msg_params)
         credentials = get_credentials_from_config(section, sysconf_dir)
-        if not any([credentials['host'], credentials['port'], credentials['dbname']]):
+        if not any([credentials["host"], credentials["port"], credentials["dbname"]]):
             msg = "Connection '{0}' not found in the file '{1}'"
             msg_params = (section, sysconf_dir,)
             tools_log.log_warning(msg, msg_params=msg_params)
@@ -192,14 +179,14 @@ def manage_pg_service(section):
 
 
 def get_credentials_from_config(section, config_file) -> dict:
-    credentials = {'host': None, 'port': None, 'dbname': None, 'user': None, 'password': None, 'sslmode': None}
+    credentials = {"host": None, "port": None, "dbname": None, "user": None, "password": None, "sslmode": None}
     try:
-        with open(config_file, 'r') as file:
+        with open(config_file, "r") as file:
             # Strip leading whitespace from each line to handle malformed section headers
             cleaned_lines = [line.lstrip() for line in file]
 
         config_parser = configparser.ConfigParser(comment_prefixes=[";", "#"], allow_no_value=True, strict=False)
-        config_parser.read_string(''.join(cleaned_lines))
+        config_parser.read_string("".join(cleaned_lines))
 
         if config_parser.has_section(section):
             params = config_parser.items(section)
