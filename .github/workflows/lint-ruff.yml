@@ -1,18 +1,14 @@
-name: 🧪 Pytest
+name: 🐍 Ruff Linting
 
 on:
   push:
-    branches:
-      - 'main'
   pull_request:
-    branches:
-      - 'main'
 
 jobs:
-  test-pytest:
+  # Run ruff linting
+  lint-ruff:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - python-version: 3.9
@@ -32,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pip install pytest sip chardet psycopg2-binary
+        run: pip install ruff
 
-      - name: Run tests
-        run: pytest -v
+      - name: Lint with ruff
+        run: ruff check . --config ruff.toml
