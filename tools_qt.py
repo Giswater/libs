@@ -799,7 +799,17 @@ def get_col_index_by_col_name(qtable, column_name):
         column_index = record.indexOf(column_name)
     except AttributeError:
         for x in range(0, model.columnCount()):
-            if columns_dict.get(model.headerData(x, Qt.Orientation.Horizontal)) == column_name:
+            header = model.headerData(x, Qt.Orientation.Horizontal)
+            name = columns_dict.get(header)
+            if name is None:
+                if header and (not isinstance(header, str) or header.strip()):
+                    name = header  # column not in dict: use header as column name
+                else:
+                    try:
+                        name = model.record(0).fieldName(x)
+                    except (AttributeError, IndexError):
+                        pass
+            if name == column_name:
                 column_index = x
                 break
 
