@@ -1214,13 +1214,17 @@ def reset_rubber_band(rubber_band):
 
 
 def restore_user_layer(layer_name, user_current_layer=None):
-    """Set active layer, preferably @user_current_layer else @layer_name"""
-    if user_current_layer:
-        iface.setActiveLayer(user_current_layer)
-    else:
-        layer = get_layer_by_tablename(layer_name)
-        if layer:
-            iface.setActiveLayer(layer)
+    """Set active layer, preferably @user_current_layer else @layer_name.
+    If user_current_layer was removed from project (C++ object deleted), falls back to layer_name."""
+    try:
+        if user_current_layer:
+            iface.setActiveLayer(user_current_layer)
+            return
+    except RuntimeError:
+        pass  # wrapped C/C++ object of type QgsVectorLayer has been deleted
+    layer = get_layer_by_tablename(layer_name)
+    if layer:
+        iface.setActiveLayer(layer)
 
 
 def set_layer_categoryze(layer, cat_field, size, color_values, unique_values=None, opacity=255):
