@@ -200,7 +200,7 @@ def log_db(text=None, color="black", bold="", header="SERVER EXECUTION", message
         text = json.dumps(text)
 
     msg_ = (f'<font color="blue"><{bold}>{header}: </font>'
-           f'<font color="{color}"><{bold}>{text}</font>')
+           f'<font><{bold}>{text}</font>')
     limit = 200
     if lib_vars.logger and lib_vars.logger.log_db_limit_characters:
         limit = lib_vars.logger.log_db_limit_characters
@@ -208,7 +208,10 @@ def log_db(text=None, color="black", bold="", header="SERVER EXECUTION", message
 
     # Check session parameter 'min_message_level' to know if we need to log message in QGIS Log Messages Panel
     if lib_vars.logger and message_level >= lib_vars.logger.min_message_level:
-        QgsMessageLog.logMessage(msg, lib_vars.logger.tab_db, message_level)
+        if Qgis.QGIS_VERSION_INT >= 40000:
+            QgsMessageLog.logMessage(msg, lib_vars.logger.tab_db, message_level, format=Qgis.StringFormat.Html)
+        else:
+            QgsMessageLog.logMessage(msg, lib_vars.logger.tab_db, message_level)
 
     # Log same message into logger file
     if lib_vars.logger and logger_file:
