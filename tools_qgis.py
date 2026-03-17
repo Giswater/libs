@@ -686,13 +686,7 @@ def get_layer_source(layer):
             if len(elem_uri) == 2:
                 list_uri.append(elem_uri)
 
-    splt_dct = dict(list_uri)
-    if "service" in splt_dct:
-        splt_dct["service"] = splt_dct["service"]
-    if "dbname" in splt_dct:
-        splt_dct["db"] = splt_dct["dbname"]
-    if "table" in splt_dct:
-        splt_dct["schema"], splt_dct["table"] = splt_dct["table"].split(".")
+    splt_dct = _manage_layer_source_dict(list_uri)
 
     for key in layer_source.keys():
         layer_source[key] = splt_dct.get(key)
@@ -1871,6 +1865,21 @@ def _add_layer_to_group(layer, first_group, second_group, third_group):
             my_group = root.insertGroup(0, "GW Layers")
         my_group.insertLayer(0, layer)
     iface.setActiveLayer(layer)
+
+
+def _manage_layer_source_dict(list_uri: list[tuple[str, str]]) -> dict[str, str]:
+    splt_dct = dict(list_uri)
+
+    if "service" in splt_dct:
+        splt_dct["service"] = splt_dct["service"]
+    if "dbname" in splt_dct:
+        splt_dct["db"] = splt_dct["dbname"]
+    if "table" in splt_dct:
+        splt_dict_table = splt_dct["table"].split(".")
+        if len(splt_dict_table) == 2:
+            splt_dct["schema"], splt_dct["table"] = splt_dict_table
+
+    return splt_dct
 
 
 # endregion
