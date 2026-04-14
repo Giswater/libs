@@ -12,7 +12,7 @@ import sys
 import subprocess
 import webbrowser
 import re
-from chardet import detect
+import warnings
 from typing import Any, Iterator, Union
 from . import tools_log
 
@@ -64,9 +64,44 @@ def open_file(file_path):
 
 
 def get_encoding_type(file_path):
-    with open(file_path, "rb") as f:
-        rawdata = f.read()
-    return detect(rawdata)["encoding"]
+    warnings.warn("This function is deprecated. Use detect_encoding instead.")
+    return detect_encoding(file_path)
+
+
+def detect_encoding(filename):
+    """
+    Detect encoding of text-file.
+
+    Args:
+        filename (str | pathlib.Path): path to file, for which the encoding should be detected.
+
+    Returns:
+
+    """
+    if "linux" in sys.platform:
+        shell_output = subprocess.check_output(['file', '-i', str(filename)]).decode().strip()
+    else:
+        try:
+            filename = pathlib.Path(filename)
+            cwd = filename.parent
+            if not cwd:
+                cwd = None
+            shell_output = subprocess.check_output(f'bash -ic "file -i {filename.name}"',
+                                                   cwd=cwd
+                                                   ).decode().strip()
+        except:
+            try:
+                import cchardet as chardet
+                with open(filename, "rb") as f:
+                    binary_txt = f.read()
+                    detection = chardet.detect(binary_txt)
+                    return detection["encoding"]
+                    # confidence = detection["confidence"]
+                    # txt1 = binary_txt.decode(encoding1)
+            except:
+                return 'utf-8'
+
+    return shell_output.split('charset=')[-1]
 
 
 def get_relative_path(filepath, levels=1):
