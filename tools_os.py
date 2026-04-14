@@ -64,7 +64,7 @@ def open_file(file_path):
 
 
 def get_encoding_type(file_path):
-    warnings.warn("This function is deprecated. Use detect_encoding instead.")
+    warnings.warn("This function is deprecated. Use detect_encoding instead.", stacklevel=2)
     return detect_encoding(file_path)
 
 
@@ -79,29 +79,28 @@ def detect_encoding(filename):
 
     """
     if "linux" in sys.platform:
-        shell_output = subprocess.check_output(['file', '-i', str(filename)]).decode().strip()
+        shell_output = subprocess.check_output(["file", "-i", str(filename)]).decode().strip()
     else:
         try:
             filename = pathlib.Path(filename)
             cwd = filename.parent
             if not cwd:
                 cwd = None
-            shell_output = subprocess.check_output(f'bash -ic "file -i {filename.name}"',
-                                                   cwd=cwd
-                                                   ).decode().strip()
-        except:
+            shell_output = subprocess.check_output(f'bash -ic "file -i {filename.name}"', cwd=cwd).decode().strip()
+        except Exception:
             try:
                 import cchardet as chardet
+
                 with open(filename, "rb") as f:
                     binary_txt = f.read()
                     detection = chardet.detect(binary_txt)
                     return detection["encoding"]
                     # confidence = detection["confidence"]
                     # txt1 = binary_txt.decode(encoding1)
-            except:
-                return 'utf-8'
+            except Exception:
+                return "utf-8"
 
-    return shell_output.split('charset=')[-1]
+    return shell_output.split("charset=")[-1]
 
 
 def get_relative_path(filepath, levels=1):
