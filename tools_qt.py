@@ -35,6 +35,7 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtGui import (
     QPixmap,
     QDoubleValidator,
+    QTextDocument,
     QTextCharFormat,
     QFont,
     QIcon,
@@ -46,6 +47,7 @@ from qgis.PyQt.QtGui import (
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import (
     QAction,
+    QApplication,
     QLineEdit,
     QComboBox,
     QWidget,
@@ -1391,14 +1393,19 @@ def get_feature_by_id(layer, id, field_id=None):
     return False
 
 
-def show_details(detail_text, title=None, inf_text=None, text_params=None, title_params=None):
+def show_details(detail_text, title=None, inf_text=None, text_params=None, title_params=None, copy_button=False):
     """Shows a message box with detail information"""
     iface.messageBar().clearWidgets()
     msg_box = QMessageBox()
     msg_box.setIcon(QMessageBox.Icon.Information)
+    detail_text_translated = ""
+    detail_text_plain = ""
     if detail_text:
-        detail_text = tr(detail_text, list_params=text_params)
-        msg_box.setText(detail_text)
+        detail_text_translated = tr(detail_text, list_params=text_params)
+        msg_box.setText(detail_text_translated)
+        text_document = QTextDocument()
+        text_document.setHtml(detail_text_translated)
+        detail_text_plain = text_document.toPlainText()
     if title:
         title = tr(title, list_params=title_params)
         msg_box.setWindowTitle(title)
@@ -1406,7 +1413,15 @@ def show_details(detail_text, title=None, inf_text=None, text_params=None, title
         inf_text = tr(inf_text)
         msg_box.setInformativeText(inf_text)
     msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
-    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Close)
+    if copy_button:
+        copy_btn = msg_box.addButton(tr("Copy to clipboard"), QMessageBox.ButtonRole.ActionRole)
+        copy_btn.clicked.connect(
+            lambda: (
+                QApplication.clipboard().setText(detail_text_plain or detail_text_translated or ""),
+                tools_qgis.show_success("Copied to clipboard"),
+            )
+        )
     msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
     msg_box.exec()
 
