@@ -597,6 +597,18 @@ def set_combo_value(combo, value, index, add_new=True):
     """
     if combo is None:
         return False
+
+    # Async combos (GwAsyncComboBox) load their items in a background task.
+    # If the rows haven't arrived yet we record a pending selection and let
+    # the widget apply it as soon as the data is in. Detection is done by
+    # duck-typing to avoid pulling a core/utils import into libs.
+    if getattr(combo, "_gw_is_async_combo", False) and not combo.property("rows_loaded"):
+        try:
+            combo.set_pending_selection(value, index)
+        except AttributeError:
+            pass
+        return True
+
     for i in range(0, combo.count()):
         elem = combo.itemData(i)
         if elem is not None and str(value) == str(elem[index]):
