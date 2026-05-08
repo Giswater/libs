@@ -6,6 +6,7 @@ or (at your option) any later version.
 """
 
 import configparser
+from importlib import import_module
 import os
 import pathlib
 import sys
@@ -15,6 +16,12 @@ import re
 import warnings
 from typing import Any, Iterator, Union
 from . import tools_log
+
+
+def get_dep(module_name: str):
+    """Import and return an optional dependency module."""
+
+    return import_module(module_name)
 
 
 def get_datadir() -> pathlib.Path:
