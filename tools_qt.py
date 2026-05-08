@@ -6,85 +6,85 @@ or (at your option) any later version.
 
 # -*- coding: utf-8 -*-
 import inspect
-import os
 import operator
-import sys
+import os
 import subprocess
+import sys
 import traceback
-from typing import Dict, Literal, Optional, Any, Union, List
 import webbrowser
-from functools import partial
 from encodings.aliases import aliases
-from warnings import warn
-from qgis.PyQt.sip import isdeleted
+from functools import partial
 from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional, Union
+from warnings import warn
+
+from qgis.core import QgsExpression
+from qgis.gui import QgsDateTimeEdit
 from qgis.PyQt.QtCore import (
+    QCoreApplication,
     QDate,
     QDateTime,
+    QLocale,
+    QPersistentModelIndex,
+    QRegularExpression,
     QSortFilterProxyModel,
     QStringListModel,
-    QTime,
     Qt,
-    QRegularExpression,
-    pyqtSignal,
-    QPersistentModelIndex,
-    QCoreApplication,
+    QTime,
     QTranslator,
-    QLocale,
+    pyqtSignal,
 )
 from qgis.PyQt.QtGui import (
-    QPixmap,
     QDoubleValidator,
-    QTextDocument,
-    QTextCharFormat,
     QFont,
     QIcon,
+    QPixmap,
     QRegularExpressionValidator,
     QStandardItem,
     QStandardItemModel,
+    QTextCharFormat,
     QTextCursor,
+    QTextDocument,
 )
 from qgis.PyQt.QtSql import QSqlTableModel
 from qgis.PyQt.QtWidgets import (
+    QAbstractItemView,
     QAction,
     QApplication,
-    QLineEdit,
-    QComboBox,
-    QWidget,
-    QDoubleSpinBox,
     QCheckBox,
-    QLabel,
-    QTextEdit,
-    QDateEdit,
-    QAbstractItemView,
+    QComboBox,
     QCompleter,
+    QDateEdit,
     QDateTimeEdit,
-    QTableView,
-    QSpinBox,
-    QTimeEdit,
-    QPushButton,
+    QDialog,
+    QDoubleSpinBox,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QMessageBox,
     QPlainTextEdit,
+    QPushButton,
     QRadioButton,
     QSizePolicy,
     QSpacerItem,
-    QFileDialog,
-    QGroupBox,
-    QMessageBox,
+    QSpinBox,
+    QTableView,
     QTabWidget,
+    QTextBrowser,
+    QTextEdit,
+    QTimeEdit,
     QToolBox,
     QToolButton,
-    QDialog,
-    QGridLayout,
-    QTextBrowser,
-    QHeaderView,
-    QListWidget,
+    QWidget,
 )
-from qgis.core import QgsExpression
-from qgis.gui import QgsDateTimeEdit
+from qgis.PyQt.sip import isdeleted
 from qgis.utils import iface
 
-from . import tools_log, tools_os, tools_qgis, tools_db
-from . import lib_vars
+from . import lib_vars, tools_db, tools_log, tools_os, tools_qgis
 from .ui.ui_manager import ShowInfoUi
 
 translator = QTranslator()
