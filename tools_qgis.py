@@ -9,6 +9,7 @@ import configparser
 import re
 from functools import partial
 from typing import Optional
+from warnings import warn
 
 import console
 import os.path
@@ -803,6 +804,56 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
     return layer
 
 
+def get_layer(custom_properties=None, tablename=None, layername=None, schema_name=None, show_warning_=False, log_info=False):
+    """
+    Iterate over all layers and get the one with selected @custom_properties, @tablename or @layername
+    :param custom_properties: Dictionary of custom properties to match (dict)
+    :param tablename: Table name to match (string)
+    :param layername: Layer name to match (string)
+    :param schema_name: Schema name to match (string)
+    :param show_warning_: Show warning if layer is not found (bool)
+    :param log_info: Log info if layer is not found (bool)
+    """
+    # Check if we have any layer loaded
+    layers = get_project_layers()
+    if len(layers) == 0:
+        return None
+
+    layer = None
+
+    if custom_properties is not None:
+        for _layer in layers:
+            valid_count = 0
+            for key, value in custom_properties.items():
+                if _layer.customProperty(key) == value:
+                    valid_count += 1
+            if valid_count == len(custom_properties):
+                layer = _layer
+                break
+
+    if layer is None and tablename is not None:
+        layer = get_layer_by_tablename(tablename, show_warning_=show_warning_, log_info=log_info, schema_name=schema_name)
+
+    if layer is None and layername is not None:
+        layer = get_layer_by_layername(layername, log_info=log_info)
+
+    if show_warning_:
+        if layer is None:
+            show_warning("Layer not found", parameter=tablename)
+        elif not layer.isValid():
+            show_warning("Layer is broken", parameter=tablename)
+
+    if log_info:
+        if layer is None:
+            msg = "Layer not found"
+            tools_log.log_info(msg, parameter=tablename)
+        elif not layer.isValid():
+            msg = "Layer is broken"
+            tools_log.log_info(msg, parameter=tablename)
+
+    return layer
+
+
 def find_matching_layer(layers, tablename, schema_name):
     for cur_layer in layers:
         uri_table = get_layer_source_table_name(cur_layer)
@@ -812,7 +863,7 @@ def find_matching_layer(layers, tablename, schema_name):
     return None
 
 
-def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None):
+def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None, custom_properties=None):
     """If the function receives a group name, check if it exists or not and put the layer in this group
     :param layer: (QgsVectorLayer)
     :param group: Name of the group that will be created in the toc (string)
@@ -820,6 +871,10 @@ def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub
     if group is None:
         QgsProject.instance().addMapLayer(layer)
         return
+
+    if custom_properties is not None:
+        for key, value in custom_properties.items():
+            layer.setCustomProperty(key, value)
 
     QgsProject.instance().addMapLayer(layer, False)
     root = QgsProject.instance().layerTreeRoot()
@@ -1280,29 +1335,39 @@ def remove_layer_from_toc(layer_name, group_name, sub_group=None):
     :param layer_name: Name's layer (String)
     :param group_name: Name's group (String)
     """
-    layer = None
-    for lyr in list(QgsProject.instance().mapLayers().values()):
-        if lyr.name() == layer_name:
-            layer = lyr
-            break
+    warn("remove_layer_from_toc is deprecated. Use remove_layer instead.", stacklevel=2)
+    remove_layer(layername=layer_name, group_name=group_name, sub_group=sub_group)
+
+
+def remove_layer(custom_properties=None, tablename=None, layername=None, group_name=None, sub_group=None):
+    """
+    Remove layer from toc if exist
+    :param custom_properties: Custom properties of the layer (dict)
+    :param tablename: Tablename of the layer (String)
+    :param layername: Layername of the layer (String)
+    :param group_name: Name's group (String)
+    :param sub_group: Name's sub group (String)
+    """
+    layer = get_layer(custom_properties=custom_properties, tablename=tablename, layername=layername)
     if layer is not None:
         # Remove layer
         QgsProject.instance().removeMapLayer(layer)
 
         # Remove group if is void
-        root = QgsProject.instance().layerTreeRoot()
-        first_group = root.findGroup(group_name)
-        if first_group:
-            if sub_group:
-                second_group = first_group.findGroup(sub_group)
-                if second_group:
-                    layers = second_group.findLayers()
-                    if not layers:
-                        root.removeChildNode(second_group)
-            layers = first_group.findLayers()
-            if not layers:
-                root.removeChildNode(first_group)
-        remove_layer_from_toc(layer_name, group_name)
+        if group_name is not None:
+            root = QgsProject.instance().layerTreeRoot()
+            first_group = root.findGroup(group_name)
+            if first_group:
+                if sub_group:
+                    second_group = first_group.findGroup(sub_group)
+                    if second_group:
+                        layers = second_group.findLayers()
+                        if not layers:
+                            root.removeChildNode(second_group)
+                layers = first_group.findLayers()
+                if not layers:
+                    root.removeChildNode(first_group)
+        remove_layer(custom_properties=custom_properties, tablename=tablename, layername=layername, group_name=group_name, sub_group=sub_group)
 
     # Force a map refresh
     force_refresh_map_canvas()
