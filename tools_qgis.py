@@ -53,6 +53,7 @@ from qgis.core import (
     QgsPrintLayout,
     Qgis,
     NULL,
+    QgsMapLayer,
 )
 from qgis.utils import iface, plugin_paths, available_plugins, active_plugins
 
@@ -787,24 +788,24 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
 
     layer = find_matching_layer(layers, tablename, schema_name)
 
-    if show_warning_:
-        if layer is None:
-            show_warning("Layer not found", parameter=tablename)
-        elif not layer.isValid():
-            show_warning("Layer is broken", parameter=tablename)
+    if layer is None:
+        msg = "Layer not found"
+    elif not layer.isValid():
+        msg = "Layer is broken"
 
-    if log_info:
-        if layer is None:
-            msg = "Layer not found"
-            tools_log.log_info(msg, parameter=tablename)
-        elif not layer.isValid():
-            msg = "Layer is broken"
+    if msg:
+        if show_warning_:
+            show_warning(msg, parameter=tablename)
+
+        if log_info:
             tools_log.log_info(msg, parameter=tablename)
 
     return layer
 
 
-def get_layer(custom_properties=None, tablename=None, layername=None, schema_name=None, show_warning_=False, log_info=False):
+def get_layer(
+    custom_properties=None, tablename=None, layername=None, schema_name=None, show_warning_=False, log_info=False
+):
     """
     Iterate over all layers and get the one with selected @custom_properties, @tablename or @layername
     :param custom_properties: Dictionary of custom properties to match (dict)
@@ -821,34 +822,26 @@ def get_layer(custom_properties=None, tablename=None, layername=None, schema_nam
 
     layer = None
 
-    if custom_properties is not None:
-        for _layer in layers:
-            valid_count = 0
-            for key, value in custom_properties.items():
-                if _layer.customProperty(key) == value:
-                    valid_count += 1
-            if valid_count == len(custom_properties):
-                layer = _layer
-                break
+    layer = _manage_custom_properties(layers, custom_properties)
 
     if layer is None and tablename is not None:
-        layer = get_layer_by_tablename(tablename, show_warning_=show_warning_, log_info=log_info, schema_name=schema_name)
+        layer = get_layer_by_tablename(
+            tablename, show_warning_=show_warning_, log_info=log_info, schema_name=schema_name
+        )
 
     if layer is None and layername is not None:
         layer = get_layer_by_layername(layername, log_info=log_info)
 
-    if show_warning_:
-        if layer is None:
-            show_warning("Layer not found", parameter=tablename)
-        elif not layer.isValid():
-            show_warning("Layer is broken", parameter=tablename)
+    if layer is None:
+        msg = "Layer not found"
+    elif not layer.isValid():
+        msg = "Layer is broken"
 
-    if log_info:
-        if layer is None:
-            msg = "Layer not found"
-            tools_log.log_info(msg, parameter=tablename)
-        elif not layer.isValid():
-            msg = "Layer is broken"
+    if msg:
+        if show_warning_:
+            show_warning(msg, parameter=tablename)
+
+        if log_info:
             tools_log.log_info(msg, parameter=tablename)
 
     return layer
@@ -863,10 +856,16 @@ def find_matching_layer(layers, tablename, schema_name):
     return None
 
 
-def add_layer_to_toc(layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None, custom_properties=None):
+def add_layer_to_toc(
+    layer, group=None, sub_group=None, create_groups=False, sub_sub_group=None, custom_properties=None
+):
     """If the function receives a group name, check if it exists or not and put the layer in this group
     :param layer: (QgsVectorLayer)
     :param group: Name of the group that will be created in the toc (string)
+    :param sub_group: Name of the sub-group that will be created in the toc (string)
+    :param create_groups: Create groups if they do not exist (boolean)
+    :param sub_sub_group: Name of the sub-sub-group that will be created in the toc (string)
+    :param custom_properties: Custom properties of the layer (dict)
     """
     if group is None:
         QgsProject.instance().addMapLayer(layer)
@@ -1367,7 +1366,13 @@ def remove_layer(custom_properties=None, tablename=None, layername=None, group_n
                 layers = first_group.findLayers()
                 if not layers:
                     root.removeChildNode(first_group)
-        remove_layer(custom_properties=custom_properties, tablename=tablename, layername=layername, group_name=group_name, sub_group=sub_group)
+        remove_layer(
+            custom_properties=custom_properties,
+            tablename=tablename,
+            layername=layername,
+            group_name=group_name,
+            sub_group=sub_group,
+        )
 
     # Force a map refresh
     force_refresh_map_canvas()
@@ -1945,6 +1950,23 @@ def _manage_layer_source_dict(list_uri: list[tuple[str, str]]) -> dict[str, str]
             splt_dct["schema"], splt_dct["table"] = splt_dict_table
 
     return splt_dct
+
+
+def _manage_custom_properties(
+    layers: list[QgsMapLayer], custom_properties: Optional[dict[str, str]]
+) -> QgsMapLayer | None:
+    """Manage custom properties of the layer
+    :param layers: List of layers (list)
+    :param custom_properties: Custom properties of the layer (dict)
+    :return: Layer (QgsMapLayer)
+    """
+    layer = None
+    if custom_properties is not None:
+        for current_layer in layers:
+            if all(current_layer.customProperty(key) == value for key, value in custom_properties.items()):
+                layer = current_layer
+                break
+    return layer
 
 
 # endregion
