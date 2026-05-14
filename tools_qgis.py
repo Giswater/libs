@@ -1924,11 +1924,11 @@ def _create_group_structure(root, group, sub_group, sub_sub_group):
 
 def _add_layer_to_group(layer, first_group, second_group, third_group):
     """Add layer to the appropriate group level"""
-    if third_group:
+    if third_group is not None:
         third_group.insertLayer(0, layer)
-    elif second_group:
+    elif second_group is not None:
         second_group.insertLayer(0, layer)
-    elif first_group:
+    elif first_group is not None:
         first_group.insertLayer(0, layer)
     else:
         root = QgsProject.instance().layerTreeRoot()
@@ -1965,6 +1965,8 @@ def _manage_custom_properties(
     layer = None
     if custom_properties is not None:
         for current_layer in layers:
+            if current_layer is None:
+                continue
             if all(current_layer.customProperty(key) == value for key, value in custom_properties.items()):
                 layer = current_layer
                 break
