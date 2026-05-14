@@ -788,17 +788,18 @@ def get_layer_by_tablename(tablename, show_warning_=False, log_info=False, schem
 
     layer = find_matching_layer(layers, tablename, schema_name)
 
-    if layer is None:
-        msg = "Layer not found"
-    elif not layer.isValid():
-        msg = "Layer is broken"
+    if show_warning_:
+        if layer is None:
+            show_warning("Layer not found", parameter=tablename)
+        elif not layer.isValid():
+            show_warning("Layer is broken", parameter=tablename)
 
-    if msg:
-        if show_warning_:
-            show_warning(msg, parameter=tablename)
-
-        if log_info:
+    if log_info:
+        if layer is None:
+            msg = "Layer not found"
             tools_log.log_info(msg, parameter=tablename)
+        elif not layer.isValid():
+            msg = "Layer is broken"
 
     return layer
 
@@ -832,17 +833,18 @@ def get_layer(
     if layer is None and layername is not None:
         layer = get_layer_by_layername(layername, log_info=log_info)
 
-    if layer is None:
-        msg = "Layer not found"
-    elif not layer.isValid():
-        msg = "Layer is broken"
+    if show_warning_:
+        if layer is None:
+            show_warning("Layer not found", parameter=tablename)
+        elif not layer.isValid():
+            show_warning("Layer is broken", parameter=tablename)
 
-    if msg:
-        if show_warning_:
-            show_warning(msg, parameter=tablename)
-
-        if log_info:
+    if log_info:
+        if layer is None:
+            msg = "Layer not found"
             tools_log.log_info(msg, parameter=tablename)
+        elif not layer.isValid():
+            msg = "Layer is broken"
 
     return layer
 
