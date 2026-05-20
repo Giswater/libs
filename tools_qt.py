@@ -1980,6 +1980,8 @@ def _translate_tooltip(context_name, widget, idx=None, aux_context="ui_message")
         elif widget.toolTip() in ("", None):
             if type(widget) is QGroupBox:
                 widget.setToolTip(widget.title())
+            elif type(widget) in (QTextEdit, QPlainTextEdit):
+                widget.setToolTip(widget.toPlainText())
             elif type(widget) is QWidget:
                 widget.setToolTip("")
             else:
