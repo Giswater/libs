@@ -18,6 +18,70 @@ from . import tools_log, tools_qt, tools_qgis, tools_pgdao, tools_os
 dao = None
 dao_db_credentials: dict[str, str] = None
 current_user = None
+DEFAULT_DB_CONNECT_TIMEOUT = 5
+
+
+def get_db_connect_timeout(default=None):
+    """Seconds to wait for PostgreSQL connect (configurable via system/db_connect_timeout)."""
+    if default is None:
+        default = DEFAULT_DB_CONNECT_TIMEOUT
+    try:
+        from ..core.utils import tools_gw
+        val = tools_gw.get_config_parser(
+            "system", "db_connect_timeout", "user", "init", False, force_reload=True
+        )
+        if val not in (None, "", "null"):
+            return max(1, int(val))
+    except Exception:
+        pass
+    return default
+
+
+def _credentials_conn_string(credentials, connect_timeout=None):
+    """Build a psycopg2 connection string from QGIS-style credentials."""
+    if connect_timeout is None:
+        connect_timeout = get_db_connect_timeout()
+    timeout_part = f" connect_timeout={int(connect_timeout)} keepalives=1 keepalives_idle=30"
+    service = credentials.get("service")
+    if service:
+        sslmode = credentials.get("sslmode")
+        conn_string = f"service={service}"
+        if sslmode:
+            conn_string += f" sslmode={sslmode}"
+        return conn_string + timeout_part
+
+    host = credentials.get("host") or "localhost"
+    port = credentials.get("port") or ""
+    db = credentials.get("db")
+    user = credentials.get("user")
+    password = credentials.get("password")
+    sslmode = credentials.get("sslmode")
+    conn_string = f"host={host} port={port} dbname={db} user='{user}'"
+    if sslmode:
+        conn_string += f" sslmode={sslmode}"
+    if password is not None:
+        conn_string += f" password={password}"
+    return conn_string + timeout_part
+
+
+def ping_database(credentials, timeout_sec=None):
+    """Open a short-lived connection; return True if PostgreSQL responds."""
+    import psycopg2
+
+    timeout = timeout_sec or get_db_connect_timeout()
+    conn_string = _credentials_conn_string(credentials, connect_timeout=timeout)
+    try:
+        conn = psycopg2.connect(conn_string)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                cur.fetchone()
+        finally:
+            conn.close()
+        return True
+    except Exception as e:
+        lib_vars.session_vars["last_error"] = str(e)
+        return False
 
 
 def create_list_for_completer(sql):
@@ -310,6 +374,9 @@ def create_qsqldatabase_connection(host, port, db, user, pwd):
     lib_vars.qgis_db_credentials.setDatabaseName(db)
     lib_vars.qgis_db_credentials.setUserName(user)
     lib_vars.qgis_db_credentials.setPassword(pwd)
+    lib_vars.qgis_db_credentials.setConnectOptions(
+        f"connect_timeout={get_db_connect_timeout()}"
+    )
     status = lib_vars.qgis_db_credentials.open()
     if not status:
         msg = "Database connection error (QSqlDatabase). Please open plugin log file to get more details"
@@ -392,7 +459,9 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
         # Try to connect using name defined in service file
         # QSqlDatabase connection
         lib_vars.qgis_db_credentials = QSqlDatabase.addDatabase("QPSQL", lib_vars.plugin_name)
-        lib_vars.qgis_db_credentials.setConnectOptions(conn_string)
+        lib_vars.qgis_db_credentials.setConnectOptions(
+            conn_string + f" connect_timeout={get_db_connect_timeout()}"
+        )
         status = lib_vars.qgis_db_credentials.open()
         if not status:
             msg = "Service database connection error (QSqlDatabase). Please open plugin log file to get more details"
@@ -403,7 +472,7 @@ def connect_to_database_service(service, sslmode=None, conn_info=None):
 
         # psycopg2 connection
         dao = tools_pgdao.GwPgDao()
-        dao.set_conn_string(conn_string)
+        dao.set_conn_string(conn_string, connect_timeout=get_db_connect_timeout())
         status = dao.init_db()
         msg = "PostgreSQL PID: {0}"
         msg_params = (dao.pid,)

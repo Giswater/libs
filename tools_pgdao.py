@@ -87,7 +87,7 @@ class GwPgDao(object):
             status = False
         return status
 
-    def set_params(self, host, port, dbname, user, password, sslmode):
+    def set_params(self, host, port, dbname, user, password, sslmode, connect_timeout=None):
         """Set database parameters"""
         self.host = host
         self.port = port
@@ -99,16 +99,28 @@ class GwPgDao(object):
             self.conn_string += f" sslmode={sslmode}"
         if self.password is not None:
             self.conn_string += f" password={self.password}"
+        self._append_connect_options(connect_timeout)
 
-    def set_conn_string(self, conn_string):
+    def set_conn_string(self, conn_string, connect_timeout=None):
         """Set connection string"""
         self.conn_string = conn_string
+        self._append_connect_options(connect_timeout)
 
-    def set_service(self, service, sslmode=None):
+    def set_service(self, service, sslmode=None, connect_timeout=None):
         """Set service"""
         self.conn_string = f"service={service}"
         if sslmode:
             self.conn_string += f" sslmode={sslmode}"
+        self._append_connect_options(connect_timeout)
+
+    def _append_connect_options(self, connect_timeout=None):
+        if connect_timeout is None:
+            from . import tools_db
+            connect_timeout = tools_db.get_db_connect_timeout()
+        self.conn_string += (
+            f" connect_timeout={int(connect_timeout)}"
+            f" keepalives=1 keepalives_idle=30"
+        )
 
     def mogrify(self, sql, params):
         """Return a query string after arguments binding"""
