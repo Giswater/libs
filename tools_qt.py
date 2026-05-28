@@ -1479,6 +1479,13 @@ def _manage_messagebox_buttons(buttons):
     return button_flags, default_button
 
 
+def _message_parent(parent=None):
+    """Return explicit parent or the active modal dialog, if any."""
+    if parent is not None:
+        return parent
+    return lib_vars.session_vars.get("message_parent")
+
+
 def show_question(
     text,
     title="Info",
@@ -1489,6 +1496,7 @@ def show_question(
     msg_params=None,
     title_params=None,
     buttons=None,
+    parent=None,
 ):
     """Ask question to the user
 
@@ -1502,7 +1510,7 @@ def show_question(
         if lib_vars.user_level["level"] not in lib_vars.user_level["showquestion"]:
             return True
 
-    msg_box = QMessageBox()
+    msg_box = QMessageBox(_message_parent(parent))
     msg = tr(text, context_name, list_params=msg_params)
     if parameter:
         msg += ": " + str(parameter)
@@ -1524,7 +1532,8 @@ def show_question(
     button_flags, default_button = _manage_messagebox_buttons(buttons)
     msg_box.setStandardButtons(button_flags)
     msg_box.setDefaultButton(default_button)
-    msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+    if _message_parent(parent) is None:
+        msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
 
     # Set icon for the type of message
     msg_box.setIcon(QMessageBox.Icon.Question)
@@ -1549,7 +1558,8 @@ def show_question(
 
 
 def show_info_box(
-    text, title=None, inf_text=None, context_name="giswater", parameter=None, msg_params=None, title_params=None
+    text, title=None, inf_text=None, context_name="giswater", parameter=None, msg_params=None, title_params=None,
+    parent=None,
 ):
     """Show information box to the user"""
     msg = ""
@@ -1558,11 +1568,12 @@ def show_info_box(
         if parameter:
             msg += ": " + str(parameter)
 
-    msg_box = QMessageBox()
+    msg_box = QMessageBox(_message_parent(parent))
     if len(msg) > 750:
         msg = msg[:750] + "\n[...]"
     msg_box.setText(msg)
-    msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+    if _message_parent(parent) is None:
+        msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if title:
         title = tr(title, context_name, list_params=title_params)
         msg_box.setWindowTitle(title)
@@ -1573,6 +1584,42 @@ def show_info_box(
         msg_box.setInformativeText(inf_text)
     msg_box.setIcon(QMessageBox.Icon.Information)
     msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+    msg_box.exec()
+
+
+def show_warning_box(
+    text,
+    title="Warning",
+    inf_text=None,
+    context_name="giswater",
+    parameter=None,
+    msg_params=None,
+    title_params=None,
+    parent=None,
+):
+    """Show warning box to the user"""
+    msg = ""
+    if text:
+        msg = tr(text, context_name, list_params=msg_params)
+        if parameter:
+            msg += ": " + str(parameter)
+
+    msg_box = QMessageBox(_message_parent(parent))
+    if len(msg) > 750:
+        msg = msg[:750] + "\n[...]"
+    msg_box.setText(msg)
+    if _message_parent(parent) is None:
+        msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+    if title:
+        title = tr(title, context_name, list_params=title_params)
+        msg_box.setWindowTitle(title)
+    if inf_text:
+        inf_text = tr(inf_text, context_name)
+        if len(inf_text) > 500:
+            inf_text = inf_text[:500] + "\n[...]"
+        msg_box.setInformativeText(inf_text)
+    msg_box.setIcon(QMessageBox.Icon.Warning)
+    msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
     msg_box.exec()
 
 
@@ -1753,6 +1800,7 @@ def show_exception_message(
     context_name="giswater",
     title_params=None,
     msg_params=None,
+    parent=None,
 ):
     """Show exception message in dialog"""
     # Show dialog only if we are not in a task process
@@ -1769,7 +1817,13 @@ def show_exception_message(
     if msg:
         msg = tr(msg, context_name, list_params=msg_params)
     set_widget_text(dlg_info, dlg_info.tab_log_txt_infolog, msg)
-    dlg_info.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+    message_parent = _message_parent(parent)
+    if message_parent is not None:
+        dlg_info.setParent(message_parent)
+        dlg_info.setWindowFlags(Qt.WindowType.Dialog)
+    else:
+        dlg_info.setParent(None)
+        dlg_info.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if pattern is None:
         pattern = f"""{tr("File name")}:|{tr("Function name")}:|{tr("Line number")}:|{tr("SQL")}:|{tr("SQL File")}:
                     |{tr("Detail")}:|{tr("Context")}:|{tr("Description")}:|{tr("Schema name")}:|{tr("Message error")}:
@@ -1777,6 +1831,9 @@ def show_exception_message(
     set_text_bold(dlg_info.tab_log_txt_infolog, pattern)
 
     dlg_info.show()
+    if message_parent is not None:
+        dlg_info.raise_()
+        dlg_info.activateWindow()
 
 
 def manage_exception(title=None, description=None, sql=None, schema_name=None):
