@@ -1510,7 +1510,8 @@ def show_question(
         if lib_vars.user_level["level"] not in lib_vars.user_level["showquestion"]:
             return True
 
-    msg_box = QMessageBox(_message_parent(parent))
+    msg_parent = _message_parent(parent)
+    msg_box = QMessageBox(msg_parent) if msg_parent is not None else QMessageBox()
     msg = tr(text, context_name, list_params=msg_params)
     if parameter:
         msg += ": " + str(parameter)
@@ -1532,8 +1533,6 @@ def show_question(
     button_flags, default_button = _manage_messagebox_buttons(buttons)
     msg_box.setStandardButtons(button_flags)
     msg_box.setDefaultButton(default_button)
-    if _message_parent(parent) is None:
-        msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
 
     # Set icon for the type of message
     msg_box.setIcon(QMessageBox.Icon.Question)
@@ -1543,6 +1542,9 @@ def show_question(
     icon_path = f"{icon_folder}{os.sep}dialogs{os.sep}136.png"
     giswater_icon = QIcon(icon_path)
     msg_box.setWindowIcon(giswater_icon)
+
+    if msg_parent is None:
+        msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
 
     ret = msg_box.exec()
     # Return True for positive actions (Yes, Ok, Save, Apply)
@@ -1568,11 +1570,12 @@ def show_info_box(
         if parameter:
             msg += ": " + str(parameter)
 
-    msg_box = QMessageBox(_message_parent(parent))
+    msg_parent = _message_parent(parent)
+    msg_box = QMessageBox(msg_parent) if msg_parent is not None else QMessageBox()
     if len(msg) > 750:
         msg = msg[:750] + "\n[...]"
     msg_box.setText(msg)
-    if _message_parent(parent) is None:
+    if msg_parent is None:
         msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if title:
         title = tr(title, context_name, list_params=title_params)
@@ -1604,11 +1607,12 @@ def show_warning_box(
         if parameter:
             msg += ": " + str(parameter)
 
-    msg_box = QMessageBox(_message_parent(parent))
+    msg_parent = _message_parent(parent)
+    msg_box = QMessageBox(msg_parent) if msg_parent is not None else QMessageBox()
     if len(msg) > 750:
         msg = msg[:750] + "\n[...]"
     msg_box.setText(msg)
-    if _message_parent(parent) is None:
+    if msg_parent is None:
         msg_box.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
     if title:
         title = tr(title, context_name, list_params=title_params)
