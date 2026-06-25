@@ -525,9 +525,12 @@ def get_plugin_version():
 
 
 def get_major_version(plugin_dir=None, default_version="3.5"):
-    """Get plugin higher version from metadata.txt file"""
-    major_version = get_plugin_metadata("version", default_version, plugin_dir)[0:3]
-    return major_version
+    """Return major.minor folder name (e.g. 4.10) from metadata.txt version."""
+    version = get_plugin_metadata("version", default_version, plugin_dir)
+    parts = version.split(".")
+    if len(parts) >= 2:
+        return f"{parts[0]}.{parts[1]}"
+    return parts[0] if parts else default_version
 
 
 def get_build_version(plugin_dir, default_version="35001"):
