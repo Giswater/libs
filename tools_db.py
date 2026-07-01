@@ -151,9 +151,11 @@ def check_column(tablename, columname, schemaname=None):
 
 
 def check_role(role_name, is_admin=None):
-    """Check if @role_name exists"""
-    sql = f"SELECT * FROM pg_roles WHERE rolname = '{role_name}'"
-    row = get_row(sql, log_info=False, is_admin=is_admin)
+    """Check if @role_name exists in pg_roles."""
+    if not role_name or dao is None:
+        return None
+    sql = "SELECT 1 FROM pg_roles WHERE rolname = %s"
+    row = get_row(sql, log_info=False, is_admin=is_admin, params=[role_name], commit=False)
     return row
 
 
